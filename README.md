@@ -1,8 +1,36 @@
+<p align="center">
+  <img src="logo.png" alt="Logo Myostoox" width="200">
+</p>
+
+
 # Myostoox
 
 Audio/video player for **Lubuntu 26.04 LTS (Resolute Raccoon)** (and other Linux GTK desktops – LXQt / XFCE), written in Python 3 + GTK3 + GStreamer.
 
 Main features: playlist, radios, TV / M3U bouquets, CD / DVD / Blu-ray (experimental), equalizer, pitch/tempo, spectrum, subtitles, lyrics (LRC), themes, MPRIS2, mini-player.
+
+## Captures d'écran
+
+<p align="center">
+  <img src="screenshots/Player_05.jpg" alt="Playlist + EQ + Pitch/tempo" width="700">
+</p>
+
+<p align="center">
+  <img src="screenshots/Player_03.jpg" alt="TV" width="700">
+</p>
+
+<p align="center">
+  <img src="screenshots/Player_10.jpg" alt="Full screen" width="700">
+</p>
+
+<p align="center">
+  <img src="screenshots/Player_07.jpg" alt="Themes" width="700">
+</p>
+
+<p align="center">
+  <img src="screenshots/Player_08.jpg" alt="Mini-player" width="700">
+</p>
+
 
 ---
 
@@ -71,6 +99,12 @@ Files passed as arguments (Thunar, double-click) are sent to the already running
 
 Configuration: `~/.config/Myostoox/` (playlist, state, radios, themes…).
 
+
+<p align="center">
+  <img src="screenshots/Player_06.jpg" alt="Videos" width="700">
+</p>
+
+
 ---
 
 ## Menu — useful new features
@@ -128,4 +162,22 @@ To prevent the screen from turning off during a movie:
 ## Author
 
 O. FRAISSE (MilOvni)
+
+<p align="center">
+  <img src="screenshots/Player_04.jpg" alt="Bouquets" width="700">
+</p>
+
+<p align="center">
+  <img src="screenshots/Player_02.jpg" alt="Radios" width="700">
+</p>
+
+<p align="center">
+  <img src="screenshots/Player_09.jpg" alt="Lyrics" width="700">
+</p>
+
+<p align="center">
+  <img src="screenshots/Player_11.jpg" alt="About" width="700">
+</p>
+
+
 ```
