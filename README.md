@@ -1,13 +1,69 @@
 <p align="center">
   <img src="logo_big.png" alt="Logo Myostoox" width="200">
 </p>
+<br>
+<p align="center">
+  <em>For people who want one lightweight application for music, video, radio and M3U/TV playlists.</em>
+</p>
 
+*For people who want one lightweight application for music, video, radio and M3U/TV playlists.*
+>>>>>>> 1dca05b (README.md Updated)
 
 # Myostoox
 
-Audio/video player for **Lubuntu 26.04 LTS (Resolute Raccoon)** (and other Linux GTK desktops – LXQt / XFCE), written in Python 3 + GTK3 + GStreamer.
+*Audio/video player* for **Lubuntu 26.04 LTS (Resolute Raccoon)** (and other Linux GTK desktops – LXQt / XFCE), written in Python 3 + GTK3 + GStreamer.
+<br>
+<br>
+<p align="center">
+  📦 <strong><a href="https://github.com/MilOvni/Myostoox/raw/refs/heads/main/myostoox_1.0-1_all.deb">Download Myostoox 1.0 (.deb)</a></strong>
+</p>
+<br>
+Play:<br>
+• 🎵 local music<br>
+• 🎬 videos<br>
+• 📻 Internet radios<br>
+• 📺 M3U / IPTV playlists<br>
+• 💿 Audio CDs<br>
+• 📀 DVDs<br>
+• 💿 Blu-rays (experimental)<br>
+<br>
+*And more*:<br>
+• Equalizer<br>
+• Pitch / tempo<br>
+• Spectrum analyzer<br>
+• Subtitles<br>
+• LRC lyrics<br>
+• MPRIS2<br>
+• Mini-player<br>
+• Themes<br>
+<br>
+<br>
 
-Main features: playlist, radios, TV / M3U bouquets, CD / DVD / Blu-ray (experimental), equalizer, pitch/tempo, spectrum, subtitles, lyrics (LRC), themes, MPRIS2, mini-player.
+
+📦 [**Download Myostoox 1.0 (.deb)**](https://github.com/MilOvni/Myostoox/blob/main/myostoox_1.0-1_all.deb)
+
+
+Play:
+
+• 🎵 local music
+• 🎬 videos
+• 📻 Internet radios
+• 📺 M3U / IPTV playlists
+• 💿 Audio CDs
+• 📀 DVDs
+• 💿 Blu-rays (experimental)
+
+And more:
+
+• Equalizer
+• Pitch / tempo
+• Spectrum analyzer
+• Subtitles
+• LRC lyrics
+• MPRIS2
+• Mini-player
+• Themes
+
 
 ## Captures d'écran
 
