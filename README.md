@@ -1,75 +1,100 @@
-<p align="center">
-  <img src="logo_big.png" alt="Logo Myostoox" width="200">
-</p>
-<br>
-<p align="center">
-  <em>For people who want one lightweight application for music, video, radio and M3U/TV playlists.</em>
-</p>
-
-*For people who want one lightweight application for music, video, radio and M3U/TV playlists.*
->>>>>>> 1dca05b (README.md Updated)
+<p align="center"> <img src="logo_big.png" alt="Myostoox logo" width="300"> </p> <p align="center"><br><br> <em>A lightweight and feature-rich multimedia player for Lubuntu and Linux.</em> </p><br> <p align="center"> 🎵 Music &nbsp;•&nbsp; 🎬 Video &nbsp;•&nbsp; 📻 Radio &nbsp;•&nbsp; 📺 M3U / IPTV &nbsp;•&nbsp; 💿 CD / DVD / Blu-ray </p><br><br> <p align="center"> <strong><a href="https://github.com/MilOvni/Myostoox/blob/main/myostoox_1.0-1_all.deb">📦 Download Myostoox 1.0 (.deb)</a></strong> </p><br> 
 
 # Myostoox
 
-*Audio/video player* for **Lubuntu 26.04 LTS (Resolute Raccoon)** (and other Linux GTK desktops – LXQt / XFCE), written in Python 3 + GTK3 + GStreamer.
-<br>
-<br>
-<p align="center">
-  📦 <strong><a href="https://github.com/MilOvni/Myostoox/raw/refs/heads/main/myostoox_1.0-1_all.deb">Download Myostoox 1.0 (.deb)</a></strong>
-</p>
-<br>
-Play:<br>
-• 🎵 local music<br>
-• 🎬 videos<br>
-• 📻 Internet radios<br>
-• 📺 M3U / IPTV playlists<br>
-• 💿 Audio CDs<br>
-• 📀 DVDs<br>
-• 💿 Blu-rays (experimental)<br>
-<br>
-*And more*:<br>
-• Equalizer<br>
-• Pitch / tempo<br>
-• Spectrum analyzer<br>
-• Subtitles<br>
-• LRC lyrics<br>
-• MPRIS2<br>
-• Mini-player<br>
-• Themes<br>
-<br>
-<br>
+<br>Myostoox is an **audio and video player** designed primarily for *Lubuntu 26.04 LTS*, while also working on other Linux desktop environments using **GTK**, including **LXQt** and **XFCE**.
 
+Written in Python 3, GTK3 and GStreamer, Myostoox brings music, video, Internet radio, TV/M3U playlists and optical media together in a single application.<br><br><br><br>
 
-📦 [**Download Myostoox 1.0 (.deb)**](https://github.com/MilOvni/Myostoox/blob/main/myostoox_1.0-1_all.deb)
-
-
-Play:
-
-• 🎵 local music
-• 🎬 videos
-• 📻 Internet radios
-• 📺 M3U / IPTV playlists
-• 💿 Audio CDs
-• 📀 DVDs
-• 💿 Blu-rays (experimental)
-
-And more:
-
-• Equalizer
-• Pitch / tempo
-• Spectrum analyzer
-• Subtitles
-• LRC lyrics
-• MPRIS2
-• Mini-player
-• Themes
-
-
-## Captures d'écran
 
 <p align="center">
   <img src="screenshots/Player_05.jpg" alt="Playlist + EQ + Pitch/tempo" width="700">
 </p>
+
+<br><br>
+## **Feature**s<br><br>
+### **Audio**
+
+    • Local music playback
+
+    • Internet radio
+
+    • M3U / M3U8 / PLS playlists
+
+    • Audio CD playback
+
+    • Equalizer
+
+    • Pitch and tempo control
+
+    • Spectrum analyzer
+
+    • LRC lyrics
+
+    • Metadata and track information
+
+    • MPRIS2 support
+
+    Desktop notifications
+
+### **Video**
+
+    • Local video playback
+
+    • Subtitles
+
+    • Full-screen playback
+
+    • Video playlists
+
+    • TV / IPTV M3U playlists
+
+    • Automatic screen-blanking inhibition during playback
+
+    • Custom handling for some MKV / E-AC3 playback cases
+
+### **Radio, TV & playlists**
+
+    • Internet radio stations
+
+    • TV / IPTV bouquets
+
+    • M3U / M3U8 / PLS import and export
+
+    • Playlist persistence
+
+    • Missing files are clearly identified
+
+    • Files opened from the file manager can be sent to an already running Myostoox instance
+
+### **Optical media**
+
+    • Audio CDs
+
+    • DVDs
+
+    • Blu-rays (experimental)
+
+### **Interface**
+
+    • Mini-player
+
+    • Themes
+
+    • Full-screen mode
+
+    • Spectrum analyzer
+
+    • MPRIS2 integration
+
+    • GTK3 interface designed for lightweight Linux desktops
+
+<br>
+<br>
+
+
+
+## Screenshots
 
 <p align="center">
   <img src="screenshots/Player_03.jpg" alt="TV" width="700">
@@ -87,8 +112,60 @@ And more:
   <img src="screenshots/Player_08.jpg" alt="Mini-player" width="700">
 </p>
 
+<p align="center">
+  <img src="screenshots/Player_04.jpg" alt="Bouquets" width="700">
+</p>
+
+<p align="center">
+  <img src="screenshots/Player_02.jpg" alt="Radios" width="700">
+</p>
+
+<p align="center">
+  <img src="screenshots/Player_09.jpg" alt="Lyrics" width="700">
+</p>
+
 
 ---
+
+<br>
+
+## 📦 Installation
+
+### Debian / Ubuntu / Lubuntu
+
+Download the `.deb` package:
+
+<p align="center">
+  <strong><a href="https://github.com/MilOvni/Myostoox/blob/main/myostoox_1.0-1_all.deb">📦 Download Myostoox 1.0 (.deb)</a></strong>
+</p>
+
+Then install it with:
+
+```bash
+sudo apt install ./myostoox_1.0-1_all.deb
+```
+
+### From source
+
+Clone the repository:
+
+```bash
+git clone https://github.com/MilOvni/Myostoox.git
+cd Myostoox
+```
+
+Then launch:
+
+```bash
+python3 Myostoox.py
+```
+
+Or:
+
+```bash
+chmod +x Myostoox.py
+./Myostoox.py
+```
 
 ## Dependencies
 
@@ -126,10 +203,10 @@ sudo apt install libcdio-dev libcdio-paranoia2
 # Encrypted CSS DVDs
 sudo dpkg-reconfigure libdvd-pkg
 
-# For Intel GPUs
+# Intel GPUs
 sudo apt install -y mesa-va-drivers vainfo
 
-# For proper NVIDIA decoding
+# NVIDIA GPUs
 sudo ubuntu-drivers autoinstall
 ```
 
@@ -140,7 +217,6 @@ sudo ubuntu-drivers autoinstall
 libaacs0 + KEYDB.cfg (commercial Blu-rays)
 ```
 
----
 
 ## Launching
 
@@ -153,13 +229,13 @@ chmod +x Myostoox.py
 
 Files passed as arguments (Thunar, double-click) are sent to the already running instance if one exists.
 
-Configuration: `~/.config/Myostoox/` (playlist, state, radios, themes…).
+Configuration: `~/.config/Myostoox/` (playlist, state, radios, themes…).<br>
 
 
 <p align="center">
   <img src="screenshots/Player_06.jpg" alt="Videos" width="700">
 </p>
-
+<br>
 
 ---
 
@@ -217,23 +293,14 @@ To prevent the screen from turning off during a movie:
 
 ## Author
 
-O. FRAISSE (MilOvni)
+**O. FRAISSE (MilOvni)**
 
-<p align="center">
-  <img src="screenshots/Player_04.jpg" alt="Bouquets" width="700">
-</p>
+GitHub — MilOvni/Myostoox<br><br>
 
-<p align="center">
-  <img src="screenshots/Player_02.jpg" alt="Radios" width="700">
-</p>
-
-<p align="center">
-  <img src="screenshots/Player_09.jpg" alt="Lyrics" width="700">
-</p>
 
 <p align="center">
   <img src="screenshots/Player_11.jpg" alt="About" width="700">
 </p>
-
+<br>
 
 ```
