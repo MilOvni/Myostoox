@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo.png" alt="Logo Myostoox" width="200">
+  <img src="logo_big.png" alt="Logo Myostoox" width="200">
 </p>
 
 
