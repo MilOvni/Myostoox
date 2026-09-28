@@ -1,0 +1,42 @@
+Myostoox 1.0 — First public release
+
+Audio/video player for Lubuntu and lightweight GTK desktops (LXQt / XFCE).
+Python 3 + GTK 3 + GStreamer.
+
+Highlights:
+• Playlist (import/export m3u, m3u8, pls)
+• Internet radios & TV / M3U bouquets
+• Experimental CD / DVD / Blu-ray
+• Equalizer, pitch/tempo, spectrum
+• Subtitles & LRC lyrics
+• Themes, MPRIS2, mini-player
+• Single-instance + optional notifications
+
+Install:
+  sudo apt install ./myostoox_1.0-1_all.deb
+
+License: GNU GPL v3+
+Author: O. Fraisse (MilOvni)
+Support: https://www.patreon.com/MilOvni
+
+---
+
+Myostoox 1.0 — Première version publique
+
+Lecteur audio/vidéo pour Lubuntu et bureaux GTK légers (LXQt / XFCE).
+
+Points forts :
+• Playlist (import/export m3u, m3u8, pls)
+• Radios Internet & TV / bouquets M3U
+• CD / DVD / Blu-ray (expérimental)
+• Égaliseur, pitch/tempo, spectre
+• Sous-titres & paroles LRC
+• Thèmes, MPRIS2, mini-lecteur
+• Instance unique + notifications optionnelles
+
+Installation :
+  sudo apt install ./myostoox_1.0-1_all.deb
+
+Licence : GNU GPL v3+
+Auteur : O. Fraisse (MilOvni)
+Soutenir : https://www.patreon.com/MilOvni
