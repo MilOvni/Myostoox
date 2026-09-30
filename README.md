@@ -35,7 +35,7 @@ Written in Python 3, GTK3 and GStreamer, Myostoox brings music, video, Internet 
 
     • MPRIS2 support
 
-    Desktop notifications
+    • Desktop notifications
 
 ### **Video**
 
