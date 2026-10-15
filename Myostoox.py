@@ -231,6 +231,62 @@ RADIOS_FILE = os.path.join(CONFIG_DIR, "radios.json")
 TVS_FILE = os.path.join(CONFIG_DIR, "tvs.json")
 BOUQUETS_FILE = os.path.join(CONFIG_DIR, "bouquets.json")
 EQ_PRESETS_FILE = os.path.join(CONFIG_DIR, "eq_presets.json")
+
+# Pré-sélections d'égaliseur fournies par défaut (écrites dans eq_presets.json
+# au premier lancement si le fichier est absent).
+DEFAULT_EQ_PRESETS = [
+    {
+        "name": "Crystal",
+        "gains": [
+            1.2958579881656789, 0.0, 0.0, -1.3179190751445091,
+            0.13872832369942145, 1.595375722543352, 3.884393063583815,
+            2.843930635838152, 1.1791907514450841, -0.14201183431952558,
+        ],
+    },
+    {
+        "name": "Flat",
+        "gains": [
+            0.0, 0.0, 0.0, 0.0, 0.037974683544305776,
+            0.0, 0.0, 0.0, 0.0, 0.0,
+        ],
+    },
+    {
+        "name": "Bass Boost",
+        "gains": [
+            4.481012658227847, 7.777777777777779, 3.7777777777777786,
+            0.037974683544305776, -0.6666666666666679, -2.2222222222222214,
+            -0.3607594936708871, -0.018987341772152888, -0.075949367088608,
+            0.37974683544304,
+        ],
+    },
+    {
+        "name": "Classique",
+        "gains": [
+            0.8924050632911396, 3.552713678800501e-15, -0.8888888888888893,
+            -1.3179190751445091, 3.552713678800501e-15, 0.2088607594936711,
+            1.1111111111111107, 1.12025316455696, 1.1772151898734151,
+            1.1772151898734151,
+        ],
+    },
+    {
+        "name": "Jazz",
+        "gains": [
+            -0.8888888888888893, -0.7594936708860764, 1.0063291139240462,
+            0.037974683544305776, -1.044303797468352, -0.2468354430379769,
+            1.0063291139240462, 2.031645569620256, 1.9746835443038009,
+            1.063291139240505,
+        ],
+    },
+    {
+        "name": "Rock Pop",
+        "gains": [
+            2.0, 2.8888888888888893, 2.0, 0.8924050632911396,
+            0.037974683544305776, -0.9873417721518969, 2.031645569620256,
+            3.0, 1.9746835443038009, 1.063291139240505,
+        ],
+    },
+]
+
 ASSOCIATIONS_FILE = os.path.join(CONFIG_DIR, "associations.json")
 
 DESKTOP_FILE_NAME = f"{APP_NAME.lower()}.desktop"
@@ -408,7 +464,7 @@ THEME_PALETTES = {
     "sang": {
         "window_bg": "#2a1418", "window_fg": "#ffe8ec",
         "topbar_bg": "#3d1c22", "topbar_border": "#7a3038",
-        "btn_bg": "#5a2830", "btn_fg": "#ffe8ec", "btn_border": "#8a4048",
+        "btn_bg": "#3d1c22", "btn_fg": "#ffe8ec", "btn_border": "#3d1c22",
         "btn_hover": "#6e343c", "btn_active_bg": "#a03848",
         "btn_active_border": "#d05060", "time_fg": "#f0c0c8",
         "header_bg": "#3a1e24", "header_fg": "#f0c0c8",
@@ -585,7 +641,7 @@ THEME_PALETTES = {
     "ciel": {
         "window_bg": "#1a4a9a", "window_fg": "#e8f4ff",
         "topbar_bg": "#2a7fd4", "topbar_border": "#5eb8f0",
-        "btn_bg": "#2e6ec0", "btn_fg": "#ffffff", "btn_border": "#5eb8f0",
+        "btn_bg": "#2a7fd4", "btn_fg": "#ffffff", "btn_border": "#2a7fd4",
         "btn_hover": "#3a8ae0", "btn_active_bg": "#4ec8f8",
         "btn_active_border": "#a0e0ff", "time_fg": "#d0ecff",
         "header_bg": "#3a9ad8", "header_fg": "#e8f8ff",
@@ -1733,6 +1789,8 @@ class Myostoox(Gtk.Window):
         # Notifications, mini-lecteur, inhibition veille
         self.desktop_notifications = True
         self.window_borders = True
+        # Plan de la fenêtre : "normal" | "above" | "below"
+        self.window_layer = "normal"
         self.playlist_transparency = False
         self.playlist_transparency_opacity = 0.35  # 0=invisible, 1=opaque
         self.show_metadata_panel = True  # panneau bas (jaquette + métadonnées)
@@ -1740,6 +1798,8 @@ class Myostoox(Gtk.Window):
         self.nano_player_mode = False
         self.nano_banner_enabled = False
         self.nano_vertical = False
+        self.nano_playlist_enabled = False
+        self.nano_playlist_side = "right"  # left | right (mode vertical)
         self._last_notify_key = None
         self._notify_unavailable = False
         self._notify_service_checked = False
@@ -1904,6 +1964,10 @@ class Myostoox(Gtk.Window):
         try:
             if getattr(self, "nano_player_mode", False) or getattr(self, "mini_player_mode", False):
                 GLib.idle_add(self._apply_compact_player_mode)
+            try:
+                GLib.idle_add(self._apply_window_layer)
+            except Exception:
+                pass
         except Exception:
             pass
 
@@ -1997,6 +2061,11 @@ class Myostoox(Gtk.Window):
     # RADIOS FAVORIS
     # ========================================================
 
+        try:
+            self._update_undecorated_move_hint()
+        except Exception:
+            pass
+
     def load_radios(self):
 
         self.radios = []
@@ -2074,6 +2143,7 @@ class Myostoox(Gtk.Window):
         )
         dialog.set_default_size(self._ui_s(560), self._ui_s(380))
         dialog.add_button(self.tr("Fermer"), Gtk.ResponseType.CLOSE)
+        self._style_app_dialog(dialog)
 
         area = dialog.get_content_area()
         area.set_border_width(12)
@@ -2506,6 +2576,7 @@ class Myostoox(Gtk.Window):
         )
         dialog.set_default_size(self._ui_s(560), self._ui_s(380))
         dialog.add_button(self.tr("Fermer"), Gtk.ResponseType.CLOSE)
+        self._style_app_dialog(dialog)
 
         area = dialog.get_content_area()
         area.set_border_width(12)
@@ -2995,9 +3066,21 @@ class Myostoox(Gtk.Window):
     # ========================================================
 
     def load_eq_presets(self):
-
+        """Charge les presets EQ ; crée le fichier avec les défauts si absent."""
         self.eq_presets = []
         if not os.path.isfile(EQ_PRESETS_FILE):
+            try:
+                self.eq_presets = [
+                    {"name": p["name"], "gains": list(p["gains"])}
+                    for p in DEFAULT_EQ_PRESETS
+                ]
+                self.save_eq_presets()
+            except Exception as e:
+                print("init eq presets:", e, file=sys.stderr)
+                self.eq_presets = [
+                    {"name": p["name"], "gains": list(p["gains"])}
+                    for p in DEFAULT_EQ_PRESETS
+                ]
             return
 
         try:
@@ -3005,17 +3088,26 @@ class Myostoox(Gtk.Window):
                 data = json.load(f)
             if isinstance(data, list):
                 for item in data:
-                    if isinstance(item, dict) and "name" in item and "gains" in item:
-                        name = str(item["name"]).strip()
-                        gains = item["gains"]
-                        if name and isinstance(gains, list) and len(gains) == EQ_BANDS:
-                            try:
-                                gains = [float(g) for g in gains]
-                                self.eq_presets.append({"name": name, "gains": gains})
-                            except Exception:
-                                pass
-        except Exception as exc:
-            print("Impossible de charger les préréglages d'égaliseur :", exc, file=sys.stderr)
+                    if not isinstance(item, dict):
+                        continue
+                    name = item.get("name")
+                    gains = item.get("gains")
+                    if isinstance(name, str) and isinstance(gains, list) and len(gains) >= EQ_BANDS:
+                        try:
+                            self.eq_presets.append({
+                                "name": name,
+                                "gains": [float(gains[i]) for i in range(EQ_BANDS)],
+                            })
+                        except Exception:
+                            pass
+        except Exception as e:
+            print("load eq presets:", e, file=sys.stderr)
+            if not self.eq_presets:
+                self.eq_presets = [
+                    {"name": p["name"], "gains": list(p["gains"])}
+                    for p in DEFAULT_EQ_PRESETS
+                ]
+
 
     def save_eq_presets(self):
 
@@ -3404,6 +3496,7 @@ class Myostoox(Gtk.Window):
                 "mini_banner_enabled": bool(getattr(self, "mini_banner_enabled", True)),
                 "desktop_notifications": bool(getattr(self, "desktop_notifications", True)),
                 "window_borders": bool(getattr(self, "window_borders", True)),
+                "window_layer": str(getattr(self, "window_layer", "normal") or "normal"),
                 "playlist_transparency": bool(getattr(self, "playlist_transparency", False)),
                 "playlist_transparency_opacity": float(
                     getattr(self, "playlist_transparency_opacity", 0.35)
@@ -3413,6 +3506,12 @@ class Myostoox(Gtk.Window):
                 "nano_player_mode": bool(getattr(self, "nano_player_mode", False)),
                 "nano_banner_enabled": bool(getattr(self, "nano_banner_enabled", False)),
                 "nano_vertical": bool(getattr(self, "nano_vertical", False)),
+                "nano_playlist_enabled": bool(
+                    getattr(self, "nano_playlist_enabled", False)
+                ),
+                "nano_playlist_side": str(
+                    getattr(self, "nano_playlist_side", "right") or "right"
+                ),
                 "shortcuts": dict(getattr(self, "shortcuts", DEFAULT_SHORTCUTS)),
                 "colorimetry_enabled": bool(
                     getattr(self, "colorimetry_enabled", False)
@@ -3705,6 +3804,11 @@ class Myostoox(Gtk.Window):
                 )
             if "window_borders" in state:
                 self.window_borders = bool(state.get("window_borders"))
+            if "window_layer" in state:
+                layer = str(state.get("window_layer") or "normal").lower()
+                if layer not in ("normal", "above", "below"):
+                    layer = "normal"
+                self.window_layer = layer
             if "playlist_transparency" in state:
                 self.playlist_transparency = bool(
                     state.get("playlist_transparency")
@@ -3723,6 +3827,11 @@ class Myostoox(Gtk.Window):
                 self.nano_banner_enabled = bool(state.get("nano_banner_enabled"))
             if "nano_vertical" in state:
                 self.nano_vertical = bool(state.get("nano_vertical"))
+            if "nano_playlist_enabled" in state:
+                self.nano_playlist_enabled = bool(state.get("nano_playlist_enabled"))
+            if "nano_playlist_side" in state:
+                side = str(state.get("nano_playlist_side") or "right").lower()
+                self.nano_playlist_side = "left" if side == "left" else "right"
             sc_col = state.get("spectrum_bar_color")
             if isinstance(sc_col, (list, tuple)) and len(sc_col) >= 3:
                 try:
@@ -3775,13 +3884,31 @@ class Myostoox(Gtk.Window):
             win_transp = False
         if win_transp:
             window_bg_css = "transparent"
+            # Champ recherche : transparent (sinon header_bg opaque)
+            entry_header_bg_css = "transparent"
         else:
             window_bg_css = p['window_bg']
-        # Barres progression / volume : bleu fixe (tous thèmes)
-        scale_fill = "#2f80ed"       # portion avancée
-        scale_trough = "#1a2a3a"     # rail sombre neutre
-        scale_thumb = "#4d9fff"      # curseur ▼
-        scale_thumb_hover = "#7ab8ff"
+            entry_header_bg_css = p['header_bg']
+        # Barres progression / volume (thèmes spéciaux → couleurs dédiées)
+        _tn = (getattr(self, "theme_name", "") or "").lower()
+        if _tn == "sang":
+            scale_fill, scale_trough = "#c41e3a", "#3a1018"
+            scale_thumb, scale_thumb_hover = "#e04050", "#ff6070"
+        elif _tn == "nature":
+            scale_fill, scale_trough = "#f0e6c8", "#2a4a30"
+            scale_thumb, scale_thumb_hover = "#fff5dc", "#ffffff"
+        elif _tn == "gdalf":
+            scale_fill, scale_trough = "#ffffff", "#6a6558"
+            scale_thumb, scale_thumb_hover = "#f5f1e6", "#ffffff"
+        elif _tn == "darth":
+            scale_fill, scale_trough = "#8a929c", "#1a1010"
+            scale_thumb, scale_thumb_hover = "#b0b8c0", "#d0d6dc"
+        elif _tn == "fremen":
+            scale_fill, scale_trough = "#c4a06a", "#2a2014"
+            scale_thumb, scale_thumb_hover = "#d4b888", "#e8d4b0"
+        else:
+            scale_fill, scale_trough = "#2f80ed", "#1a2a3a"
+            scale_thumb, scale_thumb_hover = "#4d9fff", "#7ab8ff"
         # Conservé pour d'autres usages éventuels (non utilisé par les scales)
         slider_color = (
             p.get("btn_active_border")
@@ -3847,6 +3974,46 @@ class Myostoox(Gtk.Window):
             color: inherit;
             font-size: {s(14)}px;
         }}
+
+        /* Nano-lecteur : boutons et barre ~2/3 */
+        window.nano-mode .topbar {{
+            padding: {s(1)}px {s(2)}px;
+        }}
+        window.nano-mode button.control {{
+            padding: {s(1)}px {s(4)}px;
+            min-width: {s(18)}px;
+            min-height: {s(16)}px;
+            font-size: {s(10)}px;
+            border-radius: {s(2)}px;
+        }}
+        window.nano-mode button.control label {{
+            font-size: {s(10)}px;
+        }}
+        window.nano-mode button.play-control {{
+            padding: {s(1)}px {s(5)}px;
+            min-width: {s(22)}px;
+            min-height: {s(18)}px;
+            font-size: {s(12)}px;
+        }}
+        window.nano-mode button.play-control label {{
+            font-size: {s(12)}px;
+            font-weight: bold;
+        }}
+
+        .nano-playlist-tree,
+        treeview.nano-playlist-tree {{
+            background-color: {p['tree_bg']};
+            color: {p['tree_fg']};
+            font-size: {s(10)}px;
+        }}
+        treeview.nano-playlist-tree:selected {{
+            background-color: {p['tree_sel_bg']};
+            color: {p['tree_sel_fg']};
+        }}
+        scrolledwindow.nano-playlist-scroll {{
+            background-color: {p['tree_bg']};
+            border: none;
+        }}
         button.symbol-bold,
         button.symbol-bold label {{
             font-weight: bold;
@@ -3875,25 +4042,53 @@ class Myostoox(Gtk.Window):
             font-weight: bold;
         }}
 
-        /* Barres progression / volume : bleu fixe tous thèmes */
+        /* Jauges globales : neutraliser le thème bureau (détourage bleu) */
+        scale,
+        scale.horizontal,
+        scale.vertical {{
+            outline: none;
+            box-shadow: none;
+        }}
+        scale trough,
+        scale.horizontal trough,
+        scale.vertical trough,
+        scale contents trough {{
+            background: {scale_trough};
+            background-color: {scale_trough};
+            background-image: none;
+            border: none;
+            border-style: none;
+            border-width: 0;
+            border-radius: {s(2)}px;
+            box-shadow: none;
+            outline: none;
+            min-height: {s(4)}px;
+            min-width: {s(4)}px;
+        }}
+        scale highlight,
+        scale.horizontal highlight,
+        scale.vertical highlight,
+        scale progress,
+        scale contents trough highlight {{
+            background: {scale_fill};
+            background-color: {scale_fill};
+            background-image: none;
+            border: none;
+            border-style: none;
+            border-width: 0;
+            border-radius: {s(2)}px;
+            box-shadow: none;
+            outline: none;
+        }}
         scale.horizontal {{
             min-height: {s(16)}px;
         }}
         scale.horizontal trough {{
             min-height: {s(4)}px;
-            border-radius: {s(2)}px;
-            background: {scale_trough};
-            background-color: {scale_trough};
-            border: none;
-            box-shadow: none;
         }}
-        scale.horizontal highlight {{
-            border-radius: {s(2)}px;
-            background: {scale_fill};
-            background-color: {scale_fill};
-        }}
+        /* Curseur progression / volume (triangle) */
         scale.horizontal slider,
-        scale contents trough slider {{
+        scale.horizontal contents trough slider {{
             min-width: {s(1)}px;
             min-height: {s(1)}px;
             margin: 0;
@@ -3912,8 +4107,33 @@ class Myostoox(Gtk.Window):
             outline: none;
         }}
         scale.horizontal slider:hover,
-        scale contents trough slider:hover {{
+        scale.horizontal contents trough slider:hover {{
             border-top-color: {scale_thumb_hover};
+        }}
+        /* Curseur vertical (égaliseur) — pastille thème, sans bordure système */
+        scale.vertical slider,
+        scale.vertical contents trough slider {{
+            min-width: {s(14)}px;
+            min-height: {s(10)}px;
+            margin: {s(-3)}px;
+            padding: 0;
+            background: {scale_thumb};
+            background-color: {scale_thumb};
+            background-image: none;
+            border: none;
+            border-style: none;
+            border-radius: {s(3)}px;
+            box-shadow: none;
+            outline: none;
+        }}
+        scale.vertical slider:hover,
+        scale.vertical contents trough slider:hover {{
+            background: {scale_thumb_hover};
+            background-color: {scale_thumb_hover};
+        }}
+        scale.vertical trough {{
+            min-width: {s(8)}px;
+            border-radius: {s(3)}px;
         }}
 
         .display-time {{
@@ -3960,7 +4180,8 @@ class Myostoox(Gtk.Window):
         }}
 
         .playlist-header {{
-            background: {p['header_bg']};
+            background: {entry_header_bg_css};
+            background-color: {entry_header_bg_css};
             color: {p['header_fg']};
             font-size: {s(11)}px;
             padding: {s(5)}px;
@@ -3969,9 +4190,30 @@ class Myostoox(Gtk.Window):
             border: none;
             border-radius: 0;
             box-shadow: none;
-            background: {p['header_bg']};
+            background: {entry_header_bg_css};
+            background-color: {entry_header_bg_css};
+            background-image: none;
             color: {p['header_fg']};
             min-height: {s(34)}px;
+        }}
+        entry.playlist-header.playlist-transparent,
+        entry.playlist-transparent,
+        .search-row.playlist-transparent {{
+            background: transparent;
+            background-color: transparent;
+            background-image: none;
+            box-shadow: none;
+            border: none;
+            border-image: none;
+        }}
+        entry.playlist-header.playlist-transparent:focus,
+        entry.playlist-header.playlist-transparent:selected,
+        entry.playlist-header.playlist-transparent:backdrop {{
+            background: transparent;
+            background-color: transparent;
+            background-image: none;
+            box-shadow: none;
+            border: none;
         }}
         treeview {{
             background: {p['tree_bg']};
@@ -3986,8 +4228,12 @@ class Myostoox(Gtk.Window):
             background-image: none;
         }}
         treeview.playlist-transparent:selected,
-        treeview.playlist-transparent.view:selected {{
-            background-color: rgba({tr}, {tg}, {tb}, {topacity});
+        treeview.playlist-transparent.view:selected,
+        treeview.playlist-transparent:selected:focus,
+        treeview.playlist-transparent.view:selected:focus {{
+            background-color: {p['tree_sel_bg']};
+            background: {p['tree_sel_bg']};
+            color: {p['tree_sel_fg']};
         }}
         scrolledwindow.playlist-transparent,
         scrolledwindow.playlist-transparent > viewport,
@@ -4006,15 +4252,42 @@ class Myostoox(Gtk.Window):
             background-color: rgba({tr}, {tg}, {tb}, {topacity});
             background-image: none;
         }}
-        treeview.view:selected {{
+        treeview.view:selected,
+        treeview:selected {{
             background: {p['tree_sel_bg']};
+            background-color: {p['tree_sel_bg']};
             color: {p['tree_sel_fg']};
         }}
         /* Scrollbar playlist uniquement (ne touche pas aux scales navigation) */
         scrolledwindow.playlist-scroll,
         scrolledwindow.playlist-scroll > viewport {{
             background: {p['tree_bg']};
+            background-color: {p['tree_bg']};
             border: none;
+        }}
+        /* Transparence : doit venir APRÈS les règles opaques playlist-scroll */
+        scrolledwindow.playlist-scroll.playlist-transparent,
+        scrolledwindow.playlist-scroll.playlist-transparent > viewport,
+        scrolledwindow.playlist-scroll.playlist-transparent viewport,
+        scrolledwindow.playlist-transparent,
+        scrolledwindow.playlist-transparent > viewport,
+        scrolledwindow.playlist-transparent viewport {{
+            background-color: rgba({tr}, {tg}, {tb}, {topacity});
+            background: rgba({tr}, {tg}, {tb}, {topacity});
+            background-image: none;
+            border: none;
+            box-shadow: none;
+        }}
+        treeview.playlist-transparent,
+        treeview.playlist-transparent.view {{
+            background-color: rgba({tr}, {tg}, {tb}, {topacity});
+            background: rgba({tr}, {tg}, {tb}, {topacity});
+            background-image: none;
+        }}
+        .playlist-box.playlist-transparent {{
+            background-color: rgba({tr}, {tg}, {tb}, {topacity});
+            background: rgba({tr}, {tg}, {tb}, {topacity});
+            background-image: none;
         }}
         scrolledwindow.playlist-scroll scrollbar {{
             background: {p['tree_bg']};
@@ -4170,6 +4443,273 @@ class Myostoox(Gtk.Window):
             background-color: #3a3a3a;
             background-image: none;
         }}
+        /* Dialogues auxiliaires : thème application (chrome client inclus) */
+        window.app-dialog,
+        dialog.app-dialog {{
+            background-color: {p['window_bg']};
+            background: {p['window_bg']};
+            color: {p['window_fg']};
+            border: {s(1)}px solid {p['topbar_border']};
+        }}
+        .app-dialog {{
+            background-color: {p['window_bg']};
+            color: {p['window_fg']};
+        }}
+        .app-dialog box,
+        .app-dialog grid,
+        .app-dialog viewport {{
+            background-color: {p['window_bg']};
+            color: {p['window_fg']};
+        }}
+        .app-dialog-header {{
+            background-color: {p['topbar_bg']};
+            background: {p['topbar_bg']};
+            border-bottom: {s(1)}px solid {p['topbar_border']};
+            padding: {s(4)}px {s(8)}px;
+            min-height: {s(28)}px;
+        }}
+        .app-dialog-title {{
+            color: {p['title_fg']};
+            font-weight: bold;
+            font-size: {s(12)}px;
+        }}
+        .app-dialog-close {{
+            background-image: none;
+            background-color: transparent;
+            color: {p['btn_fg']};
+            border: none;
+            border-radius: {s(3)}px;
+            padding: {s(2)}px {s(8)}px;
+            min-width: {s(28)}px;
+            min-height: {s(24)}px;
+            font-weight: bold;
+            font-size: {s(14)}px;
+        }}
+        .app-dialog-close:hover {{
+            background-color: {p['btn_active_bg']};
+            color: {p['tree_sel_fg']};
+        }}
+        .app-dialog label {{
+            color: {p['window_fg']};
+        }}
+        .app-dialog entry {{
+            background-color: {p['tree_bg']};
+            color: {p['tree_fg']};
+            border: {s(1)}px solid {p['btn_border']};
+            border-radius: {s(3)}px;
+        }}
+        .app-dialog button {{
+            background-image: none;
+            background-color: {p['btn_bg']};
+            color: {p['btn_fg']};
+            border: {s(1)}px solid {p['btn_border']};
+            border-radius: {s(3)}px;
+            padding: {s(4)}px {s(10)}px;
+            min-height: {s(28)}px;
+        }}
+        .app-dialog button:hover {{
+            background-color: {p['btn_hover']};
+            color: {p['window_fg']};
+        }}
+        .app-dialog button:active {{
+            background-color: {p['btn_active_bg']};
+            border-color: {p['btn_active_border']};
+            color: {p['tree_sel_fg']};
+        }}
+        .app-dialog treeview,
+        .app-dialog treeview.view {{
+            background-color: {p['tree_bg']};
+            color: {p['tree_fg']};
+        }}
+        .app-dialog treeview.view:selected,
+        .app-dialog treeview:selected {{
+            background-color: {p['tree_sel_bg']};
+            color: {p['tree_sel_fg']};
+        }}
+        .app-dialog treeview header button {{
+            background-color: {p['header_bg']};
+            color: {p['header_fg']};
+            border: none;
+            border-radius: 0;
+        }}
+        .app-dialog combobox button {{
+            background-color: {p['btn_bg']};
+            color: {p['btn_fg']};
+            border: {s(1)}px solid {p['btn_border']};
+        }}
+        .app-dialog-body {{
+            background-color: {p['window_bg']};
+            color: {p['window_fg']};
+            padding: {s(10)}px;
+        }}
+
+        /* Jauges dialogues : même palette, zéro détourage système */
+        .app-dialog scale,
+        .app-dialog scale.vertical,
+        .app-dialog scale.horizontal {{
+            color: {p['window_fg']};
+            outline: none;
+            box-shadow: none;
+        }}
+        .app-dialog scale trough,
+        .app-dialog scale.vertical trough,
+        .app-dialog scale.horizontal trough,
+        .app-dialog scale contents trough {{
+            background: {scale_trough};
+            background-color: {scale_trough};
+            background-image: none;
+            border: none;
+            border-style: none;
+            border-width: 0;
+            border-radius: {s(3)}px;
+            box-shadow: none;
+            outline: none;
+            min-width: {s(8)}px;
+            min-height: {s(6)}px;
+        }}
+        .app-dialog scale highlight,
+        .app-dialog scale.vertical highlight,
+        .app-dialog scale.horizontal highlight,
+        .app-dialog scale progress,
+        .app-dialog scale contents trough highlight {{
+            background: {scale_fill};
+            background-color: {scale_fill};
+            background-image: none;
+            border: none;
+            border-style: none;
+            border-width: 0;
+            border-radius: {s(3)}px;
+            box-shadow: none;
+            outline: none;
+        }}
+        .app-dialog scale.vertical slider,
+        .app-dialog scale.vertical contents trough slider {{
+            background: {scale_thumb};
+            background-color: {scale_thumb};
+            background-image: none;
+            border: none;
+            border-style: none;
+            border-radius: {s(3)}px;
+            min-width: {s(14)}px;
+            min-height: {s(10)}px;
+            margin: {s(-3)}px;
+            box-shadow: none;
+            outline: none;
+        }}
+        .app-dialog scale.vertical slider:hover {{
+            background: {scale_thumb_hover};
+            background-color: {scale_thumb_hover};
+        }}
+        .app-dialog scale.horizontal slider,
+        .app-dialog scale.horizontal contents trough slider {{
+            background: {scale_thumb};
+            background-color: {scale_thumb};
+            background-image: none;
+            border: none;
+            border-style: none;
+            border-radius: {s(3)}px;
+            min-width: {s(10)}px;
+            min-height: {s(14)}px;
+            margin: {s(-3)}px;
+            box-shadow: none;
+            outline: none;
+        }}
+        .app-dialog scale.horizontal slider:hover {{
+            background: {scale_thumb_hover};
+            background-color: {scale_thumb_hover};
+        }}
+
+        /* Scrollbars des dialogues (pas la playlist principale) */
+        .app-dialog scrolledwindow scrollbar,
+        .app-dialog scrollbar {{
+            background: {p['window_bg']};
+            background-color: {p['window_bg']};
+            border: none;
+            box-shadow: none;
+        }}
+        .app-dialog scrollbar.vertical {{
+            min-width: {s(10)}px;
+        }}
+        .app-dialog scrollbar.horizontal {{
+            min-height: {s(10)}px;
+        }}
+        .app-dialog scrollbar trough {{
+            background: {p['header_bg']};
+            background-color: {p['header_bg']};
+            border: none;
+            border-radius: {s(4)}px;
+            min-width: {s(8)}px;
+            min-height: {s(8)}px;
+        }}
+        .app-dialog scrollbar slider {{
+            background: {scale_fill};
+            background-color: {scale_fill};
+            background-image: none;
+            border: none;
+            border-radius: {s(4)}px;
+            min-width: {s(8)}px;
+            min-height: {s(8)}px;
+            margin: {s(1)}px;
+        }}
+        .app-dialog scrollbar slider:hover {{
+            background: {scale_thumb};
+            background-color: {scale_thumb};
+        }}
+        .app-dialog scrollbar slider:active {{
+            background: {scale_thumb_hover};
+            background-color: {scale_thumb_hover};
+        }}
+        .app-dialog scrollbar button {{
+            background: {p['header_bg']};
+            background-color: {p['header_bg']};
+            background-image: none;
+            border: none;
+            color: {p['header_fg']};
+            min-width: {s(10)}px;
+            min-height: {s(10)}px;
+            box-shadow: none;
+        }}
+        .app-dialog scrollbar button:hover {{
+            background: {p['btn_hover']};
+            background-color: {p['btn_hover']};
+        }}
+
+        /* En-têtes de colonnes TreeView dans les dialogues */
+        .app-dialog treeview header,
+        .app-dialog treeview.view header {{
+            background-color: {p['header_bg']};
+            color: {p['header_fg']};
+            border: none;
+        }}
+        .app-dialog treeview header button,
+        .app-dialog treeview.view header button {{
+            background-color: {p['header_bg']};
+            background: {p['header_bg']};
+            color: {p['header_fg']};
+            border: none;
+            border-right: {s(1)}px solid {p['topbar_border']};
+            border-radius: 0;
+            padding: {s(4)}px {s(6)}px;
+            box-shadow: none;
+        }}
+        .app-dialog treeview header button:hover {{
+            background-color: {p['btn_hover']};
+            color: {p['window_fg']};
+        }}
+
+        /* Combobox / listes déroulantes */
+        .app-dialog combobox,
+        .app-dialog combobox > box,
+        .app-dialog combobox button.combo {{
+            background-color: {p['btn_bg']};
+            color: {p['btn_fg']};
+            border: {s(1)}px solid {p['btn_border']};
+            border-radius: {s(3)}px;
+            box-shadow: none;
+        }}
+        .app-dialog combobox button.combo:hover {{
+            background-color: {p['btn_hover']};
+        }}
         /* Fenêtre « À propos » : couleur fond quel que soit le thème */
         .about-black,
         .about-black box,
@@ -4218,10 +4758,12 @@ class Myostoox(Gtk.Window):
             except Exception:
                 pass
         self._css_provider = provider
+        # USER (800) > APPLICATION (600) : impose le thème app
+        # sur les styles GTK du bureau (détourage bleu des scales, etc.)
         Gtk.StyleContext.add_provider_for_screen(
             screen,
             provider,
-            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
+            Gtk.STYLE_PROVIDER_PRIORITY_USER,
         )
 
     def set_theme(self, name):
@@ -4239,6 +4781,203 @@ class Myostoox(Gtk.Window):
             self.tr("Thèmes") + " : " + self.tr(THEME_LABELS.get(name, name))
         )
 
+
+    def _style_app_dialog(self, widget):
+        """Thème app + chrome client (sans décorations du gestionnaire de fenêtres).
+
+        Les barres de titre / cadres du bureau (XFCE, LXQt…) restent hors CSS.
+        On retire donc les décorations natives et on dessine une barre de titre
+        aux couleurs du thème Myostoox (topbar / bordure / titre).
+        """
+        if widget is None:
+            return
+        if getattr(widget, "_app_dialog_chrome", False):
+            return
+        try:
+            widget._app_dialog_chrome = True
+        except Exception:
+            pass
+
+        try:
+            widget.get_style_context().add_class("app-dialog")
+        except Exception:
+            pass
+
+        # Pas de décorations WM (barre bleue système, etc.)
+        try:
+            widget.set_decorated(False)
+        except Exception:
+            pass
+        try:
+            widget.set_border_width(0)
+        except Exception:
+            pass
+
+        title = ""
+        try:
+            title = widget.get_title() or ""
+        except Exception:
+            title = ""
+
+        header = Gtk.EventBox()
+        try:
+            header.get_style_context().add_class("app-dialog-header")
+        except Exception:
+            pass
+        header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        try:
+            header_box.set_margin_start(self._ui_s(6))
+            header_box.set_margin_end(self._ui_s(4))
+            header_box.set_margin_top(self._ui_s(2))
+            header_box.set_margin_bottom(self._ui_s(2))
+        except Exception:
+            pass
+        header.add(header_box)
+
+        title_lbl = Gtk.Label(label=title)
+        title_lbl.set_xalign(0)
+        title_lbl.set_hexpand(True)
+        title_lbl.set_ellipsize(Pango.EllipsizeMode.END)
+        try:
+            title_lbl.get_style_context().add_class("app-dialog-title")
+        except Exception:
+            pass
+        header_box.pack_start(title_lbl, True, True, 0)
+
+        close_btn = Gtk.Button(label="×")
+        try:
+            close_btn.get_style_context().add_class("app-dialog-close")
+        except Exception:
+            pass
+        close_btn.set_relief(Gtk.ReliefStyle.NONE)
+        close_btn.set_can_focus(False)
+        try:
+            close_btn.set_tooltip_text(self.tr("Fermer"))
+        except Exception:
+            pass
+
+        def _close(_btn=None):
+            try:
+                if isinstance(widget, Gtk.Dialog):
+                    widget.response(Gtk.ResponseType.CLOSE)
+                    return
+            except Exception:
+                pass
+            try:
+                widget.destroy()
+            except Exception:
+                pass
+
+        close_btn.connect("clicked", _close)
+        header_box.pack_end(close_btn, False, False, 0)
+
+        def _on_header_press(_w, event):
+            try:
+                if event.type != Gdk.EventType.BUTTON_PRESS:
+                    return False
+                if int(getattr(event, "button", 0) or 0) not in (1, 2, 3):
+                    return False
+                widget.begin_move_drag(
+                    int(event.button),
+                    int(event.x_root),
+                    int(event.y_root),
+                    int(event.time),
+                )
+                return True
+            except Exception:
+                return False
+
+        try:
+            header.add_events(
+                Gdk.EventMask.BUTTON_PRESS_MASK
+                | Gdk.EventMask.BUTTON1_MOTION_MASK
+            )
+            header.connect("button-press-event", _on_header_press)
+        except Exception:
+            pass
+
+        # --- Insertion du chrome ---
+        try:
+            if isinstance(widget, Gtk.Dialog):
+                area = widget.get_content_area()
+                if area is not None:
+                    try:
+                        area.get_style_context().add_class("app-dialog")
+                    except Exception:
+                        pass
+                    try:
+                        area.set_border_width(0)
+                    except Exception:
+                        pass
+                    area.pack_start(header, False, False, 0)
+                    area.reorder_child(header, 0)
+                    # Marge interne pour le contenu déjà présent / à venir
+                    try:
+                        for child in area.get_children():
+                            if child is header:
+                                continue
+                            try:
+                                child.set_margin_start(self._ui_s(10))
+                                child.set_margin_end(self._ui_s(10))
+                                child.set_margin_top(self._ui_s(8))
+                                child.set_margin_bottom(self._ui_s(8))
+                            except Exception:
+                                pass
+                    except Exception:
+                        pass
+                try:
+                    action = widget.get_action_area()
+                    if action is not None:
+                        action.get_style_context().add_class("app-dialog")
+                        try:
+                            action.set_margin_start(self._ui_s(8))
+                            action.set_margin_end(self._ui_s(8))
+                            action.set_margin_bottom(self._ui_s(8))
+                        except Exception:
+                            pass
+                except Exception:
+                    pass
+            else:
+                # Gtk.Window : encapsuler l'enfant existant
+                child = None
+                try:
+                    child = widget.get_child()
+                except Exception:
+                    child = None
+                if child is not None:
+                    try:
+                        widget.remove(child)
+                    except Exception:
+                        child = None
+                shell = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+                try:
+                    shell.get_style_context().add_class("app-dialog")
+                except Exception:
+                    pass
+                shell.pack_start(header, False, False, 0)
+                if child is not None:
+                    body = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+                    try:
+                        body.get_style_context().add_class("app-dialog-body")
+                    except Exception:
+                        pass
+                    try:
+                        body.set_border_width(0)
+                        child.set_margin_start(self._ui_s(4))
+                        child.set_margin_end(self._ui_s(4))
+                        child.set_margin_bottom(self._ui_s(4))
+                    except Exception:
+                        pass
+                    body.pack_start(child, True, True, 0)
+                    shell.pack_start(body, True, True, 0)
+                widget.add(shell)
+        except Exception as exc:
+            print("app dialog chrome:", exc, file=sys.stderr)
+
+        try:
+            header.show_all()
+        except Exception:
+            pass
 
     # ========================================================
     # INTERFACE
@@ -4276,6 +5015,7 @@ class Myostoox(Gtk.Window):
         self.top_bar_wrap = top_wrap
         main.pack_start(top_wrap, False, False, 0)
         self._build_mini_title_marquee(main)
+        self._build_nano_playlist_panel(main)
         try:
             self._update_undecorated_move_hint()
         except Exception:
@@ -4453,6 +5193,10 @@ class Myostoox(Gtk.Window):
         playlist_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         playlist_box.set_margin_start(8)
         playlist_box.set_margin_end(8)
+        try:
+            playlist_box.get_style_context().add_class("playlist-box")
+        except Exception:
+            pass
         self.playlist_box = playlist_box
         self.content_paned.pack2(playlist_box, True, True)
         self.content_paned.set_position(0)
@@ -4634,10 +5378,16 @@ class Myostoox(Gtk.Window):
             self.tree.append_column(column)
 
     def _refresh_playlist_current_style(self):
-        """Redessine la playlist pour le gras de la piste en cours."""
+        """Redessine les playlists pour le gras de la piste en cours."""
         try:
             if getattr(self, "tree", None) is not None:
                 self.tree.queue_draw()
+        except Exception:
+            pass
+        try:
+            nt = getattr(self, "nano_playlist_tree", None)
+            if nt is not None and nt.get_visible():
+                nt.queue_draw()
         except Exception:
             pass
 
@@ -10971,15 +11721,40 @@ class Myostoox(Gtk.Window):
         button.set_tooltip_text(self.tr("Répétition de la playlist activée"))
         self.status_label.set_text(self.tr("Répétition de la playlist"))
 
+    def _active_playlist_tree(self):
+        """TreeView actif pour navigation clavier (nano si mode actif, sinon principal)."""
+        try:
+            if (
+                getattr(self, "nano_player_mode", False)
+                and getattr(self, "nano_playlist_enabled", False)
+            ):
+                nt = getattr(self, "nano_playlist_tree", None)
+                if nt is not None:
+                    return nt
+        except Exception:
+            pass
+        return getattr(self, "tree", None)
+
     def move_playlist_selection(self, direction):
-        model = self.tree.get_model()
-        selection = self.tree.get_selection()
-        current_path, current_column = self.tree.get_cursor()
+        tree = self._active_playlist_tree()
+        if tree is None:
+            return
+        model = tree.get_model()
+        if model is None:
+            return
+        selection = tree.get_selection()
+        try:
+            current_path, current_column = tree.get_cursor()
+        except Exception:
+            current_path, current_column = None, None
 
         if current_path is None:
-            model_sel, paths = selection.get_selected_rows()
-            if paths:
-                current_path = paths[0]
+            try:
+                model_sel, paths = selection.get_selected_rows()
+                if paths:
+                    current_path = paths[0]
+            except Exception:
+                pass
 
         if current_path is None:
             target_path = Gtk.TreePath.new_first()
@@ -10993,13 +11768,16 @@ class Myostoox(Gtk.Window):
 
         try:
             model.get_iter(target_path)
-        except ValueError:
+        except (ValueError, TypeError):
             return
 
-        selection.unselect_all()
-        selection.select_path(target_path)
-        self.tree.set_cursor(target_path, current_column, False)
-        self.tree.scroll_to_cell(target_path, None, True, 0.5, 0)
+        try:
+            selection.unselect_all()
+            selection.select_path(target_path)
+            tree.set_cursor(target_path, current_column, False)
+            tree.scroll_to_cell(target_path, None, True, 0.5, 0)
+        except Exception:
+            pass
 
     # ========================================================
     # BUS GSTREAMER
@@ -13103,6 +13881,7 @@ class Myostoox(Gtk.Window):
         close_btn.connect("clicked", lambda b: win.destroy())
         button_box.pack_start(close_btn, False, False, 0)
 
+        self._style_app_dialog(win)
         win.show_all()
 
     def toggle_eq_mute(self, button=None):
@@ -13905,6 +14684,7 @@ class Myostoox(Gtk.Window):
         win.set_default_size(self._ui_s(400), self._ui_s(220))
         win.set_resizable(False)
         win.set_border_width(14)
+        self._style_app_dialog(win)
         self.colorimetry_window = win
 
         def on_destroy(*_a):
@@ -14096,6 +14876,7 @@ class Myostoox(Gtk.Window):
         close_btn.connect("clicked", lambda b: win.destroy())
         button_box.pack_start(close_btn, False, False, 0)
 
+        self._style_app_dialog(win)
         win.show_all()
 
     def on_pitch_changed(self, scale):
@@ -14834,6 +15615,287 @@ class Myostoox(Gtk.Window):
         except Exception:
             pass
 
+    def toggle_nano_playlist(self, *args):
+        self.nano_playlist_enabled = not bool(
+            getattr(self, "nano_playlist_enabled", False)
+        )
+        if getattr(self, "nano_player_mode", False):
+            self._apply_compact_player_mode()
+        try:
+            self.save_state()
+        except Exception:
+            pass
+
+    def set_nano_playlist_side(self, side):
+        side = "left" if str(side).lower() == "left" else "right"
+        if getattr(self, "nano_playlist_side", "right") == side:
+            return
+        self.nano_playlist_side = side
+        if getattr(self, "nano_player_mode", False) and getattr(
+            self, "nano_playlist_enabled", False
+        ):
+            self._apply_compact_player_mode()
+        try:
+            self.save_state()
+        except Exception:
+            pass
+
+    def _build_nano_playlist_panel(self, main):
+        """Mini-playlist nano : titre + artiste, 8 lignes, hors paned principal."""
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        try:
+            box.get_style_context().add_class("nano-playlist-box")
+            box.get_style_context().add_class("playlist-box")
+        except Exception:
+            pass
+        box.set_no_show_all(True)
+        box.hide()
+        self.nano_playlist_box = box
+
+        scroll = Gtk.ScrolledWindow()
+        scroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        try:
+            scroll.set_overlay_scrolling(False)
+        except Exception:
+            pass
+        try:
+            scroll.get_style_context().add_class("playlist-scroll")
+            scroll.get_style_context().add_class("nano-playlist-scroll")
+        except Exception:
+            pass
+        scroll.set_no_show_all(True)
+        self.nano_playlist_scroll = scroll
+
+        tree = Gtk.TreeView(model=self.playlist)
+        tree.set_headers_visible(False)
+        tree.set_enable_search(False)
+        tree.set_no_show_all(True)
+        try:
+            tree.get_selection().set_mode(Gtk.SelectionMode.SINGLE)
+        except Exception:
+            pass
+        try:
+            tree.get_style_context().add_class("nano-playlist-tree")
+        except Exception:
+            pass
+
+        for col_id in (self.COL_TITLE, self.COL_ARTIST):
+            col = Gtk.TreeViewColumn()
+            cell = Gtk.CellRendererText()
+            try:
+                cell.set_property("ellipsize", Pango.EllipsizeMode.END)
+            except Exception:
+                pass
+            col.pack_start(cell, True)
+            col.set_cell_data_func(cell, self._playlist_cell_data, col_id)
+            col.set_expand(True)
+            tree.append_column(col)
+
+        tree.set_can_focus(True)
+        tree.connect("row-activated", self._nano_playlist_row_activated)
+        tree.connect("key-press-event", self._on_nano_playlist_key_press)
+        self.nano_playlist_tree = tree
+        scroll.add(tree)
+        box.pack_start(scroll, True, True, 0)
+        main.pack_start(box, False, False, 0)
+
+    def _nano_playlist_row_activated(self, tree, path, column):
+        """Double-clic nano-playlist → lecture (gardes anti-crash)."""
+        try:
+            if path is None or tree is None:
+                return
+            model = tree.get_model()
+            if model is None:
+                return
+            try:
+                it = model.get_iter(path)
+            except Exception:
+                return
+            if it is None:
+                return
+            filename = model.get_value(it, self.COL_PATH)
+            if not filename or not isinstance(filename, str):
+                return
+            self.play_file(filename)
+        except Exception as e:
+            print("nano playlist activate:", e, file=sys.stderr)
+
+    def _on_nano_playlist_key_press(self, tree, event):
+        """Flèches ↑↓ + Entrée dans la mini-playlist nano."""
+        try:
+            key = Gdk.keyval_name(Gdk.keyval_to_lower(event.keyval)) or ""
+        except Exception:
+            key = ""
+        if key in ("up", "kp_up"):
+            self.move_playlist_selection(-1)
+            return True
+        if key in ("down", "kp_down"):
+            self.move_playlist_selection(1)
+            return True
+        if key in ("return", "kp_enter"):
+            try:
+                model, paths = tree.get_selection().get_selected_rows()
+                if paths and model is not None:
+                    it = model.get_iter(paths[0])
+                    filename = model.get_value(it, self.COL_PATH)
+                    if filename:
+                        self.play_file(filename)
+                        return True
+            except Exception:
+                pass
+        return False
+
+    def _hide_nano_playlist_panel(self):
+        box = getattr(self, "nano_playlist_box", None)
+        if box is None:
+            return
+        for w in (
+            box,
+            getattr(self, "nano_playlist_scroll", None),
+            getattr(self, "nano_playlist_tree", None),
+        ):
+            if w is None:
+                continue
+            try:
+                w.set_no_show_all(True)
+            except Exception:
+                pass
+            try:
+                w.hide()
+            except Exception:
+                pass
+        try:
+            box.set_size_request(-1, 0)
+        except Exception:
+            pass
+
+    def _apply_nano_playlist_layout(self):
+        """Affiche/place la mini-playlist si nano + option ; sinon masque."""
+        box = getattr(self, "nano_playlist_box", None)
+        if box is None:
+            return
+        nano = bool(getattr(self, "nano_player_mode", False))
+        enabled = bool(nano and getattr(self, "nano_playlist_enabled", False))
+        main = None
+        try:
+            main = self.get_child()
+        except Exception:
+            main = None
+
+        if not enabled:
+            self._hide_nano_playlist_panel()
+            try:
+                if main is not None:
+                    main.set_orientation(Gtk.Orientation.VERTICAL)
+            except Exception:
+                pass
+            return
+
+        row_h = max(16, self._ui_s(20))
+        pl_h = row_h * 8
+        vertical = bool(getattr(self, "nano_vertical", False))
+        side = getattr(self, "nano_playlist_side", "right") or "right"
+        top_wrap = getattr(self, "top_bar_wrap", None) or getattr(self, "top_bar", None)
+
+        try:
+            box.set_no_show_all(False)
+            scroll = getattr(self, "nano_playlist_scroll", None)
+            tree = getattr(self, "nano_playlist_tree", None)
+            for w in (scroll, tree):
+                if w is not None:
+                    w.set_no_show_all(False)
+            if vertical:
+                pl_w = self._ui_s(160)
+                box.set_size_request(pl_w, pl_h)
+                if scroll is not None:
+                    scroll.set_size_request(pl_w, pl_h)
+            else:
+                w = self._ui_s(117)
+                box.set_size_request(w, pl_h)
+                if scroll is not None:
+                    scroll.set_size_request(w, pl_h)
+            box.show_all()
+            try:
+                tree = getattr(self, "nano_playlist_tree", None)
+                if tree is not None:
+                    # Sélectionner la piste courante si possible
+                    try:
+                        cur = getattr(self, "current_path", None)
+                        if cur and tree.get_model() is not None:
+                            model = tree.get_model()
+                            it = model.get_iter_first()
+                            while it is not None:
+                                if model.get_value(it, self.COL_PATH) == cur:
+                                    path = model.get_path(it)
+                                    tree.get_selection().unselect_all()
+                                    tree.get_selection().select_path(path)
+                                    tree.set_cursor(path, None, False)
+                                    tree.scroll_to_cell(path, None, True, 0.5, 0)
+                                    break
+                                it = model.iter_next(it)
+                    except Exception:
+                        pass
+                    tree.grab_focus()
+            except Exception:
+                pass
+        except Exception as e:
+            print("nano playlist show:", e, file=sys.stderr)
+            return
+
+        if main is None:
+            return
+        try:
+            if vertical:
+                main.set_orientation(Gtk.Orientation.HORIZONTAL)
+                if side == "left":
+                    main.reorder_child(box, 0)
+                    if top_wrap is not None:
+                        main.reorder_child(top_wrap, 1)
+                else:
+                    if top_wrap is not None:
+                        main.reorder_child(top_wrap, 0)
+                    main.reorder_child(box, 1)
+            else:
+                main.set_orientation(Gtk.Orientation.VERTICAL)
+                if top_wrap is not None:
+                    main.reorder_child(top_wrap, 0)
+                main.reorder_child(box, 1)
+        except Exception as e:
+            print("nano playlist reorder:", e, file=sys.stderr)
+
+    def _resize_nano_window(self):
+        """Une seule passe de redimensionnement nano (avec ou sans playlist)."""
+        if not bool(getattr(self, "nano_player_mode", False)):
+            return
+        pl = bool(getattr(self, "nano_playlist_enabled", False))
+        vertical = bool(getattr(self, "nano_vertical", False))
+        row_h = max(16, self._ui_s(20))
+        pl_h = row_h * 8
+        ctrl_w = (
+            max(self._ui_s(20), int(round(self._ui_s(48) / 3.0)))
+            if vertical
+            else self._ui_s(117)
+        )
+        ctrl_h = self._ui_s(28)
+        if pl:
+            if vertical:
+                w = ctrl_w + self._ui_s(160) + self._ui_s(4)
+                h = max(pl_h, ctrl_h + self._ui_s(8))
+            else:
+                w = self._ui_s(117)
+                h = ctrl_h + pl_h + self._ui_s(6)
+            try:
+                self.set_size_request(w, h)
+                self.resize(w, h)
+            except Exception:
+                pass
+        else:
+            try:
+                self.set_size_request(ctrl_w, -1)
+                self.resize(ctrl_w, 1)
+            except Exception:
+                pass
+
     def _apply_nano_banner_state(self):
         if not getattr(self, "nano_player_mode", False):
             return
@@ -14973,15 +16035,23 @@ class Myostoox(Gtk.Window):
                         self._normal_size = (950, 620)
                 try:
                     child = self.get_child()
+                    nano_pl = getattr(self, "nano_playlist_box", None)
                     if child is not None:
                         for c in child.get_children():
-                            if c is not top_wrap and c is not top and c is not marquee:
-                                c.hide()
-                            elif c is top_wrap or c is top:
+                            if c is top_wrap or c is top:
                                 c.show()
+                            elif c is marquee:
+                                continue
+                            elif c is nano_pl:
+                                continue  # géré par _apply_nano_playlist_layout
+                            else:
+                                c.hide()
                 except Exception:
                     pass
-                self.set_keep_above(True)
+                try:
+                    self._apply_window_layer()
+                except Exception:
+                    pass
                 try:
                     self.set_title(APP_NAME)
                 except Exception:
@@ -14990,16 +16060,18 @@ class Myostoox(Gtk.Window):
                 if nano:
                     # Pas de timer / seek / volume / muet / bluetooth / bannière
                     self._apply_nano_chrome(True)
-                    # Largeur : horizontal ~1/3 du mini ; vertical encore −2/3
-                    if getattr(self, "nano_vertical", False):
-                        # 72 * (1/3) ≈ 24 → minimum utilisable pour boutons
-                        w = max(self._ui_s(28), int(round(self._ui_s(72) / 3.0)))
-                        self.set_size_request(w, -1)
-                        self.resize(w, 1)
-                    else:
-                        w = self._ui_s(175)
-                        self.set_size_request(w, -1)
-                        self.resize(w, 1)
+                    try:
+                        self.get_style_context().add_class("nano-mode")
+                    except Exception:
+                        pass
+                    try:
+                        self._apply_nano_playlist_layout()
+                    except Exception as e:
+                        print("nano playlist layout:", e, file=sys.stderr)
+                    try:
+                        self._resize_nano_window()
+                    except Exception:
+                        pass
                     try:
                         if marquee is not None:
                             self._stop_mini_title_scroll()
@@ -15009,7 +16081,15 @@ class Myostoox(Gtk.Window):
                     self._update_nano_tooltip()
                 else:
                     # Mini classique : restaurer chrome nano
+                    try:
+                        self.get_style_context().remove_class("nano-mode")
+                    except Exception:
+                        pass
                     self._apply_nano_chrome(False)
+                    try:
+                        self._hide_nano_playlist_panel()
+                    except Exception:
+                        pass
                     try:
                         self.set_size_request(self._ui_s(420), -1)
                         self.resize(self._ui_s(520), 1)
@@ -15033,7 +16113,21 @@ class Myostoox(Gtk.Window):
                         pass
             else:
                 # Mode normal
+                try:
+                    self.get_style_context().remove_class("nano-mode")
+                except Exception:
+                    pass
                 self._apply_nano_chrome(False)
+                try:
+                    self._hide_nano_playlist_panel()
+                except Exception:
+                    pass
+                try:
+                    main = self.get_child()
+                    if main is not None:
+                        main.set_orientation(Gtk.Orientation.VERTICAL)
+                except Exception:
+                    pass
                 self._stop_mini_title_scroll()
                 try:
                     self.set_title(APP_NAME)
@@ -15054,9 +16148,17 @@ class Myostoox(Gtk.Window):
                     pass
                 try:
                     child = self.get_child()
+                    nano_pl = getattr(self, "nano_playlist_box", None)
                     if child is not None:
                         for c in child.get_children():
                             if c is marquee:
+                                continue
+                            if c is nano_pl:
+                                try:
+                                    c.set_no_show_all(True)
+                                    c.hide()
+                                except Exception:
+                                    pass
                                 continue
                             # Panneau métadonnées : selon l'option Apparence
                             if c is getattr(self, "bottom_bar_wrap", None) or c is getattr(
@@ -15070,7 +16172,10 @@ class Myostoox(Gtk.Window):
                             c.show()
                 except Exception:
                     pass
-                self.set_keep_above(False)
+                try:
+                    self._apply_window_layer()
+                except Exception:
+                    pass
                 self.set_size_request(self._ui_s(700), self._ui_s(430))
                 if self._normal_size:
                     try:
@@ -15107,6 +16212,7 @@ class Myostoox(Gtk.Window):
             flags=0,
         )
         dialog.add_button(Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
+        self._style_app_dialog(dialog)
         try:
             dialog.set_default_size(self._ui_s(360), self._ui_s(140))
         except Exception:
@@ -15611,7 +16717,24 @@ class Myostoox(Gtk.Window):
         nano_item.connect("toggled", _on_nano_toggled)
         nano_menu.append(nano_item)
 
-        nano_vertical_item = Gtk.CheckMenuItem(label=self.tr("Vertical"))
+        nano_playlist_item = Gtk.CheckMenuItem(label=self.tr("Playlist"))
+        nano_playlist_item.set_active(
+            bool(getattr(self, "nano_playlist_enabled", False))
+        )
+
+        def _on_nano_playlist_toggled(mi):
+            want = mi.get_active()
+            if want != bool(getattr(self, "nano_playlist_enabled", False)):
+                self.toggle_nano_playlist()
+
+        nano_playlist_item.connect("toggled", _on_nano_playlist_toggled)
+        nano_menu.append(nano_playlist_item)
+
+        nano_vertical_menu = Gtk.Menu()
+        nano_vertical_root = Gtk.MenuItem(label=self.tr("Vertical"))
+        nano_vertical_root.set_submenu(nano_vertical_menu)
+
+        nano_vertical_item = Gtk.CheckMenuItem(label=self.tr("Activer le mode vertical"))
         nano_vertical_item.set_active(bool(getattr(self, "nano_vertical", False)))
 
         def _on_nano_vertical_toggled(mi):
@@ -15620,7 +16743,32 @@ class Myostoox(Gtk.Window):
                 self.toggle_nano_vertical()
 
         nano_vertical_item.connect("toggled", _on_nano_vertical_toggled)
-        nano_menu.append(nano_vertical_item)
+        nano_vertical_menu.append(nano_vertical_item)
+        nano_vertical_menu.append(Gtk.SeparatorMenuItem())
+
+        side = getattr(self, "nano_playlist_side", "right") or "right"
+        radio_right = Gtk.RadioMenuItem.new_with_label(
+            None, self.tr("Playlist droite")
+        )
+        radio_left = Gtk.RadioMenuItem.new_with_label_from_widget(
+            radio_right, self.tr("Playlist gauche")
+        )
+        radio_right.set_active(side != "left")
+        radio_left.set_active(side == "left")
+
+        def _on_side_right(mi):
+            if mi.get_active():
+                self.set_nano_playlist_side("right")
+
+        def _on_side_left(mi):
+            if mi.get_active():
+                self.set_nano_playlist_side("left")
+
+        radio_right.connect("toggled", _on_side_right)
+        radio_left.connect("toggled", _on_side_left)
+        nano_vertical_menu.append(radio_right)
+        nano_vertical_menu.append(radio_left)
+        nano_menu.append(nano_vertical_root)
 
         menu.append(nano_root)
 
@@ -15806,6 +16954,44 @@ class Myostoox(Gtk.Window):
         borders_item.set_active(bool(getattr(self, "window_borders", True)))
         borders_item.connect("toggled", self.toggle_window_borders)
         appearance_menu.append(borders_item)
+
+        # Plan de fenêtre : normal / premier plan / arrière-plan
+        layer_menu = Gtk.Menu()
+        layer_root = Gtk.MenuItem(label=self.tr("Plan de la fenêtre"))
+        layer_root.set_submenu(layer_menu)
+        cur_layer = str(getattr(self, "window_layer", "normal") or "normal")
+        radio_normal = Gtk.RadioMenuItem.new_with_label(
+            None, self.tr("Plan normal")
+        )
+        radio_above = Gtk.RadioMenuItem.new_with_label_from_widget(
+            radio_normal, self.tr("Toujours au premier plan")
+        )
+        radio_below = Gtk.RadioMenuItem.new_with_label_from_widget(
+            radio_normal, self.tr("Toujours en arrière-plan")
+        )
+        radio_normal.set_active(cur_layer == "normal")
+        radio_above.set_active(cur_layer == "above")
+        radio_below.set_active(cur_layer == "below")
+
+        def _on_layer_normal(mi):
+            if mi.get_active():
+                self.set_window_layer("normal")
+
+        def _on_layer_above(mi):
+            if mi.get_active():
+                self.set_window_layer("above")
+
+        def _on_layer_below(mi):
+            if mi.get_active():
+                self.set_window_layer("below")
+
+        radio_normal.connect("toggled", _on_layer_normal)
+        radio_above.connect("toggled", _on_layer_above)
+        radio_below.connect("toggled", _on_layer_below)
+        layer_menu.append(radio_normal)
+        layer_menu.append(radio_above)
+        layer_menu.append(radio_below)
+        appearance_menu.append(layer_root)
 
         # MenuItem parent (pas de CheckMenuItem+submenu = pas de bascule au survol)
         transparency_root = Gtk.MenuItem(label=self.tr("Transparence"))
@@ -16042,6 +17228,47 @@ class Myostoox(Gtk.Window):
 
         if menuitem.get_active():
             self.set_performance_mode(mode)
+
+    def set_window_layer(self, layer):
+        """Définit le plan de la fenêtre : normal / above / below."""
+        layer = str(layer or "normal").lower()
+        if layer not in ("normal", "above", "below"):
+            layer = "normal"
+        self.window_layer = layer
+        try:
+            self._apply_window_layer()
+        except Exception:
+            pass
+        try:
+            self.save_state()
+        except Exception:
+            pass
+        try:
+            labels = {
+                "above": self.tr("Toujours au premier plan"),
+                "below": self.tr("Toujours en arrière-plan"),
+                "normal": self.tr("Plan normal"),
+            }
+            self.status_label.set_text(labels.get(layer, labels["normal"]))
+        except Exception:
+            pass
+
+    def _apply_window_layer(self):
+        """Applique keep_above / keep_below selon window_layer."""
+        layer = str(getattr(self, "window_layer", "normal") or "normal").lower()
+        try:
+            if layer == "above":
+                self.set_keep_below(False)
+                self.set_keep_above(True)
+            elif layer == "below":
+                self.set_keep_above(False)
+                self.set_keep_below(True)
+            else:
+                self.set_keep_above(False)
+                self.set_keep_below(False)
+        except Exception as e:
+            print("window layer:", e, file=sys.stderr)
+        return False
 
     def toggle_window_borders(self, menuitem):
         enabled = bool(menuitem.get_active())
@@ -16293,24 +17520,47 @@ class Myostoox(Gtk.Window):
         rgba.alpha = max(0.0, min(1.0, a))
         return rgba
 
-    def _set_widget_bg_alpha(self, widget, rgba_or_none):
-        """override_background_color : fiable sur TreeView (CSS seul échoue souvent)."""
+    def _set_widget_bg_alpha(self, widget, rgba_or_none, *, preserve_selection=False):
+        """override_background_color : fiable sur TreeView (CSS seul échoue souvent).
+
+        preserve_selection=True : ne pas écraser SELECTED (surlignage playlist).
+        """
         if widget is None:
             return
         try:
-            flags = (
-                Gtk.StateFlags.NORMAL,
-                Gtk.StateFlags.ACTIVE,
-                Gtk.StateFlags.PRELIGHT,
-                Gtk.StateFlags.SELECTED,
-                Gtk.StateFlags.FOCUSED,
-                Gtk.StateFlags.BACKDROP,
-            )
+            if preserve_selection:
+                flags = (
+                    Gtk.StateFlags.NORMAL,
+                    Gtk.StateFlags.ACTIVE,
+                    Gtk.StateFlags.PRELIGHT,
+                    Gtk.StateFlags.FOCUSED,
+                    Gtk.StateFlags.BACKDROP,
+                )
+            else:
+                flags = (
+                    Gtk.StateFlags.NORMAL,
+                    Gtk.StateFlags.ACTIVE,
+                    Gtk.StateFlags.PRELIGHT,
+                    Gtk.StateFlags.SELECTED,
+                    Gtk.StateFlags.FOCUSED,
+                    Gtk.StateFlags.BACKDROP,
+                )
         except Exception:
             flags = (Gtk.StateFlags.NORMAL,)
         for st in flags:
             try:
                 widget.override_background_color(st, rgba_or_none)
+            except Exception:
+                pass
+        if preserve_selection:
+            try:
+                widget.override_background_color(Gtk.StateFlags.SELECTED, None)
+            except Exception:
+                pass
+            try:
+                widget.override_background_color(
+                    Gtk.StateFlags.SELECTED | Gtk.StateFlags.FOCUSED, None
+                )
             except Exception:
                 pass
 
@@ -16324,6 +17574,9 @@ class Myostoox(Gtk.Window):
             "content_paned",
             "search_entry",
             "search_row",
+            "nano_playlist_box",
+            "nano_playlist_scroll",
+            "nano_playlist_tree",
         ):
             w = getattr(self, attr, None)
             if w is not None and w not in widgets:
@@ -16405,8 +17658,61 @@ class Myostoox(Gtk.Window):
             try:
                 if not enabled:
                     self._set_widget_bg_alpha(w, None)
-                elif w is getattr(self, "tree", None) or w is getattr(self, "playlist_scroll", None) or w is getattr(self, "playlist_box", None):
+                elif w is getattr(self, "tree", None):
+                    # Fond semi-transparent sans écraser SELECTED
+                    self._set_widget_bg_alpha(w, rgba, preserve_selection=True)
+                    try:
+                        palette = THEME_PALETTES.get(
+                            getattr(self, "theme_name", "sombre"),
+                            THEME_PALETTES.get("sombre", {}),
+                        )
+                        sel = Gdk.RGBA()
+                        hx = (palette.get("tree_sel_bg") or "#30404a").lstrip("#")
+                        sel.red = int(hx[0:2], 16) / 255.0
+                        sel.green = int(hx[2:4], 16) / 255.0
+                        sel.blue = int(hx[4:6], 16) / 255.0
+                        sel.alpha = 1.0
+                        w.override_background_color(Gtk.StateFlags.SELECTED, sel)
+                        w.override_background_color(
+                            Gtk.StateFlags.SELECTED | Gtk.StateFlags.FOCUSED, sel
+                        )
+                        fg = Gdk.RGBA()
+                        hx2 = (palette.get("tree_sel_fg") or "#ffffff").lstrip("#")
+                        fg.red = int(hx2[0:2], 16) / 255.0
+                        fg.green = int(hx2[2:4], 16) / 255.0
+                        fg.blue = int(hx2[4:6], 16) / 255.0
+                        fg.alpha = 1.0
+                        w.override_color(Gtk.StateFlags.SELECTED, fg)
+                        w.override_color(
+                            Gtk.StateFlags.SELECTED | Gtk.StateFlags.FOCUSED, fg
+                        )
+                    except Exception:
+                        pass
+                elif w is getattr(self, "search_entry", None) or w is getattr(self, "search_row", None):
+                    # Champ recherche : fond totalement transparent
+                    self._set_widget_bg_alpha(w, clear)
+                    try:
+                        for st in (
+                            Gtk.StateFlags.NORMAL,
+                            Gtk.StateFlags.ACTIVE,
+                            Gtk.StateFlags.PRELIGHT,
+                            Gtk.StateFlags.SELECTED,
+                            Gtk.StateFlags.FOCUSED,
+                            Gtk.StateFlags.BACKDROP,
+                            Gtk.StateFlags.INSENSITIVE,
+                        ):
+                            w.override_background_color(st, clear)
+                    except Exception:
+                        pass
+                elif w is getattr(self, "playlist_scroll", None) or w is getattr(self, "playlist_box", None):
                     self._set_widget_bg_alpha(w, rgba)
+                    try:
+                        if w is getattr(self, "playlist_scroll", None):
+                            child = w.get_child()
+                            if child is not None:
+                                self._set_widget_bg_alpha(child, rgba)
+                    except Exception:
+                        pass
                 else:
                     self._set_widget_bg_alpha(w, clear)
             except Exception:
@@ -17098,6 +18404,14 @@ def main():
         )
 
     window.show_all()
+    try:
+        window._hide_nano_playlist_panel()
+    except Exception:
+        pass
+    try:
+        window._apply_window_layer()
+    except Exception:
+        pass
 
     if files:
         # Ouverture explicite depuis le gestionnaire de fichiers / CLI :
