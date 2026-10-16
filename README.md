@@ -1,4 +1,4 @@
-<p align="center"> <img src="logo_big.png" alt="Myostoox logo" width="300"> </p> <p align="center"><br><br> <em>A complete audio player built with GTK3 and GStreamer... but a bit of a video player too.</em> </p><br> <p align="center"> 🎵 Music &nbsp;•&nbsp; 🎬 Video &nbsp;•&nbsp; 📻 Radio &nbsp;•&nbsp; 📺 M3U / IPTV &nbsp;•&nbsp; 💿 CD / DVD / Blu-ray </p><br><br> <p align="center"> <strong><a href="https://github.com/MilOvni/Myostoox/raw/refs/heads/main/myostoox_1.2-1_all.deb">📦 Download Myostoox 1.2 (.deb)</a></strong> </p><br> 
+<p align="center"> <img src="logo_big.png" alt="Myostoox logo" width="300"> </p> <p align="center"><br><br> <em>A complete audio player built with GTK3 and GStreamer... but a bit of a video player too.</em> </p><br> <p align="center"> 🎵 Music &nbsp;•&nbsp; 🎬 Video &nbsp;•&nbsp; 📻 Radio &nbsp;•&nbsp; 📺 M3U / IPTV &nbsp;•&nbsp; 💿 CD / DVD / Blu-ray </p><br><br> <p align="center"> <strong><a href="https://github.com/MilOvni/Myostoox/raw/refs/heads/main/myostoox_1.3-1_all.deb">📦 Download Myostoox 1.3 (.deb)</a></strong> </p><br> 
 
 # Myostoox
 
@@ -27,7 +27,7 @@ Written in Python 3, GTK3 and GStreamer, Myostoox brings music, video, Internet 
 
     • Pitch and tempo control
 
-    • Spectrum analyzer
+    • 3 Spectrum analyzer (Bars, Oscilloscope, Pixel)
 
     • LRC lyrics
 
@@ -84,6 +84,8 @@ Written in Python 3, GTK3 and GStreamer, Myostoox brings music, video, Internet 
     • Themes
 
     • Full-screen mode
+
+    • Maximize mode
 
     • Spectrum analyzer
 
@@ -142,17 +144,17 @@ Written in Python 3, GTK3 and GStreamer, Myostoox brings music, video, Internet 
 Download the `.deb` package:
 
 <p align="center">
-  <strong><a href="https://github.com/MilOvni/Myostoox/raw/refs/heads/main/myostoox_1.2-1_all.deb">📦 Download Myostoox 1.2 (.deb)</a></strong>
+  <strong><a href="https://github.com/MilOvni/Myostoox/raw/refs/heads/main/myostoox_1.3-1_all.deb">📦 Download Myostoox 1.3 (.deb)</a></strong>
 </p>
 
 Then install it with:
 
 ```bash
-sudo apt install ./myostoox_1.2-1_all.deb
+sudo apt install ./myostoox_1.3-1_all.deb
 
 # or
 
-sudo dpkg -i myostoox_1.2-1_all.deb
+sudo dpkg -i myostoox_1.3-1_all.deb
 
 ```
 
