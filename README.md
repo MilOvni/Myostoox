@@ -8,7 +8,7 @@ Written in Python 3, GTK3 and GStreamer, Myostoox brings music, video, Internet 
 
 
 <p align="center">
-  <img src="screenshots/Player_05.jpg" alt="Playlist + EQ + Pitch/tempo" width="700">
+  <img src="screenshots/Player_01.jpg" alt="Playlist + EQ + Pitch/tempo" width="700">
 </p>
 
 <br><br>
@@ -107,31 +107,39 @@ Written in Python 3, GTK3 and GStreamer, Myostoox brings music, video, Internet 
 ## Screenshots
 
 <p align="center">
-  <img src="screenshots/Player_03.jpg" alt="TV" width="700">
+  <img src="screenshots/Player_02.jpg" alt="TV" width="700">
 </p>
 
 <p align="center">
-  <img src="screenshots/Player_10.jpg" alt="Full screen" width="700">
+  <img src="screenshots/Player_03.jpg" alt="Full screen" width="700">
 </p>
 
 <p align="center">
-  <img src="screenshots/Player_07.jpg" alt="Themes" width="700">
+  <img src="screenshots/Player_04.jpg" alt="Themes" width="700">
 </p>
 
 <p align="center">
-  <img src="screenshots/Player_08.jpg" alt="Mini-player" width="700">
+  <img src="screenshots/Player_05.jpg" alt="Mini-player" width="700">
 </p>
 
 <p align="center">
-  <img src="screenshots/Player_04.jpg" alt="Bouquets" width="700">
+  <img src="screenshots/Player_07.jpg" alt="Bouquets" width="700">
 </p>
 
 <p align="center">
-  <img src="screenshots/Player_02.jpg" alt="Radios" width="700">
+  <img src="screenshots/Player_08.jpg" alt="Radios" width="700">
 </p>
 
 <p align="center">
   <img src="screenshots/Player_09.jpg" alt="Lyrics" width="700">
+</p>
+
+<p align="center">
+  <img src="screenshots/Player_10.jpg" alt="Lyrics" width="700">
+</p>
+
+<p align="center">
+  <img src="screenshots/Player_11.jpg" alt="Lyrics" width="700">
 </p>
 
 
@@ -327,7 +335,7 @@ GitHub — MilOvni/Myostoox<br><br>
 
 
 <p align="center">
-  <img src="screenshots/Player_11.jpg" alt="About" width="700">
+  <img src="screenshots/Player_12.jpg" alt="About" width="700">
 </p>
 <br>
 
