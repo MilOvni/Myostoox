@@ -1,4 +1,4 @@
-<p align="center"> <img src="logo_big.png" alt="Myostoox logo" width="300"> </p> <p align="center"><br><br> <em>A complete audio player built with GTK3 and GStreamer... but a bit of a video player too.</em> </p><br> <p align="center"> 🎵 Music &nbsp;•&nbsp; 🎬 Video &nbsp;•&nbsp; 📻 Radio &nbsp;•&nbsp; 📺 M3U / IPTV &nbsp;•&nbsp; 💿 CD / DVD / Blu-ray </p><br><br> <p align="center"> <strong><a href="https://github.com/MilOvni/Myostoox/raw/refs/heads/main/myostoox_1.3-5_all.deb">📦 Download Myostoox 1.3.5 (.deb)</a></strong> </p><br> 
+<p align="center"> <img src="logo_big2.png" alt="Myostoox logo" width="300"> </p> <p align="center"><br><br> <em>A complete audio player built with GTK3 and GStreamer... but a bit of a video player too.</em> </p><br> <p align="center"> 🎵 Music &nbsp;•&nbsp; 🎬 Video &nbsp;•&nbsp; 📻 Radio &nbsp;•&nbsp; 📺 M3U / IPTV &nbsp;•&nbsp; 💿 CD / DVD / Blu-ray </p><br><br> <p align="center"> <strong><a href="https://github.com/MilOvni/Myostoox/raw/refs/heads/main/myostoox_1.3-5_all.deb">📦 Download Myostoox 1.3.5 (.deb)</a></strong> </p><br> 
 
 # Myostoox
 
