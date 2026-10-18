@@ -26,6 +26,40 @@ import re
 import json
 import time
 import unicodedata
+import gc
+from collections import OrderedDict
+from functools import lru_cache
+
+# P8 — allocateur glibc : limiter les arenas multi-thread AVANT Gtk/GStreamer
+try:
+    import ctypes
+    _libc = ctypes.CDLL("libc.so.6")
+    try:
+        # M_ARENA_MAX = -8 → 2 arenas (réduit le RSS sur process multi-thread)
+        _libc.mallopt(-8, 2)
+    except Exception:
+        pass
+except Exception:
+    _libc = None
+
+
+def trim_memory(force=False):
+    """gc.collect + malloc_trim (throttle 30 s sauf force=True). Linux/glibc."""
+    now = time.monotonic()
+    last = getattr(trim_memory, "_last", 0.0)
+    if not force and (now - last) < 30.0:
+        return
+    trim_memory._last = now
+    try:
+        gc.collect()
+    except Exception:
+        pass
+    try:
+        if _libc is not None:
+            _libc.malloc_trim(0)
+    except Exception:
+        pass
+
 
 import gi
 
@@ -74,6 +108,11 @@ import errno
 
 APP_NAME = "Myostoox"
 DEBUG_MYOSTOOX = False  # True → logs pipeline MKV / diagnostics
+
+METADATA_CACHE_MAX = 1500
+COVER_DECODE_MAX_PX = 256
+EXTERNAL_COVER_MAX_BYTES = 8 * 1024 * 1024
+
 
 # Politique codecs vidéo / AV1
 # NVIDIA (nvh264dec, nvh265dec, nvav1dec, …) prioritaire en mode Matériel ;
@@ -224,6 +263,8 @@ PLAYLIST_FILE = os.path.join(
 
 RECENT_FILE = os.path.join(CONFIG_DIR, "recent.json")
 RECENT_MAX = 15
+META_CACHE_FILE = os.path.join(CONFIG_DIR, "meta_cache.json")
+META_DISK_MAX = 5000
 PATREON_URL = "https://www.patreon.com/MilOvni"
 
 STATE_FILE = os.path.join(CONFIG_DIR, "state.json")
@@ -408,6 +449,8 @@ DEFAULT_SHORTCUTS = {
     "quit": "Alt+q",
     "factory_reset": "Ctrl+Alt+x",
     "playlist_menu": "Ctrl+p",
+    "focus_search": "Ctrl+r",
+    "toggle_recording": "Ctrl+s",
 }
 
 SHORTCUT_LABELS = {
@@ -432,6 +475,8 @@ SHORTCUT_LABELS = {
     "quit": "Quitter",
     "factory_reset": "Quitter et réinitialiser",
     "playlist_menu": "Menu playlist",
+    "focus_search": "Champ de recherche",
+    "toggle_recording": "Enregistrement",
 }
 
 
@@ -1223,10 +1268,15 @@ def load_external_cover(filename):
 
             try:
 
+                try:
+                    sz = os.path.getsize(path)
+                    if sz <= 0 or sz > EXTERNAL_COVER_MAX_BYTES:
+                        continue
+                except Exception:
+                    pass
                 with open(path, "rb") as file:
-                    data = file.read()
-
-                if data:
+                    data = file.read(EXTERNAL_COVER_MAX_BYTES + 1)
+                if data and len(data) <= EXTERNAL_COVER_MAX_BYTES:
                     return data
 
             except Exception:
@@ -1367,7 +1417,26 @@ def load_metadata(filename, load_cover=True):
                 ("date", "DATE", "year", "YEAR", "TDRC", "TYER")
             ) or year
 
-        # --- Passe 2 : tags bruts (covers + compléments ID3/MP4) ---
+        # --- Passe 2 : tags bruts seulement si cover ou champs incomplets ---
+        need_raw = bool(load_cover) or not (title and artist)
+        if not need_raw:
+            if year:
+                try:
+                    y = str(year).strip()
+                    if len(y) >= 4 and y[:4].isdigit():
+                        year = y[:4]
+                except Exception:
+                    pass
+            return (
+                title,
+                artist,
+                album,
+                year,
+                duration,
+                cover,
+                technical,
+            )
+
         audio = MutagenFile(filename, easy=False)
         if audio is None:
             if load_cover and cover is None:
@@ -1630,6 +1699,50 @@ def detect_ui_scale():
 # APPLICATION
 # ============================================================
 
+
+def _memlog_tick():
+    """Journal mémoire si MYOSTOOX_MEMLOG=1 (toutes les 30 s)."""
+    try:
+        import tracemalloc
+        lines = []
+        try:
+            with open("/proc/self/status", "r", encoding="utf-8") as f:
+                for line in f:
+                    if line.startswith(("VmRSS:", "RssAnon:", "RssFile:", "RssShmem:")):
+                        lines.append(line.strip())
+        except Exception:
+            pass
+        try:
+            if not tracemalloc.is_tracing():
+                tracemalloc.start(15)
+            snap = tracemalloc.take_snapshot()
+            top = snap.statistics("lineno")[:5]
+            lines.append("tracemalloc top:")
+            for s in top:
+                lines.append("  " + str(s))
+        except Exception:
+            pass
+        try:
+            # Compteurs applicatifs via instance globale si dispo
+            w = getattr(_memlog_tick, "window", None)
+            if w is not None:
+                lines.append(
+                    "cache=%s missing=%s playlist=%s gc=%s"
+                    % (
+                        len(getattr(w, "metadata_cache", {}) or {}),
+                        len(getattr(w, "_missing_cache", {}) or {}),
+                        len(w.playlist) if getattr(w, "playlist", None) is not None else 0,
+                        gc.get_count(),
+                    )
+                )
+        except Exception:
+            pass
+        print("[memlog]", " | ".join(lines), flush=True)
+    except Exception as exc:
+        print("[memlog] error:", exc, file=sys.stderr)
+    return True
+
+
 class Myostoox(Gtk.Window):
 
     COL_PATH = 0
@@ -1683,6 +1796,10 @@ class Myostoox(Gtk.Window):
         self.shuffle_mode = False
         self.shuffle_queue = []
         self.language = self.load_saved_language()
+        try:
+            self._load_tr_table(self.language)
+        except Exception:
+            self._tr_table = TRANSLATIONS.get(self.language, {}) or {}
         self.user_seeking = False
 
         self.search_text = ""
@@ -1696,8 +1813,24 @@ class Myostoox(Gtk.Window):
         self.spectrum_quiet = [0] * SPECTRUM_BANDS
         self.spectrum_peak_hold = [0.0] * SPECTRUM_BANDS
 
-        self.metadata_cache = {}
+        self.metadata_cache = OrderedDict()
+        self._disk_meta_cache = {}
+        self._disk_meta_dirty = False
+        self._disk_meta_save_id = 0
+        try:
+            self._load_disk_meta_cache()
+        except Exception:
+            self._disk_meta_cache = {}
         self._missing_cache = {}
+        self._cover_pixbuf_cache = OrderedDict()  # path → GdkPixbuf réduit
+        self._selection_info_timeout_id = 0
+        self._pending_selection_path = None
+        self._info_generation = 0
+        self._transparency_css_timeout_id = 0
+        self._spectrum_mag_method = None
+        self._mkv_probe_cache = {}
+        self._spectrum_in_filter = True
+        self._sub_lang_cache = {}
         self.spectrum_enabled = True
         self.spectrum_agc_enabled = SPECTRUM_AGC_ENABLED_DEFAULT
         self.recent_files = []
@@ -1726,6 +1859,12 @@ class Myostoox(Gtk.Window):
         self.icy_artist = ""
         self.current_radio_name = None
         self.current_tv_name = None
+
+        # Enregistrement audio des flux (pipeline séparé → MP3 320 kb/s)
+        self._recording = False
+        self._record_pipeline = None
+        self._record_temp_path = None
+        self._record_bus_watch_id = 0
 
         Gst.init(None)
 
@@ -1770,10 +1909,25 @@ class Myostoox(Gtk.Window):
         self._custom_sub_muted = False
         self._custom_sub_overlay = None
 
-        # Sink vidéo : glimagesink > ximagesink > xvimagesink (évite bug GLAMOR/Xv en 4K).
-        self.video_sink = self._create_video_sink()
-        if self.video_sink is not None:
-            self.player.set_property("video-sink", self.video_sink)
+        # Sink vidéo réel (GL) créé à la demande au premier média vidéo
+        # → économise le chargement des libs GL au démarrage audio-only.
+        self.video_sink = None
+        self._video_sink_is_real = False
+        try:
+            _vfake = Gst.ElementFactory.make("fakesink", "video_sink_placeholder")
+            if _vfake is not None:
+                try:
+                    _vfake.set_property("sync", False)
+                except Exception:
+                    pass
+                try:
+                    _vfake.set_property("async", False)
+                except Exception:
+                    pass
+                self.player.set_property("video-sink", _vfake)
+                self.video_sink = _vfake
+        except Exception:
+            pass
 
         # Buffers playbin (dimensionnés pour MKV multi-pistes sans underrun).
         self._configure_playbin_buffers()
@@ -1867,7 +2021,8 @@ class Myostoox(Gtk.Window):
         except Exception:
             pass
 
-        self.pitch = Gst.ElementFactory.make("pitch", "pitch")
+        # pitch (SoundTouch) : créé à la demande si pitch/tempo ≠ 1.0
+        self.pitch = None
         self.equalizer = Gst.ElementFactory.make(
             "equalizer-10bands",
             "equalizer"
@@ -2015,13 +2170,31 @@ class Myostoox(Gtk.Window):
 
         if self.language == "Français":
             return text
-        return TRANSLATIONS.get(self.language, {}).get(text, text)
+        table = getattr(self, "_tr_table", None)
+        if table is None:
+            table = TRANSLATIONS.get(self.language, {})
+        return table.get(text, text)
+
+    def _load_tr_table(self, language):
+        """Pointe vers la table de la langue active uniquement."""
+        if language == "Français":
+            self._tr_table = {}
+            return
+        table = TRANSLATIONS.get(language)
+        if isinstance(table, dict):
+            self._tr_table = table
+        else:
+            self._tr_table = {}
 
     def set_language(self, language):
 
         if language not in LANGUAGES:
             return
         self.language = language
+        try:
+            self._load_tr_table(language)
+        except Exception:
+            self._tr_table = TRANSLATIONS.get(language, {}) or {}
         self.apply_language()
         self.save_state()
 
@@ -2030,9 +2203,12 @@ class Myostoox(Gtk.Window):
         self.set_title(APP_NAME)
 
         if hasattr(self, "add_files_button"):
-            self.add_files_button.set_tooltip_text(self.tr("Ajouter des fichiers"))
-        if hasattr(self, "add_folder_button"):
-            self.add_folder_button.set_tooltip_text(self.tr("Ajouter un dossier"))
+            self.add_files_button.set_tooltip_text(self.tr("Ajout des fichiers"))
+        if hasattr(self, "record_button"):
+            if getattr(self, "_recording", False):
+                self.record_button.set_tooltip_text(self.tr("Arrêter l'enregistrement"))
+            else:
+                self.record_button.set_tooltip_text(self.tr("Enregistrement"))
         if hasattr(self, "previous_button"):
             self.previous_button.set_tooltip_text(self.tr("Morceau précédent"))
         if hasattr(self, "play_button"):
@@ -3142,9 +3318,11 @@ class Myostoox(Gtk.Window):
     def get_metadata(self, filename, load_cover=False):
 
         if not load_cover and filename in self.metadata_cache:
-
+            try:
+                self.metadata_cache.move_to_end(filename)
+            except Exception:
+                pass
             data = self.metadata_cache[filename]
-
             return (
                 data["title"],
                 data["artist"],
@@ -3155,12 +3333,39 @@ class Myostoox(Gtk.Window):
                 data["technical"],
             )
 
+        # Cache disque (sans cover) : évite re-parse mutagen au redémarrage
+        if not load_cover:
+            try:
+                hit = self._disk_meta_lookup(filename)
+            except Exception:
+                hit = None
+            if hit is not None:
+                self.metadata_cache[filename] = hit
+                try:
+                    self.metadata_cache.move_to_end(filename)
+                except Exception:
+                    pass
+                while len(self.metadata_cache) > METADATA_CACHE_MAX:
+                    try:
+                        self.metadata_cache.popitem(last=False)
+                    except Exception:
+                        break
+                return (
+                    hit["title"],
+                    hit["artist"],
+                    hit["album"],
+                    hit["year"],
+                    hit["duration"],
+                    None,
+                    hit.get("technical") or {},
+                )
+
         title, artist, album, year, duration, cover, technical = load_metadata(
             filename,
             load_cover=load_cover
         )
 
-        self.metadata_cache[filename] = {
+        entry = {
             "title": title,
             "artist": artist,
             "album": album,
@@ -3168,10 +3373,23 @@ class Myostoox(Gtk.Window):
             "duration": duration,
             "technical": technical,
         }
+        self.metadata_cache[filename] = entry
 
-        if len(self.metadata_cache) > 100:
-            premiere_cle = next(iter(self.metadata_cache))
-            del self.metadata_cache[premiere_cle]
+        try:
+            self.metadata_cache.move_to_end(filename)
+        except Exception:
+            pass
+        while len(self.metadata_cache) > METADATA_CACHE_MAX:
+            try:
+                self.metadata_cache.popitem(last=False)
+            except Exception:
+                break
+
+        if not load_cover:
+            try:
+                self._disk_meta_store(filename, entry)
+            except Exception:
+                pass
 
         return (
             title,
@@ -3183,12 +3401,119 @@ class Myostoox(Gtk.Window):
             technical,
         )
 
+    def _load_disk_meta_cache(self):
+        self._disk_meta_cache = {}
+        if not os.path.isfile(META_CACHE_FILE):
+            return
+        try:
+            with open(META_CACHE_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if isinstance(data, dict):
+                self._disk_meta_cache = data
+        except Exception as exc:
+            print("meta_cache load:", exc, file=sys.stderr)
+            self._disk_meta_cache = {}
+
+    def _schedule_disk_meta_save(self):
+        self._disk_meta_dirty = True
+        tid = getattr(self, "_disk_meta_save_id", 0) or 0
+        if tid:
+            return
+        def _do():
+            self._disk_meta_save_id = 0
+            try:
+                self._save_disk_meta_cache()
+            except Exception:
+                pass
+            return False
+        try:
+            self._disk_meta_save_id = GLib.timeout_add_seconds(8, _do)
+        except Exception:
+            try:
+                self._save_disk_meta_cache()
+            except Exception:
+                pass
+
+    def _save_disk_meta_cache(self):
+        if not getattr(self, "_disk_meta_dirty", False):
+            return
+        cache = getattr(self, "_disk_meta_cache", None)
+        if not isinstance(cache, dict):
+            return
+        try:
+            # Borne : garde les entrées les plus récentes (ordre d'insertion)
+            if len(cache) > META_DISK_MAX:
+                keys = list(cache.keys())
+                for k in keys[: max(0, len(keys) - META_DISK_MAX)]:
+                    cache.pop(k, None)
+            os.makedirs(CONFIG_DIR, exist_ok=True)
+            tmp = META_CACHE_FILE + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as f:
+                json.dump(cache, f, ensure_ascii=False, separators=(",", ":"))
+            os.replace(tmp, META_CACHE_FILE)
+            self._disk_meta_dirty = False
+        except Exception as exc:
+            print("meta_cache save:", exc, file=sys.stderr)
+
+    def _disk_meta_lookup(self, filename):
+        if not filename or is_stream(filename) or is_cdda(filename):
+            return None
+        if is_dvd(filename) or is_bluray(filename):
+            return None
+        try:
+            st = os.stat(filename)
+        except Exception:
+            return None
+        cache = getattr(self, "_disk_meta_cache", None) or {}
+        rec = cache.get(filename)
+        if not isinstance(rec, dict):
+            return None
+        try:
+            if int(rec.get("m", -1)) != int(st.st_mtime) or int(rec.get("s", -1)) != int(st.st_size):
+                return None
+        except Exception:
+            return None
+        return {
+            "title": rec.get("title") or os.path.splitext(os.path.basename(filename))[0],
+            "artist": rec.get("artist") or "",
+            "album": rec.get("album") or "",
+            "year": rec.get("year") or "",
+            "duration": float(rec.get("duration") or 0),
+            "technical": rec.get("technical") or {},
+        }
+
+    def _disk_meta_store(self, filename, entry):
+        if not filename or is_stream(filename) or is_cdda(filename):
+            return
+        if is_dvd(filename) or is_bluray(filename):
+            return
+        try:
+            st = os.stat(filename)
+        except Exception:
+            return
+        cache = getattr(self, "_disk_meta_cache", None)
+        if cache is None:
+            self._disk_meta_cache = {}
+            cache = self._disk_meta_cache
+        cache[filename] = {
+            "m": int(st.st_mtime),
+            "s": int(st.st_size),
+            "title": entry.get("title") or "",
+            "artist": entry.get("artist") or "",
+            "album": entry.get("album") or "",
+            "year": entry.get("year") or "",
+            "duration": float(entry.get("duration") or 0),
+            "technical": entry.get("technical") or {},
+        }
+        self._schedule_disk_meta_save()
+
 
     # ========================================================
     # TRI DE LA PLAYLIST
     # ========================================================
 
     @staticmethod
+    @lru_cache(maxsize=8192)
     def normalize_sort_text(value):
 
         if value is None:
@@ -3717,9 +4042,8 @@ class Myostoox(Gtk.Window):
             if getattr(self, "_need_playbin_rebind", False):
                 self._need_playbin_rebind = False
                 try:
-                    self.video_sink = self._create_video_sink()
-                    if self.video_sink is not None:
-                        self.player.set_property("video-sink", self.video_sink)
+                    self._video_sink_is_real = False
+                    self._ensure_video_sink()
                 except Exception:
                     pass
                 try:
@@ -4851,6 +5175,14 @@ class Myostoox(Gtk.Window):
             "gtk-close": self.tr("Fermer"),
             "open": self.tr("Ouvrir"),
             "ouvrir": self.tr("Ouvrir"),
+            "gtk-open": self.tr("Ouvrir"),
+            "öffnen": self.tr("Ouvrir"),
+            "abrir": self.tr("Ouvrir"),
+            "apri": self.tr("Ouvrir"),
+            "openen": self.tr("Ouvrir"),
+            "otwórz": self.tr("Ouvrir"),
+            "öppna": self.tr("Ouvrir"),
+            "открыть": self.tr("Ouvrir"),
             "save": self.tr("Enregistrer"),
             "enregistrer": self.tr("Enregistrer"),
             "select": self.tr("Valider"),
@@ -4917,15 +5249,29 @@ class Myostoox(Gtk.Window):
             # Réponses standards
             try:
                 resp = dialog.get_response_for_widget(btn)
-                if resp == Gtk.ResponseType.OK and _norm(lab) in (
-                    "ok", "gtk-ok", "select", "select color", "select colour",
-                    "sélectionner", "sélectionner la couleur", "valider",
-                ):
-                    btn.set_label(self.tr("Valider"))
+                nlab = _norm(lab)
+                if resp == Gtk.ResponseType.OK:
+                    # FileChooser « Ouvrir » vs dialogues « Valider » / OK
+                    if nlab in (
+                        "open", "ouvrir", "gtk-open", "öffnen", "abrir",
+                        "apri", "openen", "otwórz", "öppna", "открыть",
+                    ) or nlab.startswith("open") or "ouvrir" in nlab:
+                        btn.set_label(self.tr("Ouvrir"))
+                    elif nlab in (
+                        "ok", "gtk-ok", "select", "select color", "select colour",
+                        "sélectionner", "sélectionner la couleur", "valider",
+                    ):
+                        btn.set_label(self.tr("Valider"))
+                    elif nlab in ("save", "enregistrer", "gtk-save"):
+                        btn.set_label(self.tr("Enregistrer"))
                 elif resp == Gtk.ResponseType.CANCEL:
                     btn.set_label(self.tr("Annuler"))
                 elif resp == Gtk.ResponseType.CLOSE:
                     btn.set_label(self.tr("Fermer"))
+                elif resp == Gtk.ResponseType.ACCEPT:
+                    # Parfois utilisé pour « Ouvrir »
+                    if nlab in ("open", "ouvrir", "gtk-open") or "open" in nlab:
+                        btn.set_label(self.tr("Ouvrir"))
             except Exception:
                 pass
 
@@ -5174,15 +5520,19 @@ class Myostoox(Gtk.Window):
         menu.connect("clicked", self.show_menu)
         top.pack_start(menu, False, False, 0)
 
-        button = self.make_button("+", self.tr("Ajouter des fichiers"))
+        button = self.make_button("+", self.tr("Ajout des fichiers"))
         self.add_files_button = button
-        button.connect("clicked", self.add_files)
+        button.connect("clicked", self._on_add_button_clicked)
         top.pack_start(button, False, False, 0)
 
-        button = self.make_button("▣", self.tr("Ajouter un dossier"))
-        self.add_folder_button = button
-        button.connect("clicked", self.add_folder)
+        button = self.make_button("●", self.tr("Enregistrement"))
+        self.record_button = button
+        button.connect("clicked", self.toggle_recording)
         top.pack_start(button, False, False, 0)
+        try:
+            self._update_record_button_state()
+        except Exception:
+            pass
 
         button = self.make_button("◀◀", self.tr("Morceau précédent"))
         self.previous_button = button
@@ -5547,9 +5897,18 @@ class Myostoox(Gtk.Window):
         if hit and now - hit[1] < 5.0:
             return hit[0]
         missing = not os.path.isfile(path)
-        if not hasattr(self, "_missing_cache"):
+        if not hasattr(self, "_missing_cache") or self._missing_cache is None:
             self._missing_cache = {}
         self._missing_cache[path] = (missing, now)
+        # Borne : évite une croissance illimitée sur de très grosses playlists
+        if len(self._missing_cache) > 4000:
+            try:
+                # Supprime ~25 % des plus anciennes insertions (ordre dict)
+                drop = len(self._missing_cache) // 4
+                for _ in range(drop):
+                    self._missing_cache.pop(next(iter(self._missing_cache)))
+            except Exception:
+                self._missing_cache.clear()
         return missing
 
 
@@ -6033,6 +6392,12 @@ class Myostoox(Gtk.Window):
         is_pl_menu = self._shortcut_matches("playlist_menu", event_str, key_n) or (
             event_str.lower() in ("ctrl+p",)
         )
+        is_focus_search = self._shortcut_matches("focus_search", event_str, key_n) or (
+            event_str.lower() in ("ctrl+r",)
+        )
+        is_toggle_rec = self._shortcut_matches("toggle_recording", event_str, key_n) or (
+            event_str.lower() in ("ctrl+s",)
+        )
         if is_quit:
             try:
                 self.close()
@@ -6047,6 +6412,12 @@ class Myostoox(Gtk.Window):
             return True
         if is_pl_menu:
             self._popup_playlist_menu_from_shortcut()
+            return True
+        if is_focus_search:
+            self.focus_search_entry()
+            return True
+        if is_toggle_rec:
+            self.toggle_recording()
             return True
 
         if self._is_text_input_focused():
@@ -6065,9 +6436,7 @@ class Myostoox(Gtk.Window):
             if self.current_is_video:
                 self.toggle_video_fullscreen()
                 return True
-        if self._shortcut_matches("screenshot", event_str, key_n) or (
-            event_str.lower() in ("ctrl+s",)
-        ):
+        if self._shortcut_matches("screenshot", event_str, key_n):
             if self.current_is_video:
                 self.capture_screenshot()
                 return True
@@ -6127,62 +6496,743 @@ class Myostoox(Gtk.Window):
         if self._shortcut_matches("playlist_menu", event_str, key_n):
             self._popup_playlist_menu_from_shortcut()
             return True
+        if self._shortcut_matches("focus_search", event_str, key_n):
+            self.focus_search_entry()
+            return True
+        if self._shortcut_matches("toggle_recording", event_str, key_n):
+            self.toggle_recording()
+            return True
 
         return False
+
+    def focus_search_entry(self):
+        """Place le focus dans le champ de recherche (Ctrl+R)."""
+        entry = getattr(self, "search_entry", None)
+        if entry is None:
+            return
+        try:
+            # Afficher la zone recherche si masquée (modes compacts rares)
+            row = getattr(self, "search_row", None)
+            if row is not None:
+                row.show()
+            entry.show()
+        except Exception:
+            pass
+        try:
+            entry.grab_focus()
+            # Sélectionne le texte existant pour remplacer rapidement
+            try:
+                entry.select_region(0, -1)
+            except Exception:
+                pass
+        except Exception as exc:
+            print("focus_search:", exc, file=sys.stderr)
 
     # ========================================================
     # AJOUT DE FICHIERS / FLUX
     # ========================================================
 
-    def add_files(self, *args):
+    def _on_add_button_clicked(self, button):
+        """Bouton + : menu clair Fichiers / Dossier (GTK ne permet pas les deux dans un seul dialogue)."""
+        self._popup_add_media_menu(button)
 
+    def add_files(self, *args):
+        """Compat / menu contextuel : ouvre le sélecteur de fichiers."""
+        self._add_files_dialog()
+
+    def add_folder(self, *args):
+        """Compat / menu contextuel : ouvre le sélecteur de dossier."""
+        self._add_folder_dialog()
+
+    def _popup_add_media_menu(self, widget=None):
+        """Petit menu sous le bouton + : Fichiers… ou Dossier…"""
+        old = getattr(self, "_add_media_menu", None)
+        if old is not None:
+            try:
+                old.popdown()
+            except Exception:
+                pass
+            try:
+                old.destroy()
+            except Exception:
+                pass
+            self._add_media_menu = None
+
+        menu = Gtk.Menu()
+        self._add_media_menu = menu
+
+        item_files = Gtk.MenuItem(label=self.tr("Fichiers…"))
+        item_files.connect(
+            "activate", lambda *a: self._add_files_dialog()
+        )
+        menu.append(item_files)
+
+        item_folder = Gtk.MenuItem(label=self.tr("Dossier…"))
+        item_folder.connect(
+            "activate", lambda *a: self._add_folder_dialog()
+        )
+        menu.append(item_folder)
+
+        def _on_deactivate(m):
+            if getattr(self, "_add_media_menu", None) is m:
+                self._add_media_menu = None
+            try:
+                GLib.idle_add(m.destroy)
+            except Exception:
+                try:
+                    m.destroy()
+                except Exception:
+                    pass
+            return False
+
+        menu.connect("deactivate", _on_deactivate)
+        menu.show_all()
+        try:
+            if widget is not None:
+                menu.popup_at_widget(
+                    widget,
+                    Gdk.Gravity.SOUTH_WEST,
+                    Gdk.Gravity.NORTH_WEST,
+                    None,
+                )
+            else:
+                menu.popup_at_pointer(None)
+        except Exception:
+            try:
+                menu.popup(None, None, None, None, 0, Gtk.get_current_event_time())
+            except Exception as exc:
+                print("add media menu:", exc, file=sys.stderr)
+
+    def _add_files_dialog(self, *args):
+        """Dialogue multi-sélection de fichiers multimédias."""
         dialog = Gtk.FileChooserDialog(
             title=self.tr("Ajouter des fichiers"),
             parent=self,
-            action=Gtk.FileChooserAction.OPEN
+            action=Gtk.FileChooserAction.OPEN,
         )
-        dialog.add_buttons(
-            Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
-            Gtk.STOCK_OPEN, Gtk.ResponseType.OK
-        )
+        dialog.add_button(self.tr("Annuler"), Gtk.ResponseType.CANCEL)
+        dialog.add_button(self.tr("Ouvrir"), Gtk.ResponseType.OK)
+        dialog.set_default_response(Gtk.ResponseType.OK)
         dialog.set_select_multiple(True)
+        try:
+            dialog.set_local_only(False)
+        except Exception:
+            pass
 
-        if dialog.run() == Gtk.ResponseType.OK:
-            added_paths = []
-            for filename in dialog.get_filenames():
-                if is_audio_file(filename) or is_video_file(filename):
-                    self.add_file(filename, save=False, scroll_to=False)
-                    added_paths.append(filename)
-            if added_paths:
-                self.save_playlist()
-                try:
-                    GLib.idle_add(self._refresh_playlist_scroll_adjustments)
-                    GLib.idle_add(self._scroll_playlist_to_end)
-                except Exception:
-                    pass
-                # Un seul fichier choisi → lecture immédiate (comme ouverture
-                # depuis le gestionnaire de fichiers)
-                if len(added_paths) == 1:
-                    self.play_file(added_paths[0])
+        try:
+            filt_media = Gtk.FileFilter()
+            filt_media.set_name(self.tr("Fichiers multimédias"))
+            for ext in sorted(AUDIO_EXTENSIONS | VIDEO_EXTENSIONS):
+                filt_media.add_pattern("*" + ext)
+                filt_media.add_pattern("*" + ext.upper())
+            dialog.add_filter(filt_media)
+            filt_all = Gtk.FileFilter()
+            filt_all.set_name(self.tr("Tous les fichiers"))
+            filt_all.add_pattern("*")
+            dialog.add_filter(filt_all)
+            dialog.set_filter(filt_media)
+        except Exception:
+            pass
 
-        dialog.destroy()
+        try:
+            self._translate_dialog_action_buttons(dialog)
+        except Exception:
+            pass
 
-    def add_folder(self, *args):
+        paths = []
+        try:
+            if dialog.run() == Gtk.ResponseType.OK:
+                paths = list(dialog.get_filenames() or [])
+        finally:
+            dialog.destroy()
 
+        if paths:
+            self._ingest_media_paths(paths)
+
+    def _add_folder_dialog(self, *args):
+        """Dialogue de sélection d'un dossier (scan récursif des médias)."""
         dialog = Gtk.FileChooserDialog(
             title=self.tr("Ajouter un dossier"),
             parent=self,
-            action=Gtk.FileChooserAction.SELECT_FOLDER
+            action=Gtk.FileChooserAction.SELECT_FOLDER,
+        )
+        dialog.add_button(self.tr("Annuler"), Gtk.ResponseType.CANCEL)
+        dialog.add_button(self.tr("Ouvrir"), Gtk.ResponseType.OK)
+        dialog.set_default_response(Gtk.ResponseType.OK)
+        try:
+            self._translate_dialog_action_buttons(dialog)
+        except Exception:
+            pass
+
+        folder = None
+        try:
+            if dialog.run() == Gtk.ResponseType.OK:
+                folder = dialog.get_filename()
+        finally:
+            dialog.destroy()
+
+        if folder:
+            # add_directory gère le scan en arrière-plan + message de statut
+            self.add_directory(folder)
+
+    def _ingest_media_paths(self, paths):
+        """Ajoute une liste de fichiers (et dossiers éventuels) à la playlist."""
+        added_files = []
+        directories = []
+        for raw in paths:
+            if not raw:
+                continue
+            try:
+                p = (
+                    os.path.abspath(os.path.expanduser(raw))
+                    if not is_stream(raw)
+                    else raw
+                )
+            except Exception:
+                p = raw
+            try:
+                if is_stream(p):
+                    self.add_file(p, save=False, scroll_to=False)
+                    added_files.append(p)
+                elif os.path.isdir(p):
+                    directories.append(p)
+                elif is_audio_file(p) or is_video_file(p):
+                    self.add_file(p, save=False, scroll_to=False)
+                    added_files.append(p)
+            except Exception:
+                pass
+
+        for directory in directories:
+            try:
+                self.add_directory(directory)
+            except Exception:
+                pass
+
+        if added_files:
+            try:
+                self.save_playlist()
+            except Exception:
+                pass
+            try:
+                GLib.idle_add(self._refresh_playlist_scroll_adjustments)
+                GLib.idle_add(self._scroll_playlist_to_end)
+            except Exception:
+                pass
+            if len(added_files) == 1 and not directories:
+                try:
+                    self.play_file(added_files[0])
+                except Exception:
+                    pass
+
+    def _update_record_button_state(self):
+        """Sensibilité et libellé du bouton Enregistrement."""
+        btn = getattr(self, "record_button", None)
+        if btn is None:
+            return
+        try:
+            can = bool(
+                self.current_path
+                and is_stream(self.current_path)
+                and (self.is_playing or self.is_paused or self._recording)
+            )
+            btn.set_sensitive(can or self._recording)
+        except Exception:
+            pass
+        try:
+            if self._recording:
+                btn.set_label("◼")
+                btn.set_tooltip_text(self.tr("Arrêter l'enregistrement"))
+                try:
+                    btn.get_style_context().add_class("recording")
+                except Exception:
+                    pass
+            else:
+                btn.set_label("●")
+                btn.set_tooltip_text(self.tr("Enregistrement"))
+                try:
+                    btn.get_style_context().remove_class("recording")
+                except Exception:
+                    pass
+        except Exception:
+            pass
+
+    def toggle_recording(self, *args):
+        """Démarre ou arrête l'enregistrement du flux en cours."""
+        if getattr(self, "_recording", False):
+            self._stop_recording(show_save_dialog=True)
+        else:
+            self._start_recording()
+
+    def _start_recording(self):
+        """Enregistre le flux courant (Radio / TV / Bouquet / URL) en MP3 320 kb/s.
+
+        Pipeline séparé (playbin recorder) : n'interrompt pas la lecture.
+        Fonctionne pour tout URI stream (is_stream), y compris les chaînes
+        TV et bouquets vidéo (seule la piste audio est encodée).
+        """
+        path = getattr(self, "current_path", None)
+        if not path or not is_stream(path):
+            try:
+                self.status_label.set_text(
+                    self.tr("Enregistrement disponible uniquement pour les flux")
+                )
+            except Exception:
+                pass
+            return
+        if not (self.is_playing or self.is_paused):
+            try:
+                self.status_label.set_text(
+                    self.tr("Lancez d'abord la lecture du flux")
+                )
+            except Exception:
+                pass
+            return
+        if self._recording:
+            return
+
+        try:
+            self._destroy_record_pipeline()
+        except Exception:
+            pass
+
+        import tempfile
+        try:
+            cache_root = GLib.get_user_cache_dir()
+            rec_dir = os.path.join(cache_root or os.path.expanduser("~/.cache"), APP_NAME)
+            os.makedirs(rec_dir, exist_ok=True)
+            fd, tmp = tempfile.mkstemp(
+                prefix="myostoox_rec_", suffix=".mp3", dir=rec_dir
+            )
+            os.close(fd)
+        except Exception as exc:
+            print("record temp:", exc, file=sys.stderr)
+            try:
+                self.status_label.set_text(self.tr("Enregistrement impossible"))
+            except Exception:
+                pass
+            return
+
+        self._record_temp_path = tmp
+        uri = path if is_stream(path) else path_to_uri(path)
+
+        # Chaîne d'encodage audio : convert → resample → queue → lamemp3enc → filesink
+        # IMPORTANT : ne PAS muter / volume=0 sur le playbin recorder :
+        # volume/mute s'appliquent aux échantillons envoyés au audio-sink
+        # (donc au fichier) et produiraient un MP3 silencieux.
+        audio_bin = None
+        try:
+            convert = Gst.ElementFactory.make("audioconvert", "rec_convert")
+            resample = Gst.ElementFactory.make("audioresample", "rec_resample")
+            queue = Gst.ElementFactory.make("queue", "rec_queue")
+            enc = Gst.ElementFactory.make("lamemp3enc", "rec_enc")
+            sink = Gst.ElementFactory.make("filesink", "rec_sink")
+            if not all((convert, resample, queue, enc, sink)):
+                missing = []
+                if convert is None:
+                    missing.append("audioconvert")
+                if resample is None:
+                    missing.append("audioresample")
+                if queue is None:
+                    missing.append("queue")
+                if enc is None:
+                    missing.append("lamemp3enc")
+                if sink is None:
+                    missing.append("filesink")
+                raise RuntimeError(
+                    "éléments manquants : " + ", ".join(missing)
+                )
+            try:
+                # Bornes strictes : évite une queue illimitée en RAM si l'encodeur retarde
+                queue.set_property("max-size-buffers", 0)
+                queue.set_property("max-size-time", 3 * Gst.SECOND)
+                queue.set_property("max-size-bytes", 4 * 1024 * 1024)
+                queue.set_property("leaky", 0)  # pas de drop silencieux
+            except Exception:
+                pass
+            # target : bitrate (1) → ~320 kb/s ; cbr pour un débit stable
+            try:
+                enc.set_property("target", 1)
+            except Exception:
+                try:
+                    enc.set_property("target", "bitrate")
+                except Exception:
+                    pass
+            try:
+                enc.set_property("bitrate", 320)
+            except Exception:
+                pass
+            try:
+                enc.set_property("cbr", True)
+            except Exception:
+                pass
+            sink.set_property("location", tmp)
+            try:
+                sink.set_property("sync", False)
+            except Exception:
+                pass
+            try:
+                sink.set_property("async", False)
+            except Exception:
+                pass
+
+            audio_bin = Gst.Bin.new("rec_audio_bin")
+            for el in (convert, resample, queue, enc, sink):
+                audio_bin.add(el)
+            if not convert.link(resample):
+                raise RuntimeError("link convert→resample")
+            if not resample.link(queue):
+                raise RuntimeError("link resample→queue")
+            if not queue.link(enc):
+                raise RuntimeError("link queue→enc")
+            if not enc.link(sink):
+                raise RuntimeError("link enc→sink")
+            sink_pad = convert.get_static_pad("sink")
+            if sink_pad is None:
+                raise RuntimeError("pad sink convert")
+            ghost = Gst.GhostPad.new("sink", sink_pad)
+            if not audio_bin.add_pad(ghost):
+                raise RuntimeError("ghost pad")
+        except Exception as exc:
+            print("record audio bin:", exc, file=sys.stderr)
+            audio_bin = None
+
+        if audio_bin is None:
+            try:
+                self.status_label.set_text(
+                    self.tr("Enregistrement impossible")
+                    + " (lamemp3enc ?)"
+                )
+            except Exception:
+                pass
+            try:
+                os.unlink(tmp)
+            except Exception:
+                pass
+            self._record_temp_path = None
+            return
+
+        try:
+            rec = Gst.ElementFactory.make("playbin", "recorder")
+            if rec is None:
+                raise RuntimeError("playbin recorder introuvable")
+            rec.set_property("uri", uri)
+            # Pistes audio (+ sous-titres ignorés). On laisse le flag vidéo
+            # pour que les flux HLS/DASH / TV se démultiplexent correctement ;
+            # la vidéo part dans un fakesink (pas d'affichage, pas de double fenetre).
+            try:
+                # GstPlayFlags : VIDEO=1, AUDIO=2, TEXT=4, VIS=8, ...
+                # Audio uniquement : évite de décoder la vidéo TV pour un fakesink
+                flags = int(rec.get_property("flags"))
+                flags = (flags | 2)   # AUDIO
+                flags = flags & ~1   # pas de VIDEO
+                flags = flags & ~4   # pas de sous-titres
+                flags = flags & ~8   # pas de visualisation
+                rec.set_property("flags", flags)
+            except Exception:
+                pass
+            try:
+                vfake = Gst.ElementFactory.make("fakesink", "rec_vfake")
+                if vfake is not None:
+                    try:
+                        vfake.set_property("sync", False)
+                    except Exception:
+                        pass
+                    try:
+                        vfake.set_property("async", False)
+                    except Exception:
+                        pass
+                    rec.set_property("video-sink", vfake)
+            except Exception:
+                pass
+            rec.set_property("audio-sink", audio_bin)
+            # Volume normal : les échantillons partent vers filesink uniquement
+            # (audio-sink custom = pas de sortie haut-parleur du recorder).
+            try:
+                rec.set_property("volume", 1.0)
+            except Exception:
+                pass
+            try:
+                rec.set_property("mute", False)
+            except Exception:
+                pass
+            self._record_pipeline = rec
+        except Exception as exc:
+            print("record playbin:", exc, file=sys.stderr)
+            try:
+                os.unlink(tmp)
+            except Exception:
+                pass
+            self._record_temp_path = None
+            self._record_pipeline = None
+            try:
+                self.status_label.set_text(self.tr("Enregistrement impossible"))
+            except Exception:
+                pass
+            return
+
+        try:
+            bus = self._record_pipeline.get_bus()
+            bus.add_signal_watch()
+            self._record_bus_watch_id = bus.connect(
+                "message", self._on_record_bus_message
+            )
+        except Exception as exc:
+            print("record bus:", exc, file=sys.stderr)
+
+        ret = self._record_pipeline.set_state(Gst.State.PLAYING)
+        if ret == Gst.StateChangeReturn.FAILURE:
+            try:
+                self._destroy_record_pipeline()
+            except Exception:
+                pass
+            try:
+                if self._record_temp_path and os.path.exists(self._record_temp_path):
+                    os.unlink(self._record_temp_path)
+            except Exception:
+                pass
+            self._record_temp_path = None
+            try:
+                self.status_label.set_text(self.tr("Enregistrement impossible"))
+            except Exception:
+                pass
+            return
+
+        self._recording = True
+        self._update_record_button_state()
+        try:
+            self.status_label.set_text(self.tr("Enregistrement en cours…"))
+        except Exception:
+            pass
+
+    def _on_record_bus_message(self, bus, message):
+        try:
+            t = message.type
+        except Exception:
+            return
+        if t == Gst.MessageType.ERROR:
+            err, dbg = message.parse_error()
+            print("record error:", err, dbg, file=sys.stderr)
+            GLib.idle_add(self._on_record_failed, str(err) if err else "")
+        elif t == Gst.MessageType.EOS:
+            GLib.idle_add(self._on_record_eos)
+        return
+
+    def _on_record_failed(self, err_msg=""):
+        if not getattr(self, "_recording", False):
+            return False
+        self._recording = False
+        try:
+            self._destroy_record_pipeline()
+        except Exception:
+            pass
+        try:
+            self.status_label.set_text(
+                self.tr("Enregistrement impossible")
+                + ((" — " + err_msg) if err_msg else "")
+            )
+        except Exception:
+            pass
+        self._update_record_button_state()
+        return False
+
+    def _on_record_eos(self):
+        # Fin naturelle du flux pendant l'enregistrement
+        if getattr(self, "_recording", False):
+            self._stop_recording(show_save_dialog=True)
+        return False
+
+    def _destroy_record_pipeline(self):
+        pipe = getattr(self, "_record_pipeline", None)
+        self._record_pipeline = None
+        wid = getattr(self, "_record_bus_watch_id", 0) or 0
+        self._record_bus_watch_id = 0
+        if pipe is not None:
+            try:
+                bus = pipe.get_bus()
+                if wid:
+                    try:
+                        bus.disconnect(wid)
+                    except Exception:
+                        pass
+                try:
+                    bus.remove_signal_watch()
+                except Exception:
+                    pass
+            except Exception:
+                pass
+            try:
+                pipe.set_state(Gst.State.NULL)
+                pipe.get_state(500 * Gst.MSECOND)
+            except Exception:
+                pass
+
+    def _stop_recording(self, show_save_dialog=True):
+        """Arrête l'enregistrement et propose d'enregistrer le fichier."""
+        if not getattr(self, "_recording", False) and not getattr(
+            self, "_record_pipeline", None
+        ):
+            return
+        self._recording = False
+        tmp = getattr(self, "_record_temp_path", None)
+        self._record_temp_path = None
+
+        pipe = getattr(self, "_record_pipeline", None)
+        if pipe is not None:
+            try:
+                # EOS propre pour finaliser le flux MP3 (frames + tags)
+                pipe.send_event(Gst.Event.new_eos())
+                bus = pipe.get_bus()
+                if bus is not None:
+                    bus.timed_pop_filtered(
+                        5 * Gst.SECOND,
+                        Gst.MessageType.EOS | Gst.MessageType.ERROR,
+                    )
+            except Exception as exc:
+                print("record EOS:", exc, file=sys.stderr)
+            try:
+                # Forcer l'état NULL pour flush filesink
+                pipe.set_state(Gst.State.NULL)
+                pipe.get_state(2 * Gst.SECOND)
+            except Exception:
+                pass
+            try:
+                self._destroy_record_pipeline()
+            except Exception:
+                pass
+
+        self._update_record_button_state()
+
+        if not show_save_dialog:
+            try:
+                if tmp and os.path.exists(tmp):
+                    os.unlink(tmp)
+            except Exception:
+                pass
+            return
+
+        size = 0
+        try:
+            if tmp and os.path.isfile(tmp):
+                size = os.path.getsize(tmp)
+        except Exception:
+            size = 0
+
+        # Un MP3 valide de quelques secondes fait au moins quelques Ko
+        if not tmp or not os.path.isfile(tmp) or size < 256:
+            try:
+                if tmp and os.path.exists(tmp):
+                    os.unlink(tmp)
+            except Exception:
+                pass
+            try:
+                self.status_label.set_text(self.tr("Enregistrement vide ou impossible"))
+            except Exception:
+                pass
+            return
+
+        self._prompt_save_recording(tmp)
+
+    def _prompt_save_recording(self, temp_path):
+        """Dialogue de sauvegarde (thème app) après arrêt de l'enregistrement."""
+        from datetime import datetime
+
+        default_name = "Audio_" + datetime.now().strftime("%H-%M_%d-%m-%Y") + ".mp3"
+
+        dialog = Gtk.FileChooserDialog(
+            title=self.tr("Enregistrer l'audio"),
+            parent=self,
+            action=Gtk.FileChooserAction.SAVE,
         )
         dialog.add_buttons(
             Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
-            Gtk.STOCK_OPEN, Gtk.ResponseType.OK
+            self.tr("Enregistrer"), Gtk.ResponseType.OK,
         )
+        dialog.set_do_overwrite_confirmation(True)
+        try:
+            self._style_app_dialog(dialog)
+        except Exception:
+            pass
+        try:
+            self._translate_dialog_action_buttons(dialog)
+        except Exception:
+            pass
 
-        if dialog.run() == Gtk.ResponseType.OK:
-            self.add_directory(dialog.get_filename())
+        # Dossier par défaut : Téléchargements
+        try:
+            downloads = GLib.get_user_special_dir(
+                GLib.UserDirectory.DIRECTORY_DOWNLOAD
+            )
+            if downloads:
+                dialog.set_current_folder(downloads)
+            else:
+                dialog.set_current_folder(os.path.expanduser("~/Downloads"))
+        except Exception:
+            try:
+                fr = os.path.expanduser("~/Téléchargements")
+                if os.path.isdir(fr):
+                    dialog.set_current_folder(fr)
+                else:
+                    dialog.set_current_folder(os.path.expanduser("~/Downloads"))
+            except Exception:
+                dialog.set_current_folder(os.path.expanduser("~"))
 
-        dialog.destroy()
+        filt = Gtk.FileFilter()
+        filt.set_name("MP3 (*.mp3)")
+        filt.add_pattern("*.mp3")
+        dialog.add_filter(filt)
+        dialog.set_current_name(default_name)
+
+        dest = None
+        try:
+            if dialog.run() == Gtk.ResponseType.OK:
+                dest = dialog.get_filename()
+        finally:
+            dialog.destroy()
+
+        if not dest:
+            try:
+                os.unlink(temp_path)
+            except Exception:
+                pass
+            try:
+                self.status_label.set_text(self.tr("Enregistrement annulé"))
+            except Exception:
+                pass
+            return
+
+        if not dest.lower().endswith(".mp3"):
+            dest = dest + ".mp3"
+
+        try:
+            import shutil
+            shutil.move(temp_path, dest)
+            try:
+                self.status_label.set_text(
+                    self.tr("Enregistrement sauvegardé") + " — " + os.path.basename(dest)
+                )
+            except Exception:
+                pass
+        except Exception as exc:
+            print("save recording:", exc, file=sys.stderr)
+            try:
+                # copie de secours
+                import shutil
+                shutil.copy2(temp_path, dest)
+                os.unlink(temp_path)
+                self.status_label.set_text(
+                    self.tr("Enregistrement sauvegardé") + " — " + os.path.basename(dest)
+                )
+            except Exception as exc2:
+                print("save recording copy:", exc2, file=sys.stderr)
+                try:
+                    self.status_label.set_text(self.tr("Impossible d'enregistrer l'audio."))
+                except Exception:
+                    pass
+                try:
+                    if os.path.exists(temp_path):
+                        os.unlink(temp_path)
+                except Exception:
+                    pass
 
     def add_directory(self, directory):
         """Scan récursif en arrière-plan pour ne pas bloquer l'UI."""
@@ -6758,7 +7808,41 @@ class Myostoox(Gtk.Window):
         if iterator is None:
             return
         filename = model[iterator][self.COL_PATH]
-        self.update_information(filename)
+        self._pending_selection_path = filename
+        # Nouvelle génération : annule toute pochette « en retard »
+        try:
+            self._info_generation = int(getattr(self, "_info_generation", 0)) + 1
+        except Exception:
+            self._info_generation = 1
+        # Affichage immédiat seulement si la pochette de CE fichier est déjà en cache.
+        # Sinon on laisse l'image actuelle jusqu'à la fin du chargement (évite le
+        # flash de l'icône « pas de pochette » entre deux pochettes réelles).
+        try:
+            cache = getattr(self, "_cover_pixbuf_cache", None) or {}
+            if filename in cache:
+                self.cover.set_from_pixbuf(cache[filename])
+        except Exception:
+            pass
+        tid = getattr(self, "_selection_info_timeout_id", 0) or 0
+        if tid:
+            try:
+                GLib.source_remove(tid)
+            except Exception:
+                pass
+        self._selection_info_timeout_id = GLib.timeout_add(
+            120, self._selection_info_timeout
+        )
+
+    def _selection_info_timeout(self):
+        self._selection_info_timeout_id = 0
+        filename = getattr(self, "_pending_selection_path", None)
+        self._pending_selection_path = None
+        if filename:
+            try:
+                self.update_information(filename)
+            except Exception:
+                pass
+        return False
 
     def row_activated(self, tree, path, column):
 
@@ -6779,6 +7863,8 @@ class Myostoox(Gtk.Window):
 
     def update_information(self, filename):
         """Met à jour la zone d'info en bas (titre / artiste / album)."""
+
+        gen = int(getattr(self, "_info_generation", 0))
 
         def _after_info():
             try:
@@ -6833,7 +7919,8 @@ class Myostoox(Gtk.Window):
                     self.bottom_artist.set_text(self.tr("Flux en direct"))
                 self.bottom_album.set_text("")
 
-            self.set_default_cover()
+            if gen == int(getattr(self, "_info_generation", 0)):
+                self.set_default_cover()
             if filename == self.current_path and self.is_playing and not self.is_paused:
                 try:
                     self._notify_track_change(
@@ -6850,8 +7937,18 @@ class Myostoox(Gtk.Window):
             return
 
         # Cas normal (fichier ou CD)
+        try:
+            cache = getattr(self, "_cover_pixbuf_cache", None) or {}
+            if filename in cache and gen == int(getattr(self, "_info_generation", 0)):
+                self.cover.set_from_pixbuf(cache[filename])
+        except Exception:
+            pass
+
         title, artist, album, year, duration, cover, technical = \
             self.get_metadata(filename, load_cover=True)
+
+        if gen != int(getattr(self, "_info_generation", 0)):
+            return
 
         if is_cdda(filename):
             track = get_cdda_track_number(filename) or 0
@@ -6874,7 +7971,7 @@ class Myostoox(Gtk.Window):
                 pass
 
         if cover:
-            self.set_cover(cover)
+            self.set_cover(cover, for_path=filename)
         else:
             self.set_default_cover()
 
@@ -6890,7 +7987,7 @@ class Myostoox(Gtk.Window):
         except Exception:
             self.cover.clear()
 
-    def set_cover(self, data):
+    def set_cover(self, data, for_path=None):
 
         if not data:
             self.set_default_cover()
@@ -6911,23 +8008,55 @@ class Myostoox(Gtk.Window):
             self.set_default_cover()
             return
 
-        pixbuf = None
+        # Cache par chemin fichier (évite de réafficher une mauvaise pochette)
+        if for_path:
+            try:
+                cache = getattr(self, "_cover_pixbuf_cache", None)
+                if cache is not None and for_path in cache:
+                    try:
+                        cache.move_to_end(for_path)
+                    except Exception:
+                        pass
+                    try:
+                        self.cover.set_from_pixbuf(cache[for_path])
+                        return
+                    except Exception:
+                        pass
+            except Exception:
+                pass
 
-        # 1) GLib.Bytes + MemoryInputStream (API stable PyGObject / GdkPixbuf 2.42+)
+        pixbuf = None
+        try:
+            target_px = max(64, int(COVER_DECODE_MAX_PX))
+        except Exception:
+            target_px = 256
+
+        # 1) Décode déjà réduit (évite RGBA plein format ~36 Mo)
         try:
             gbytes = GLib.Bytes.new(data)
             stream = Gio.MemoryInputStream.new_from_bytes(gbytes)
-            pixbuf = GdkPixbuf.Pixbuf.new_from_stream(stream, None)
+            pixbuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale(
+                stream, target_px, target_px, True, None
+            )
         except Exception:
             pixbuf = None
 
-        # 2) PixbufLoader (détection auto du format)
+        # 2) PixbufLoader + scale si trop grand
         if pixbuf is None:
             try:
                 loader = GdkPixbuf.PixbufLoader()
                 loader.write(data)
                 loader.close()
                 pixbuf = loader.get_pixbuf()
+                if pixbuf is not None:
+                    w, h = pixbuf.get_width(), pixbuf.get_height()
+                    if max(w, h) > target_px:
+                        sc = float(target_px) / float(max(w, h))
+                        pixbuf = pixbuf.scale_simple(
+                            max(1, int(w * sc)),
+                            max(1, int(h * sc)),
+                            GdkPixbuf.InterpType.BILINEAR,
+                        )
             except Exception:
                 pixbuf = None
 
@@ -6978,6 +8107,28 @@ class Myostoox(Gtk.Window):
             cs = self._ui_s(105)
             pixbuf = pixbuf.scale_simple(cs, cs, GdkPixbuf.InterpType.BILINEAR)
             self.cover.set_from_pixbuf(pixbuf)
+            try:
+                if for_path:
+                    if not hasattr(self, "_cover_pixbuf_cache") or self._cover_pixbuf_cache is None:
+                        self._cover_pixbuf_cache = OrderedDict()
+                    self._cover_pixbuf_cache[for_path] = pixbuf
+                    try:
+                        self._cover_pixbuf_cache.move_to_end(for_path)
+                    except Exception:
+                        pass
+                    while len(self._cover_pixbuf_cache) > 32:
+                        try:
+                            self._cover_pixbuf_cache.popitem(last=False)
+                        except Exception:
+                            break
+            except Exception:
+                pass
+            # P8 : libérer les buffers d'une grosse image source après réduction
+            try:
+                if data is not None and len(data) > 512 * 1024:
+                    GLib.idle_add(lambda: (trim_memory(force=True), False)[1])
+            except Exception:
+                pass
         except Exception as exc:
             print("set_cover:", exc, file=sys.stderr)
             self.set_default_cover()
@@ -6996,52 +8147,66 @@ class Myostoox(Gtk.Window):
         self.spectrum_agc_ceiling = SPECTRUM_AGC_CEILING_MIN_DB
 
     def _extract_magnitudes(self, structure):
+        """Extrait les magnitudes spectrum ; mémorise la méthode qui marche."""
 
-        magnitudes = None
+        method = getattr(self, "_spectrum_mag_method", None)
 
-        try:
+        def _via_list():
             ok, value_array = structure.get_list("magnitude")
-            if ok and value_array is not None:
-                n = value_array.n_values
-                magnitudes = []
-                for i in range(n):
-                    try:
-                        magnitudes.append(value_array.get_nth(i))
-                    except Exception:
-                        break
-                if magnitudes:
-                    return magnitudes
-        except Exception:
-            pass
+            if not ok or value_array is None:
+                return None
+            n = value_array.n_values
+            magnitudes = []
+            for i in range(n):
+                try:
+                    magnitudes.append(value_array.get_nth(i))
+                except Exception:
+                    break
+            return magnitudes or None
 
-        try:
+        def _via_value():
             raw = structure.get_value("magnitude")
-            if raw is not None:
-                if isinstance(raw, (list, tuple)):
-                    magnitudes = [float(x) for x in raw]
-                    if magnitudes:
-                        return magnitudes
-                if hasattr(raw, "n_values") and hasattr(raw, "get_nth"):
-                    magnitudes = [raw.get_nth(i) for i in range(raw.n_values)]
-                    if magnitudes:
-                        return magnitudes
-        except Exception:
-            pass
+            if raw is None:
+                return None
+            if isinstance(raw, (list, tuple)):
+                magnitudes = [float(x) for x in raw]
+                return magnitudes or None
+            if hasattr(raw, "n_values") and hasattr(raw, "get_nth"):
+                magnitudes = [raw.get_nth(i) for i in range(raw.n_values)]
+                return magnitudes or None
+            return None
 
-        try:
+        def _via_regex():
             s = structure.to_string()
             m = re.search(r"magnitude=\(float\)\{([^}]*)\}", s)
-            if m:
-                magnitudes = [
-                    float(x.strip())
-                    for x in m.group(1).split(",")
-                    if x.strip()
-                ]
-                if magnitudes:
-                    return magnitudes
-        except Exception:
-            pass
+            if not m:
+                return None
+            magnitudes = [
+                float(x.strip())
+                for x in m.group(1).split(",")
+                if x.strip()
+            ]
+            return magnitudes or None
 
+        order = []
+        if method == "list":
+            order = [_via_list, _via_value, _via_regex]
+        elif method == "value":
+            order = [_via_value, _via_list, _via_regex]
+        elif method == "regex":
+            order = [_via_regex, _via_list, _via_value]
+        else:
+            order = [_via_list, _via_value, _via_regex]
+
+        names = {_via_list: "list", _via_value: "value", _via_regex: "regex"}
+        for fn in order:
+            try:
+                magnitudes = fn()
+                if magnitudes:
+                    self._spectrum_mag_method = names[fn]
+                    return magnitudes
+            except Exception:
+                pass
         return None
 
     def _build_spectrum_ranges(self, source_count):
@@ -7270,6 +8435,15 @@ class Myostoox(Gtk.Window):
         # En vidéo le FFT est coupé : pas de redraw 60 Hz inutile
         if getattr(self, "current_is_video", False):
             return True
+
+        if not getattr(self, "is_playing", False):
+            try:
+                if all(v <= 0.001 for v in self.spectrum_values) and all(
+                    t <= 0.001 for t in self.spectrum_targets
+                ):
+                    return True
+            except Exception:
+                pass
 
         # Cadence ~60 Hz en audio seul
 
@@ -7835,17 +9009,76 @@ class Myostoox(Gtk.Window):
 
         return sink
 
-    def _configure_playbin_buffers(self):
+    def _ensure_video_sink(self):
+        """Crée le vrai sink vidéo (glimagesink/…) si pas encore fait.
+
+        À appeler uniquement en état NULL, avant le premier média vidéo.
+        """
+        if getattr(self, "_video_sink_is_real", False) and self.video_sink is not None:
+            return self.video_sink
+        try:
+            sink = self._create_video_sink()
+        except Exception:
+            sink = None
+        if sink is None:
+            return self.video_sink
+        self.video_sink = sink
+        self._video_sink_is_real = True
+        try:
+            if self.player is not None:
+                self.player.set_property("video-sink", sink)
+        except Exception:
+            pass
+        return sink
+
+    def _release_real_video_sink(self):
+        """Repasse sur fakesink après une session vidéo (état NULL uniquement).
+
+        Libère le contexte GL / buffers associés au vrai sink.
+        """
+        if not getattr(self, "_video_sink_is_real", False):
+            return
+        try:
+            fake = Gst.ElementFactory.make("fakesink", "video_sink_placeholder")
+            if fake is None:
+                return
+            try:
+                fake.set_property("sync", False)
+            except Exception:
+                pass
+            try:
+                fake.set_property("async", False)
+            except Exception:
+                pass
+            if self.player is not None:
+                self.player.set_property("video-sink", fake)
+            self.video_sink = fake
+            self._video_sink_is_real = False
+            try:
+                self._pause_pixbuf = None
+            except Exception:
+                pass
+        except Exception as exc:
+            print("release video sink:", exc, file=sys.stderr)
+
+    def _configure_playbin_buffers(self, audio_only=False):
         """Configure les tampons playbin pour MKV locaux (multi-pistes / 4K).
 
         Buffer un peu plus généreux en mode Logiciel pour absorber les pics
         CPU ; en Matériel on reste modéré pour limiter la RAM.
+
+        audio_only=True (uniquement en état NULL) : retire le flag VIDEO pour
+        ne pas instancier le décodeur / sink vidéo sur les MP3/FLAC/CDDA.
         """
         if self.player is None:
             return
         soft = getattr(self, "performance_mode", "hardware") == "software"
-        buf_size = (12 if soft else 8) * 1024 * 1024
-        buf_dur = (5 if soft else 4) * Gst.SECOND
+        if audio_only:
+            buf_size = 2 * 1024 * 1024
+            buf_dur = 2 * Gst.SECOND
+        else:
+            buf_size = (12 if soft else 8) * 1024 * 1024
+            buf_dur = (5 if soft else 4) * Gst.SECOND
         for prop, value in (
             ("buffer-size", buf_size),
             ("buffer-duration", buf_dur),
@@ -7855,16 +9088,20 @@ class Myostoox(Gtk.Window):
             except Exception:
                 pass
 
-        # Flags : vidéo + audio + texte, sans visualisation ni download ring.
+        # Flags : uniquement en NULL (appelant responsable). Jamais en PLAYING.
         try:
-            flags = self.player.get_property("flags")
+            flags = int(self.player.get_property("flags"))
             VIDEO = 1 << 0
             AUDIO = 1 << 1
             TEXT = 1 << 2
             VIS = 1 << 3
             DOWNLOAD = 1 << 7
-            # TEXT activé pour sous-titres embarqués MKV
-            flags = (flags | VIDEO | AUDIO | TEXT) & ~VIS & ~DOWNLOAD
+            if audio_only:
+                # Audio pur : pas de décodeur vidéo ni de sink GL
+                flags = (flags | AUDIO) & ~VIDEO & ~VIS & ~DOWNLOAD
+            else:
+                # TEXT pour sous-titres embarqués MKV
+                flags = (flags | VIDEO | AUDIO | TEXT) & ~VIS & ~DOWNLOAD
             self.player.set_property("flags", flags)
         except Exception:
             pass
@@ -7958,11 +9195,15 @@ class Myostoox(Gtk.Window):
 
     def on_sync_message(self, bus, message):
         """Répond au message synchrone prepare-window-handle (mécanisme GStreamer standard)."""
-        structure = message.get_structure()
-        if structure is None:
-            return
-        if structure.get_name() != "prepare-window-handle":
-            return
+        try:
+            if not GstVideo.is_video_overlay_prepare_window_handle_message(message):
+                return
+        except Exception:
+            structure = message.get_structure()
+            if structure is None:
+                return
+            if structure.get_name() != "prepare-window-handle":
+                return
         handle = self._video_window_handle
         if handle is None:
             handle = self._cache_video_window_handle()
@@ -9224,19 +10465,40 @@ class Myostoox(Gtk.Window):
 
 
     def _discover_subtitle_languages(self, filepath):
-        """Retourne {stream_id: code_langue} pour les pistes sous-titres (Discoverer)."""
+        """Retourne {stream_id: code_langue} pour les pistes sous-titres (Discoverer).
+
+        Résultat mis en cache (chemin + mtime + taille) pour éviter un Discoverer
+        bloquant 2–6 s à chaque ouverture du même MKV.
+        """
         result = {}
         if GstPbutils is None or not filepath:
             return result
+        try:
+            st = os.stat(filepath)
+            cache_key = (os.path.abspath(filepath), int(st.st_mtime), int(st.st_size))
+        except Exception:
+            cache_key = None
+        cache = getattr(self, "_sub_lang_cache", None)
+        if cache is None:
+            self._sub_lang_cache = {}
+            cache = self._sub_lang_cache
+        if cache_key is not None and cache_key in cache:
+            try:
+                return dict(cache[cache_key])
+            except Exception:
+                pass
         try:
             uri = Gst.filename_to_uri(os.path.abspath(filepath))
         except Exception:
             return result
         try:
-            disc = GstPbutils.Discoverer.new(int(6 * Gst.SECOND))
+            # 2.5 s : assez pour les métadonnées ; 6 s gelait trop le thread UI
+            disc = GstPbutils.Discoverer.new(int(2.5 * Gst.SECOND))
             info = disc.discover_uri(uri)
         except Exception as e:
             print("Discoverer sous-titres:", e, file=sys.stderr)
+            if cache_key is not None:
+                cache[cache_key] = {}
             return result
         try:
             streams = info.get_subtitle_streams() or []
@@ -9272,6 +10534,13 @@ class Myostoox(Gtk.Window):
                 sid = None
             if sid:
                 result[sid] = lang
+        if cache_key is not None:
+            try:
+                cache[cache_key] = dict(result)
+                while len(cache) > 12:
+                    cache.pop(next(iter(cache)))
+            except Exception:
+                pass
         return result
 
     def _normalize_lang_code(self, raw):
@@ -10188,12 +11457,36 @@ class Myostoox(Gtk.Window):
         return False
 
     def _mkv_probe_header(self, path, size=1024 * 1024):
-        """Lit le début d'un fichier Matroska (CodecID en tête EBML/Tracks)."""
+        """Lit le début d'un fichier Matroska (CodecID en tête EBML/Tracks).
+
+        Cache court (chemin + mtime + taille) : évite 2× 1 Mo pour
+        _mkv_has_ac3_family_audio + _mkv_has_av1_video sur le même fichier.
+        """
+        try:
+            st = os.stat(path)
+            key = (path, int(st.st_mtime), int(st.st_size), int(size))
+        except Exception:
+            key = None
+        cache = getattr(self, "_mkv_probe_cache", None)
+        if cache is None:
+            self._mkv_probe_cache = {}
+            cache = self._mkv_probe_cache
+        if key is not None and key in cache:
+            return cache[key]
         try:
             with open(path, "rb") as f:
-                return f.read(size)
+                data = f.read(size)
         except Exception:
-            return b""
+            data = b""
+        if key is not None:
+            cache[key] = data
+            # Une seule entrée utile en pratique (piste courante)
+            while len(cache) > 4:
+                try:
+                    cache.pop(next(iter(cache)))
+                except Exception:
+                    break
+        return data
 
     def _mkv_has_ac3_family_audio(self, path):
         """True uniquement pour E-AC3 (A_EAC3) — cas du crash a52dec + playbin.
@@ -10283,6 +11576,14 @@ class Myostoox(Gtk.Window):
         self._custom_sub_overlay = None
         self._custom_sub_muted = False
         self._need_playbin_rebind = True
+        try:
+            self._mkv_probe_cache = {}
+        except Exception:
+            pass
+        try:
+            GLib.idle_add(lambda: (trim_memory(force=True), False)[1])
+        except Exception:
+            pass
 
     def _attach_custom_bus(self, element):
         try:
@@ -10335,6 +11636,7 @@ class Myostoox(Gtk.Window):
         if video_sink is None:
             video_sink = Gst.ElementFactory.make("autovideosink", "mkv-vsink")
         self.video_sink = video_sink
+        self._video_sink_is_real = video_sink is not None
         try:
             if video_sink is not None and video_sink.find_property("force-aspect-ratio"):
                 video_sink.set_property("force-aspect-ratio", True)
@@ -10477,7 +11779,8 @@ class Myostoox(Gtk.Window):
                 return
             try:
                 # Utilise tous les cœurs (plafond 16) : AV1 soft en a besoin
-                ncpu = max(2, min(16, (os.cpu_count() or 2)))
+                # Plafond 8 threads : chaque frame 4K retenue coûte ~RAM ; 16 était excessif
+                ncpu = max(2, min(8, (os.cpu_count() or 2)))
                 for prop in ("max-threads", "n-threads", "threads"):
                     try:
                         if decode.find_property(prop):
@@ -10486,6 +11789,12 @@ class Myostoox(Gtk.Window):
                     except Exception:
                         continue
                 # dav1d : frame + tile threads si exposés
+                # dav1d / libav : limite les frames en vol (RAM 4K)
+                try:
+                    if decode.find_property("max-frame-delay") is not None:
+                        decode.set_property("max-frame-delay", 2)
+                except Exception:
+                    pass
                 for prop, val in (
                     ("frame-threads", max(1, ncpu // 2)),
                     ("tile-threads", max(1, min(4, ncpu // 2))),
@@ -10516,6 +11825,76 @@ class Myostoox(Gtk.Window):
             except Exception:
                 pass
 
+        def _sink_wants_gl():
+            """True si le sink vidéo est un gl*imagesink (chemin OpenGL)."""
+            try:
+                sink = video_sink
+                if sink is None:
+                    return False
+                fac = sink.get_factory()
+                name = (fac.get_name() if fac is not None else "") or ""
+                return "gl" in name.lower()
+            except Exception:
+                return False
+
+        def _make_gl_convert_bin():
+            """glupload → glcolorconvert : évite la copie GPU→CPU via videoconvert."""
+            try:
+                upload = Gst.ElementFactory.make("glupload", "mkv-glupload")
+                gconv = Gst.ElementFactory.make("glcolorconvert", "mkv-glcconv")
+            except Exception:
+                return None
+            if upload is None or gconv is None:
+                return None
+            try:
+                b = Gst.Bin.new("mkv-glconvert-bin")
+                b.add(upload)
+                b.add(gconv)
+                if not upload.link(gconv):
+                    return None
+                sinkpad = upload.get_static_pad("sink")
+                srcpad = gconv.get_static_pad("src")
+                if sinkpad is None or srcpad is None:
+                    return None
+                gp_sink = Gst.GhostPad.new("sink", sinkpad)
+                gp_src = Gst.GhostPad.new("src", srcpad)
+                if gp_sink is None or gp_src is None:
+                    return None
+                try:
+                    gp_sink.set_active(True)
+                    gp_src.set_active(True)
+                except Exception:
+                    pass
+                if not b.add_pad(gp_sink) or not b.add_pad(gp_src):
+                    return None
+                return b
+            except Exception as exc:
+                if DEBUG_MYOSTOOX:
+                    print("gl convert bin:", exc, file=sys.stderr)
+                return None
+
+        def _make_video_convert_element(preferred=None):
+            """Convertisseur vidéo pour le pipeline MKV custom.
+
+            - preferred : post-processeur HW (vapostproc, vaapipostproc…)
+            - si sink GL : bin glupload+glcolorconvert (moins de copies CPU)
+            - sinon : videoconvert classique
+            """
+            if preferred is not None:
+                return preferred
+            if _sink_wants_gl():
+                glbin = _make_gl_convert_bin()
+                if glbin is not None:
+                    if DEBUG_MYOSTOOX:
+                        print(
+                            "Myostoox: MKV convert GL (glupload+glcolorconvert)",
+                            file=sys.stderr,
+                        )
+                    return glbin
+            convert = Gst.ElementFactory.make("videoconvert", "mkv-vconv")
+            _configure_videoconvert(convert)
+            return convert
+
         def _make_h265_chain():
             parse = Gst.ElementFactory.make("h265parse", "mkv-h265parse")
             if parse is None:
@@ -10538,15 +11917,12 @@ class Myostoox(Gtk.Window):
                     convert = None
                     if post_name:
                         convert = Gst.ElementFactory.make(post_name, "mkv-vpost")
-                    if convert is None:
-                        convert = Gst.ElementFactory.make(
-                            "videoconvert", "mkv-vconv"
-                        )
+                    convert = _make_video_convert_element(preferred=convert)
                     if convert is None:
                         continue
                     return parse, decode, convert, dec_name
             decode = Gst.ElementFactory.make("avdec_h265", "mkv-vdec")
-            convert = Gst.ElementFactory.make("videoconvert", "mkv-vconv")
+            convert = _make_video_convert_element()
             if not decode or not convert:
                 return None
             _configure_software_decoder(decode)
@@ -10575,15 +11951,12 @@ class Myostoox(Gtk.Window):
                     convert = None
                     if post_name:
                         convert = Gst.ElementFactory.make(post_name, "mkv-vpost")
-                    if convert is None:
-                        convert = Gst.ElementFactory.make(
-                            "videoconvert", "mkv-vconv"
-                        )
+                    convert = _make_video_convert_element(preferred=convert)
                     if convert is None:
                         continue
                     return parse, decode, convert, dec_name
             decode = Gst.ElementFactory.make("avdec_h264", "mkv-vdec")
-            convert = Gst.ElementFactory.make("videoconvert", "mkv-vconv")
+            convert = _make_video_convert_element()
             if not decode or not convert:
                 return None
             _configure_software_decoder(decode)
@@ -10606,23 +11979,18 @@ class Myostoox(Gtk.Window):
                     convert = None
                     if post_name:
                         convert = Gst.ElementFactory.make(post_name, "mkv-vpost")
-                    if convert is None:
-                        convert = Gst.ElementFactory.make(
-                            "videoconvert", "mkv-vconv"
-                        )
+                    convert = _make_video_convert_element(preferred=convert)
                     if convert is None:
                         continue
-                    _configure_videoconvert(convert)
                     return parse, decode, convert, dec_name
             for dec_name in _AV1_SOFT_DECODER_ORDER:
                 decode = Gst.ElementFactory.make(dec_name, "mkv-vdec")
                 if decode is None:
                     continue
-                convert = Gst.ElementFactory.make("videoconvert", "mkv-vconv")
+                convert = _make_video_convert_element()
                 if convert is None:
                     continue
                 _configure_software_decoder(decode)
-                _configure_videoconvert(convert)
                 return parse, decode, convert, dec_name
             return None
 
@@ -10643,15 +12011,12 @@ class Myostoox(Gtk.Window):
                     convert = None
                     if post_name:
                         convert = Gst.ElementFactory.make(post_name, "mkv-vpost")
-                    if convert is None:
-                        convert = Gst.ElementFactory.make(
-                            "videoconvert", "mkv-vconv"
-                        )
+                    convert = _make_video_convert_element(preferred=convert)
                     if convert is None:
                         continue
                     return parse, decode, convert, dec_name
             decode = Gst.ElementFactory.make("avdec_vp9", "mkv-vdec")
-            convert = Gst.ElementFactory.make("videoconvert", "mkv-vconv")
+            convert = _make_video_convert_element()
             if not decode or not convert:
                 return None
             _configure_software_decoder(decode)
@@ -10672,15 +12037,12 @@ class Myostoox(Gtk.Window):
                     convert = None
                     if post_name:
                         convert = Gst.ElementFactory.make(post_name, "mkv-vpost")
-                    if convert is None:
-                        convert = Gst.ElementFactory.make(
-                            "videoconvert", "mkv-vconv"
-                        )
+                    convert = _make_video_convert_element(preferred=convert)
                     if convert is None:
                         continue
                     return parse, decode, convert, dec_name
             decode = Gst.ElementFactory.make("avdec_vp8", "mkv-vdec")
-            convert = Gst.ElementFactory.make("videoconvert", "mkv-vconv")
+            convert = _make_video_convert_element()
             if not decode or not convert:
                 return None
             _configure_software_decoder(decode)
@@ -10701,15 +12063,12 @@ class Myostoox(Gtk.Window):
                     convert = None
                     if post_name:
                         convert = Gst.ElementFactory.make(post_name, "mkv-vpost")
-                    if convert is None:
-                        convert = Gst.ElementFactory.make(
-                            "videoconvert", "mkv-vconv"
-                        )
+                    convert = _make_video_convert_element(preferred=convert)
                     if convert is None:
                         continue
                     return parse, decode, convert, dec_name
             decode = Gst.ElementFactory.make("avdec_mpeg2video", "mkv-vdec")
-            convert = Gst.ElementFactory.make("videoconvert", "mkv-vconv")
+            convert = _make_video_convert_element()
             if not decode or not convert:
                 return None
             _configure_software_decoder(decode)
@@ -10864,7 +12223,7 @@ class Myostoox(Gtk.Window):
                     return
 
                 decode = Gst.ElementFactory.make("decodebin", "mkv-vdecode")
-                convert = Gst.ElementFactory.make("videoconvert", "mkv-vconv")
+                convert = _make_video_convert_element()
                 if not decode or not convert:
                     return
                 for el in (queue, decode, convert):
@@ -11426,6 +12785,14 @@ class Myostoox(Gtk.Window):
         if not filename:
             return
 
+        # Changement de média : finaliser un éventuel enregistrement en cours
+        try:
+            if getattr(self, "_recording", False):
+                if filename != getattr(self, "current_path", None):
+                    self._stop_recording(show_save_dialog=True)
+        except Exception:
+            pass
+
         try:
             if is_cdda(filename) or is_stream(filename) or is_dvd(filename) or is_bluray(filename):
                 uri = filename
@@ -11478,9 +12845,8 @@ class Myostoox(Gtk.Window):
             if getattr(self, "_need_playbin_rebind", False):
                 self._need_playbin_rebind = False
                 try:
-                    self.video_sink = self._create_video_sink()
-                    if self.video_sink is not None:
-                        self.player.set_property("video-sink", self.video_sink)
+                    self._video_sink_is_real = False
+                    self._ensure_video_sink()
                 except Exception:
                     pass
                 try:
@@ -11589,7 +12955,7 @@ class Myostoox(Gtk.Window):
             except Exception as e:
                 print("lyrics refresh:", e, file=sys.stderr)
 
-            # Pitch/tempo ne doit jamais rester actif hors audio local
+            # Pitch/tempo hors audio local + spectre hors chaîne en vidéo
             try:
                 want_pitch = (
                     self.pitch is not None
@@ -11599,7 +12965,12 @@ class Myostoox(Gtk.Window):
                         or abs(self.tempo_value - 1.0) > 0.001
                     )
                 )
-                if want_pitch != bool(getattr(self, "_pitch_active", False)):
+                want_spectrum = not bool(getattr(self, "current_is_video", False))
+                need_rebuild = (
+                    want_pitch != bool(getattr(self, "_pitch_active", False))
+                    or want_spectrum != bool(getattr(self, "_spectrum_in_filter", True))
+                )
+                if need_rebuild:
                     self.rebuild_audio_filter(force=True, restart=False)
             except Exception:
                 pass
@@ -11670,6 +13041,22 @@ class Myostoox(Gtk.Window):
 
             if not used_custom:
                 self._destroy_custom_pipeline()
+                # Flags VIDEO on/off en NULL uniquement (jamais en PLAYING)
+                try:
+                    audio_only = not bool(getattr(self, "current_is_video", False))
+                    self._configure_playbin_buffers(audio_only=audio_only)
+                except Exception:
+                    pass
+                if getattr(self, "current_is_video", False):
+                    try:
+                        self._ensure_video_sink()
+                    except Exception:
+                        pass
+                else:
+                    try:
+                        self._release_real_video_sink()
+                    except Exception:
+                        pass
                 self.player.set_property("uri", uri)
                 # Pipeline unifié audio/vidéo : NULL → PLAYING
                 self.player.set_state(Gst.State.PLAYING)
@@ -11677,6 +13064,10 @@ class Myostoox(Gtk.Window):
             self.is_playing = True
             try:
                 self._update_screensaver_inhibit()
+            except Exception:
+                pass
+            try:
+                self._update_record_button_state()
             except Exception:
                 pass
 
@@ -11862,6 +13253,11 @@ class Myostoox(Gtk.Window):
         self._seek_in_progress = False
         self._pending_seek_delta = 0.0
         self._last_known_position = 0.0
+        try:
+            if getattr(self, "_recording", False):
+                self._stop_recording(show_save_dialog=True)
+        except Exception:
+            pass
         self._destroy_custom_pipeline()
         try:
             self.player.set_state(Gst.State.NULL)
@@ -11870,6 +13266,14 @@ class Myostoox(Gtk.Window):
         self.is_playing = False
         self.is_paused = False
         self._pause_pixbuf = None
+        try:
+            n = len(getattr(self, "spectrum_values", []) or [])
+            if n:
+                self.spectrum_values = [0.0] * n
+                self.spectrum_targets = [0.0] * n
+                self.spectrum_peaks = [0.0] * n
+        except Exception:
+            pass
         try:
             self._refresh_playlist_current_style()
         except Exception:
@@ -11917,7 +13321,15 @@ class Myostoox(Gtk.Window):
             self._update_colorimetry_menu_sensitivity()
         except Exception:
             pass
+        try:
+            self._update_record_button_state()
+        except Exception:
+            pass
         self._mpris_notify_playback()
+        try:
+            GLib.idle_add(lambda: (trim_memory(force=True), False)[1])
+        except Exception:
+            pass
 
     # ========================================================
     # NAVIGATION
@@ -13591,10 +15003,7 @@ class Myostoox(Gtk.Window):
         for action_id in DEFAULT_SHORTCUTS.keys():
             label = SHORTCUT_LABELS.get(action_id, action_id)
             key = self.shortcuts.get(action_id, DEFAULT_SHORTCUTS[action_id])
-            store.append([action_id, self.tr(label) if label in (
-                "Muet", "Lecture / Pause", "Supprimer la sélection", "Capture d'écran",
-                "Vider la playlist"
-            ) else label, key])
+            store.append([action_id, self.tr(label), key])
 
         tree = Gtk.TreeView(model=store)
         tree.set_headers_visible(True)
@@ -13662,7 +15071,7 @@ class Myostoox(Gtk.Window):
                     label = SHORTCUT_LABELS.get(action_id, action_id)
                     store.append([
                         action_id,
-                        label,
+                        self.tr(label),
                         DEFAULT_SHORTCUTS[action_id],
                     ])
                 try:
@@ -14021,8 +15430,21 @@ class Myostoox(Gtk.Window):
 
                 self.playlist.remove(iterator)
 
-                if filename in self.metadata_cache:
-                    del self.metadata_cache[filename]
+                try:
+                    if filename in self.metadata_cache:
+                        del self.metadata_cache[filename]
+                except Exception:
+                    pass
+                try:
+                    if getattr(self, "_missing_cache", None) is not None:
+                        self._missing_cache.pop(filename, None)
+                except Exception:
+                    pass
+                try:
+                    if getattr(self, "_cover_pixbuf_cache", None) is not None:
+                        self._cover_pixbuf_cache.pop(filename, None)
+                except Exception:
+                    pass
 
                 self.save_playlist()
 
@@ -14040,6 +15462,7 @@ class Myostoox(Gtk.Window):
             iterator = self.playlist.iter_next(iterator)
 
     def clear_playlist(self):
+        """Vide la playlist rapidement (détache les TreeView pendant le clear)."""
 
         if getattr(self, "bouquet_active", False):
             self.dismiss_bouquet_playlist()
@@ -14047,7 +15470,10 @@ class Myostoox(Gtk.Window):
             return
 
         self.bouquet_active = False
-        self.stop()
+        try:
+            self.stop()
+        except Exception:
+            pass
         self.current_path = None
         self.current_duration = 0
         self._last_known_position = 0.0
@@ -14060,12 +15486,63 @@ class Myostoox(Gtk.Window):
             self.time_label.set_text("0:00 • 0:00")
         except Exception:
             pass
-        self.playlist.clear()
-        self.metadata_cache.clear()
-        self.save_playlist()
 
-        self._clear_now_playing_display(reset_time=True)
-        self.status_label.set_text(self.tr("Playlist vide"))
+        # Détacher les vues pendant le clear : avec TreeModelFilter + cell_data_func
+        # (isfile, style…), vider 100+ lignes ligne par ligne est très lent.
+        detached = []
+        for attr in ("tree", "nano_playlist_tree"):
+            t = getattr(self, attr, None)
+            if t is None:
+                continue
+            try:
+                m = t.get_model()
+                t.set_model(None)
+                detached.append((t, m))
+            except Exception:
+                pass
+
+        try:
+            self.playlist.clear()
+        except Exception:
+            pass
+        try:
+            self.metadata_cache.clear()
+        except Exception:
+            pass
+        try:
+            if hasattr(self, "_missing_cache") and isinstance(self._missing_cache, dict):
+                self._missing_cache.clear()
+        except Exception:
+            pass
+
+        for t, m in detached:
+            try:
+                t.set_model(m)
+            except Exception:
+                pass
+        try:
+            if getattr(self, "playlist_filter", None) is not None:
+                self.playlist_filter.refilter()
+        except Exception:
+            pass
+
+        try:
+            self.save_playlist()
+        except Exception:
+            pass
+
+        try:
+            self._clear_now_playing_display(reset_time=True)
+        except Exception:
+            pass
+        try:
+            self.status_label.set_text(self.tr("Playlist vide"))
+        except Exception:
+            pass
+        try:
+            GLib.idle_add(lambda: (trim_memory(force=True), False)[1])
+        except Exception:
+            pass
 
     # ========================================================
     # ÉGALISEUR GRAPHIQUE
@@ -14392,6 +15869,11 @@ class Myostoox(Gtk.Window):
     def _configure_pitch_element(self):
         """Applique pitch/tempo avec rate SoundTouch forcé à 1.0 (pas d'accélération)."""
         if self.pitch is None:
+            try:
+                self.pitch = Gst.ElementFactory.make("pitch", "pitch")
+            except Exception:
+                self.pitch = None
+        if self.pitch is None:
             return
         self._snap_pitch_tempo_values()
         for prop, val in (
@@ -14407,16 +15889,34 @@ class Myostoox(Gtk.Window):
     def rebuild_audio_filter(self, force=False, restart=True):
 
         # Pitch/tempo : fichiers audio locaux uniquement (pas vidéo / flux / disques)
-        need_pitch = (
-            self.pitch is not None
-            and is_pure_audio_file(getattr(self, "current_path", None))
+        want_pitch = (
+            is_pure_audio_file(getattr(self, "current_path", None))
             and (
                 abs(self.pitch_value - 1.0) > 0.001
                 or abs(self.tempo_value - 1.0) > 0.001
             )
         )
+        if want_pitch and self.pitch is None:
+            try:
+                self.pitch = Gst.ElementFactory.make("pitch", "pitch")
+            except Exception:
+                self.pitch = None
+        need_pitch = want_pitch and self.pitch is not None
+        # En vidéo : pas de spectre dans le filter (post-messages déjà off,
+        # mais l'élément dans la chaîne coûte encore des buffers).
+        include_spectrum = (
+            self.spectrum is not None
+            and not bool(getattr(self, "current_is_video", False))
+        )
+        spectrum_active = include_spectrum and bool(
+            getattr(self, "spectrum_enabled", True)
+        )
 
-        if not force and need_pitch == self._pitch_active:
+        if (
+            not force
+            and need_pitch == self._pitch_active
+            and spectrum_active == getattr(self, "_spectrum_in_filter", True)
+        ):
             if need_pitch and self.pitch is not None:
                 self._configure_pitch_element()
             return
@@ -14435,8 +15935,11 @@ class Myostoox(Gtk.Window):
 
         elements = []
 
-        if self.spectrum is not None:
+        if include_spectrum:
             elements.append(self.spectrum)
+            self._spectrum_in_filter = True
+        else:
+            self._spectrum_in_filter = False
 
         if need_pitch and self.pitch is not None:
             elements.append(self.pitch)
@@ -15108,6 +16611,12 @@ class Myostoox(Gtk.Window):
                 self.tr("Pitch / Tempo") + " — " + self.tr("audio uniquement")
             )
             return
+
+        if self.pitch is None:
+            try:
+                self.pitch = Gst.ElementFactory.make("pitch", "pitch")
+            except Exception:
+                self.pitch = None
 
         if self.pitch is None:
             dialog = Gtk.MessageDialog(
@@ -16198,7 +17707,28 @@ class Myostoox(Gtk.Window):
         except Exception as e:
             print("nano playlist reorder:", e, file=sys.stderr)
 
-    def _resize_nano_window(self):
+    def _queue_resize_recursive(self, widget):
+        """Invalide le cache de taille d'un widget et de tous ses descendants."""
+        if widget is None:
+            return
+        try:
+            widget.queue_resize()
+        except Exception:
+            pass
+        try:
+            if isinstance(widget, Gtk.Container):
+                for child in widget.get_children():
+                    self._queue_resize_recursive(child)
+        except Exception:
+            pass
+
+    def _resize_nano_window_deferred(self):
+        """Seconde mesure, une fois le CSS nano-mode réellement appliqué."""
+        if getattr(self, "nano_player_mode", False):
+            self._resize_nano_window(_deferred=True)
+        return False
+
+    def _resize_nano_window(self, _deferred=False):
         """Redimensionne le nano au plus près des boutons (+ playlist si active)."""
         if not bool(getattr(self, "nano_player_mode", False)):
             return
@@ -16208,24 +17738,25 @@ class Myostoox(Gtk.Window):
         pl_h = row_h * 8
         pl_w = self._ui_s(180)
 
-        # Mesure réelle de la barre de contrôles
+        # Mesure réelle de la barre de contrôles.
+        # On mesure l'EventBox englobant (top_wrap) : sa taille préférée inclut
+        # déjà les marges de la barre, il ne faut donc PAS les rajouter ensuite.
         top = getattr(self, "top_bar", None)
+        measure = getattr(self, "top_bar_wrap", None) or top
         btn_w, btn_h = self._ui_s(210), self._ui_s(28)
         try:
-            if top is not None:
+            if measure is not None:
+                # Le CSS "nano-mode" vient d'être appliqué : on invalide les
+                # tailles en cache (conteneur + enfants) avant de mesurer.
+                self._queue_resize_recursive(measure)
                 # Ne PAS show_all (réafficherait seek/volume masqués)
-                top.queue_resize()
-                _min, nat = top.get_preferred_size()
+                _min, nat = measure.get_preferred_size()
                 nw = int(getattr(nat, "width", 0) or 0)
                 nh = int(getattr(nat, "height", 0) or 0)
                 if nw > 0:
-                    btn_w = nw + int(top.get_margin_start() or 0) + int(
-                        top.get_margin_end() or 0
-                    )
+                    btn_w = nw
                 if nh > 0:
-                    btn_h = nh + int(top.get_margin_top() or 0) + int(
-                        top.get_margin_bottom() or 0
-                    )
+                    btn_h = nh
         except Exception:
             pass
 
@@ -16254,6 +17785,14 @@ class Myostoox(Gtk.Window):
             self.set_size_request(max(1, w), max(1, h))
         except Exception:
             pass
+
+        # Une seule re-mesure différée : corrige le cas où le CSS n'était pas
+        # encore pleinement pris en compte lors de la première mesure.
+        if not _deferred:
+            try:
+                GLib.timeout_add(150, self._resize_nano_window_deferred)
+            except Exception:
+                pass
 
 
     def _apply_nano_banner_state(self):
@@ -16743,19 +18282,31 @@ class Myostoox(Gtk.Window):
                 )
             except Exception:
                 return
-            try:
-                self.build_css()
-            except Exception:
-                pass
-            if getattr(self, "playlist_transparency", False):
+            tid = getattr(self, "_transparency_css_timeout_id", 0) or 0
+            if tid:
                 try:
-                    self._apply_playlist_transparency()
+                    GLib.source_remove(tid)
                 except Exception:
                     pass
-            try:
-                self.save_state()
-            except Exception:
-                pass
+
+            def _apply_debounced():
+                self._transparency_css_timeout_id = 0
+                try:
+                    self.build_css()
+                except Exception:
+                    pass
+                if getattr(self, "playlist_transparency", False):
+                    try:
+                        self._apply_playlist_transparency()
+                    except Exception:
+                        pass
+                try:
+                    self.save_state()
+                except Exception:
+                    pass
+                return False
+
+            self._transparency_css_timeout_id = GLib.timeout_add(120, _apply_debounced)
 
         scale.connect("value-changed", _on_change)
         box.pack_start(scale, False, False, 0)
@@ -17996,11 +19547,11 @@ class Myostoox(Gtk.Window):
 
         # Ajout fichiers / dossier
         add_files = Gtk.MenuItem(label=self.tr("Ajouter des fichiers"))
-        add_files.connect("activate", lambda item: self.add_files())
+        add_files.connect("activate", lambda item: self._add_files_dialog())
         menu.append(add_files)
 
         add_folder = Gtk.MenuItem(label=self.tr("Ajouter un dossier"))
-        add_folder.connect("activate", lambda item: self.add_folder())
+        add_folder.connect("activate", lambda item: self._add_folder_dialog())
         menu.append(add_folder)
 
         menu.append(Gtk.SeparatorMenuItem())
@@ -19000,7 +20551,7 @@ class Myostoox(Gtk.Window):
             pass
 
         dialog.set_program_name(APP_NAME)
-        dialog.set_version("1.3.1")
+        dialog.set_version("1.3.5")
         dialog.set_comments(
             self.tr("Un lecteur audio complet en GTK3 et GStreamer")
         )
@@ -19127,6 +20678,17 @@ class Myostoox(Gtk.Window):
 
         self._app_closing = True
 
+        # Finalise l'enregistrement flux si actif (propose la sauvegarde)
+        try:
+            if getattr(self, "_recording", False):
+                self._stop_recording(show_save_dialog=True)
+        except Exception:
+            pass
+        try:
+            self._destroy_record_pipeline()
+        except Exception:
+            pass
+
         # Arrête les timers GLib (évite callbacks après destruction)
         try:
             self._stop_mini_title_scroll()
@@ -19143,6 +20705,9 @@ class Myostoox(Gtk.Window):
                         "_fs_toast_tl_timeout",
             "_fs_toast_tr_timeout",
             "_mini_title_scroll_id",
+            "_disk_meta_save_id",
+            "_selection_info_timeout_id",
+            "_transparency_css_timeout_id",
         ):
             tid = getattr(self, attr, 0) or 0
             if tid:
@@ -19184,8 +20749,14 @@ class Myostoox(Gtk.Window):
             self.save_tvs()
             self.save_bouquets()
             self.save_associations()
+            self._disk_meta_dirty = True
+            self._save_disk_meta_cache()
         except Exception as e:
             print("save on destroy:", e, file=sys.stderr)
+        try:
+            trim_memory(force=True)
+        except Exception:
+            pass
 
         # Libère le nom MPRIS2
         try:
@@ -19447,6 +21018,26 @@ def main():
 
     window = Myostoox()
     window._instance_lock_fd = lock_fd
+    try:
+        if os.environ.get("MYOSTOOX_MEMLOG", "").strip() in ("1", "true", "yes"):
+            _memlog_tick.window = window
+            GLib.timeout_add_seconds(30, _memlog_tick)
+            print("[memlog] enabled (every 30s)", flush=True)
+    except Exception:
+        pass
+    # Purge enregistrements orphelins
+    try:
+        cache_root = GLib.get_user_cache_dir()
+        rec_dir = os.path.join(cache_root or os.path.expanduser("~/.cache"), APP_NAME)
+        if os.path.isdir(rec_dir):
+            for name in os.listdir(rec_dir):
+                if name.startswith("myostoox_rec_") and name.endswith(".mp3"):
+                    try:
+                        os.unlink(os.path.join(rec_dir, name))
+                    except Exception:
+                        pass
+    except Exception:
+        pass
 
     if not window.start_single_instance_server():
         # Cas très rare : bind impossible malgré le verrou.
