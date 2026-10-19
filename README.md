@@ -1,4 +1,4 @@
-<p align="center"> <img src="logo_big2.png" alt="Myostoox logo" width="300"> </p> <p align="center"><br><br> <em>A complete audio player built with GTK3 and GStreamer... but a bit of a video player too.</em> </p><br> <p align="center"> 🎵 Music &nbsp;•&nbsp; 🎬 Video &nbsp;•&nbsp; 📻 Radio &nbsp;•&nbsp; 📺 M3U / IPTV &nbsp;•&nbsp; 💿 CD / DVD / Blu-ray </p><br><br> <p align="center"> <strong><a href="https://github.com/MilOvni/Myostoox/raw/refs/heads/main/myostoox_1.3-5_all.deb">📦 Download Myostoox 1.3.5 (.deb)</a></strong> </p><br> 
+<p align="center"> <img src="logo_big2.png" alt="Myostoox logo" width="300"> </p> <p align="center"><br><br> <em>A complete audio player built with GTK3 and GStreamer... but a bit of a video player too.</em> </p><br> <p align="center"> 🎵 Music &nbsp;•&nbsp; 🎬 Video &nbsp;•&nbsp; 📻 Radio &nbsp;•&nbsp; 📺 M3U / IPTV &nbsp;•&nbsp; 💿 CD / DVD / Blu-ray </p><br><br> <p align="center"> <strong><a href="https://github.com/MilOvni/Myostoox/raw/refs/heads/main/myostoox_1.3-7_all.deb">📦 Download Myostoox 1.3.7 (.deb)</a></strong> </p><br> 
 
 # Myostoox
 
@@ -8,7 +8,7 @@ Written in Python 3, GTK3 and GStreamer, Myostoox brings music, video, Internet 
 
 
 <p align="center">
-  <img src="screenshots/Player_01.jpg" alt="Playlist + EQ + Pitch/tempo" width="700">
+  <img src="screenshots/Player_01.jpg" alt="Playlist + EQ + Pitch/tempo + Bar color" width="700">
 </p>
 
 <br><br>
@@ -154,17 +154,17 @@ Written in Python 3, GTK3 and GStreamer, Myostoox brings music, video, Internet 
 Download the `.deb` package:
 
 <p align="center">
-  <strong><a href="https://github.com/MilOvni/Myostoox/raw/refs/heads/main/myostoox_1.3-5_all.deb">📦 Download Myostoox 1.3.5 (.deb)</a></strong>
+  <strong><a href="https://github.com/MilOvni/Myostoox/raw/refs/heads/main/myostoox_1.3-7_all.deb">📦 Download Myostoox 1.3.7 (.deb)</a></strong>
 </p>
 
-Then install it with:
+From the directory containing the deb package, open a Terminal and install the application with one of the following commands:
 
 ```bash
-sudo apt install ./myostoox_1.3-5_all.deb
+sudo apt install ./myostoox_1.3-7_all.deb
 
 # or
 
-sudo dpkg -i myostoox_1.3-5_all.deb
+sudo dpkg -i myostoox_1.3-7_all.deb
 
 ```
 
@@ -273,6 +273,80 @@ Configuration: `~/.config/Myostoox/` (playlist, state, radios, themes…).<br>
 - **Missing file**: absent tracks (unplugged USB) appear in *italics* with ⚠.
 - **Screen blanking**: automatically inhibited during **video playback** (via `org.freedesktop.ScreenSaver`).
 - **Notifications**: title / artist on every track change (if `libnotify` is installed).
+
+---
+
+## Myostoox — Keyboard Shortcuts
+
+> All shortcuts are customizable via **Menu → Keyboard shortcuts** (saved in `state.json`).
+
+## Playback
+
+| Key | Action |
+|---|---|
+| `Space` | Play / Pause (plays the selected track if it differs from the current one) |
+| `M` | Mute / Unmute |
+| `Ctrl` + `↑` | Volume up (+5 %) |
+| `Ctrl` + `↓` | Volume down (−5 %) |
+
+## Seeking
+
+| Key | Action |
+|---|---|
+| `←` / `→` | −5 s / +5 s |
+| `J` / `L` | −10 s / +10 s |
+| `Page Up` / `Page Down` | −30 s / +30 s |
+
+## Video
+
+| Key | Action |
+|---|---|
+| `F11` or `F` | Toggle fullscreen (video or lyrics) |
+| `Esc` | Exit fullscreen |
+| `F12` | Screenshot (video only) |
+
+## Playlist
+
+| Key | Action |
+|---|---|
+| `↑` / `↓` | Move selection up / down |
+| `Shift` + `↑` / `↓` | Extend selection |
+| `Delete` | Remove selected item(s) |
+| `F1` | Clear playlist |
+| `Ctrl` + `P` | Open playlist context menu |
+| `Ctrl` + `R` | Focus the search field |
+
+## Streams
+
+| Key | Action |
+|---|---|
+| `Ctrl` + `S` | Start / stop recording (radio, TV, bouquet or URL stream → MP3 320 kb/s) |
+
+## Application
+
+| Key | Action |
+|---|---|
+| `Alt` + `Q` | Quit |
+| `Ctrl` + `Alt` + `X` | Quit and factory reset |
+
+## Multimedia keys (always active, not remappable)
+
+| Key | Action |
+|---|---|
+| `XF86AudioPlay` / `XF86AudioPause` | Play / Pause |
+| `XF86AudioStop` | Stop |
+| `XF86AudioNext` / `XF86AudioPrev` | Next / Previous track |
+| `XF86AudioMute` | Mute |
+| `XF86AudioRaiseVolume` / `XF86AudioLowerVolume` | Volume ±5 % |
+
+## Notes
+
+- While a text field has focus (e.g. the search box), single-key shortcuts are disabled so you can type freely.
+  Only **Quit**, **Factory reset**, **Playlist menu**, **Focus search** and **Recording** still work there.
+- Nano-player playlist: `↑` / `↓` to navigate, `Enter` to play the selected track.
+- Mouse: double-click a playlist row to play it; double-click the video area to toggle fullscreen.
+- Playlist multi-selection: `Ctrl` + click / `Shift` + click.
+- MPRIS2 (D-Bus) is also exposed, so desktop media controls work as well.
 
 ---
 
