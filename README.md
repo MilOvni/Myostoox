@@ -111,6 +111,10 @@ Written in Python 3, GTK3 and GStreamer, Myostoox brings music, video, Internet 
 </p>
 
 <p align="center">
+  <img src="screenshots/Player_13.jpg" alt="TV" width="700">
+</p>
+
+<p align="center">
   <img src="screenshots/Player_03.jpg" alt="Full screen" width="700">
 </p>
 
