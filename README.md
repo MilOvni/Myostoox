@@ -4,7 +4,7 @@
 
 <br>Myostoox is an **audio and video player** designed primarily for *Debian XFCE Trixie* and *Lubuntu 26.04 LTS*, while also working on other Linux desktop environments using **GTK**, including **LXQt** and **XFCE**.
 
-Written in Python 3, GTK3 and GStreamer, Myostoox brings music, video, Internet radio, TV/M3U playlists and optical media together in a single application.<br><br><br><br>
+Built with Python 3, GTK3 and GStreamer, and developed with AI assistance, Myostoox brings music, video, Internet radio, TV/M3U playlists and optical media together in a single application.<br><br><br><br>
 
 
 <p align="center">
@@ -51,7 +51,7 @@ Written in Python 3, GTK3 and GStreamer, Myostoox brings music, video, Internet 
 
     • TV / IPTV M3U playlists
 
-    • Playback speed : 0.5x , 0.75x , 1.0x (normal), 1.25x, 1.50x, 1.75x
+    • Playback speed : 0.5x , 0.75x , 1.0x (normal) , 1.25x , 1.50x , 1.75x
 
     • Video playback resume support
 
@@ -427,9 +427,9 @@ To prevent the screen from turning off during a movie:
 
 ---
 
-## Author
+## Author(s)
 
-**O. FRAISSE (MilOvni)**
+**O. FRAISSE (MilOvni)** & (AI) **Grok**
 
 GitHub — MilOvni/Myostoox<br><br>
 
