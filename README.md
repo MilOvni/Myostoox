@@ -388,16 +388,6 @@ Configuration: `~/.config/Myostoox/` (playlist, state, radios, themes…).<br>
 
 ---
 
-## License / usage
-
-This project is free software distributed under the **GNU General Public License version 3** (GPL-3.0).
-
-See the [`LICENSE`](LICENSE) file for the full text.
-
-Use in accordance with local laws (DVD/Blu-ray, stream sources).
-
----
-
 ## Screen blanking / sleep under LXQt
 
 Myostoox tries to inhibit screen blanking during **video playback** via D-Bus  
@@ -411,6 +401,16 @@ To prevent the screen from turning off during a movie:
 3. Optional: install a D-Bus-compatible screensaver provider
 
 `ServiceUnknown` messages related to ScreenSaver / Notifications are silently ignored.
+
+---
+
+## License / usage
+
+This project is free software distributed under the **GNU General Public License version 3** (GPL-3.0).
+
+See the [`LICENSE`](LICENSE) file for the full text.
+
+Use in accordance with local laws (DVD/Blu-ray, stream sources).
 
 ---
 
