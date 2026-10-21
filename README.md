@@ -1,4 +1,4 @@
-<p align="center"> <img src="logo_big2.png" alt="Myostoox logo" width="300"> </p> <p align="center"><br><br> <em>A complete audio player built with GTK3 and GStreamer... but a bit of a video player too.</em> </p><br> <p align="center"> 🎵 Music &nbsp;•&nbsp; 🎬 Video &nbsp;•&nbsp; 📻 Radio &nbsp;•&nbsp; 📺 M3U / IPTV &nbsp;•&nbsp; 💿 CD / DVD / Blu-ray </p><br><br> <p align="center"> <strong><a href="https://github.com/MilOvni/Myostoox/raw/refs/heads/main/myostoox_1.3-8_all.deb">📦 Download Myostoox 1.3.8 (.deb)</a></strong> </p><br> 
+<p align="center"> <img src="logo_big2.png" alt="Myostoox logo" width="300"> </p> <p align="center"><br><br> <em>A complete audio player built with GTK3 and GStreamer... but a bit of a video player too.</em> </p><br> <p align="center"> 🎵 Music &nbsp;•&nbsp; 🎬 Video &nbsp;•&nbsp; 📻 Radio &nbsp;•&nbsp; 📺 M3U / IPTV &nbsp;•&nbsp; 💿 CD / DVD / Blu-ray </p><br><br> <p align="center"> <strong><a href="https://github.com/MilOvni/Myostoox/raw/refs/heads/main/myostoox_1.3-9_all.deb">📦 Download Myostoox 1.3.9 (.deb)</a></strong> </p><br> 
 
 # Myostoox
 
@@ -51,6 +51,12 @@ Written in Python 3, GTK3 and GStreamer, Myostoox brings music, video, Internet 
 
     • TV / IPTV M3U playlists
 
+    • Playback speed : 0.5x , 0.75x , 1.0x (normal), 1.25x, 1.50x, 1.75x
+
+    • Video playback resume support
+
+    • Export screenshots to BMP
+
     • Automatic screen-blanking inhibition during playback
 
     • Custom handling for some MKV / E-AC3 playback cases
@@ -79,17 +85,19 @@ Written in Python 3, GTK3 and GStreamer, Myostoox brings music, video, Internet 
 
 ### **Interface**
 
-    • Mini-player
+    • Mini-player (with scrolling banner)
 
     • Nano-player (with playlist)
 
     • Themes
 
+    • Hide navigation controls
+
     • Full-screen mode
 
     • Maximize mode
 
-    • Spectrum analyzer
+    • Spectrum analyzer + Color choice + Spectrum synchronization
 
     • Transparency effect
 
@@ -98,6 +106,18 @@ Written in Python 3, GTK3 and GStreamer, Myostoox brings music, video, Internet 
     • MPRIS2 integration
 
     • GTK3 interface designed for lightweight Linux desktops
+
+### **Supported Formats & Media**
+
+    • Audio: .mp3, .flac, .wav, .aac, .m4a, .wma, .ogg, .oga, .opus, .wv, .aif, .aiff, .dts
+    
+    • Video & Containers: .mp4, .mkv, .avi, .webm, .mov, .mpeg, .mpg, .ac3
+    
+    • Playlists & IPTV: .m3u, .m3u8, .pls
+    
+    • Lyrics: .lrc, .txt
+    
+    • Physical Media: Audio CDs, DVDs & Blu-rays (experimental)
 
 <br>
 <br>
@@ -158,17 +178,17 @@ Written in Python 3, GTK3 and GStreamer, Myostoox brings music, video, Internet 
 Download the `.deb` package:
 
 <p align="center">
-  <strong><a href="https://github.com/MilOvni/Myostoox/raw/refs/heads/main/myostoox_1.3-8_all.deb">📦 Download Myostoox 1.3.8 (.deb)</a></strong>
+  <strong><a href="https://github.com/MilOvni/Myostoox/raw/refs/heads/main/myostoox_1.3-9_all.deb">📦 Download Myostoox 1.3.9 (.deb)</a></strong>
 </p>
 
 From the directory containing the deb package, open a Terminal and install the application with one of the following commands:
 
 ```bash
-sudo apt install ./myostoox_1.3-8_all.deb
+sudo apt install ./myostoox_1.3-9_all.deb
 
 # or
 
-sudo dpkg -i myostoox_1.3-8_all.deb
+sudo dpkg -i myostoox_1.3-9_all.deb
 
 ```
 
