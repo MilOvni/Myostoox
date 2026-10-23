@@ -26,65 +26,62 @@
     </style>
   </defs>
 
-  <!-- Left bar -->
-  <rect x="36" y="78" width="508" height="36" rx="4" fill="url(#gold-l)"/>
-  <!-- Right bar -->
-  <rect x="656" y="78" width="508" height="36" rx="4" fill="url(#gold-r)"/>
+  <!-- Bars thinner (h=26), letters unchanged -->
+  <rect x="36" y="83" width="508" height="26" rx="3" fill="url(#gold-l)"/>
+  <rect x="656" y="83" width="508" height="26" rx="3" fill="url(#gold-r)"/>
+  <rect x="36" y="83" width="508" height="26" rx="3" fill="none" stroke="#f8efc4" stroke-width="0.7" opacity=".3"/>
+  <rect x="656" y="83" width="508" height="26" rx="3" fill="none" stroke="#f8efc4" stroke-width="0.7" opacity=".3"/>
 
-  <rect x="36" y="78" width="508" height="36" rx="4" fill="none" stroke="#f8efc4" stroke-width="0.8" opacity=".3"/>
-  <rect x="656" y="78" width="508" height="36" rx="4" fill="none" stroke="#f8efc4" stroke-width="0.8" opacity=".3"/>
-
-  <!-- Left labels (larger) -->
-  <text class="bar-text" x="290" y="103" text-anchor="middle" font-size="18">AUDIO  ·  MUSIC  ·  RADIO</text>
-
-  <!-- Right labels -->
-  <text class="bar-text" x="910" y="103" text-anchor="middle" font-size="18">IPTV  ·  CD/DVD  ·  VIDEO</text>
+  <text class="bar-text" x="290" y="102" text-anchor="middle" font-size="18">AUDIO  ·  MUSIC  ·  RADIO</text>
+  <text class="bar-text" x="910" y="102" text-anchor="middle" font-size="18">IPTV  ·  CD/DVD  ·  VIDEO</text>
 
   <!-- Medallion -->
   <circle cx="600" cy="96" r="38" fill="url(#core)"/>
   <circle cx="600" cy="96" r="38" fill="none" stroke="#f8efc4" stroke-width="2.2"/>
   <path fill="#f8efc4" d="M588 78 L620 96 L588 114 Z"/>
 
-  <!-- Pixel spectrum (larger cells) -->
-  <g transform="translate(600 158)">
-    <rect class="px" x="-66" y="-5" width="5.5" height="4.5" rx="0.4" opacity=".5"/>
-    <rect class="px" x="-58" y="-5" width="5.5" height="4.5" rx="0.4" opacity=".55"/>
-    <rect class="px" x="-58" y="-11" width="5.5" height="4.5" rx="0.4" opacity=".7"/>
-    <rect class="px" x="-50" y="-5" width="5.5" height="4.5" rx="0.4" opacity=".5"/>
-    <rect class="px" x="-42" y="-5" width="5.5" height="4.5" rx="0.4" opacity=".55"/>
-    <rect class="px" x="-42" y="-11" width="5.5" height="4.5" rx="0.4" opacity=".72"/>
-    <rect class="px" x="-42" y="-17" width="5.5" height="4.5" rx="0.4" opacity=".88"/>
-    <rect class="px" x="-34" y="-5" width="5.5" height="4.5" rx="0.4" opacity=".55"/>
-    <rect class="px" x="-34" y="-11" width="5.5" height="4.5" rx="0.4" opacity=".75"/>
-    <rect class="px" x="-26" y="-5" width="5.5" height="4.5" rx="0.4" opacity=".5"/>
-    <rect class="px" x="-26" y="-11" width="5.5" height="4.5" rx="0.4" opacity=".68"/>
-    <rect class="px" x="-26" y="-17" width="5.5" height="4.5" rx="0.4" opacity=".85"/>
-    <rect class="px" x="-26" y="-23" width="5.5" height="4.5" rx="0.4" opacity="1"/>
-    <rect class="px" x="-18" y="-5" width="5.5" height="4.5" rx="0.4" opacity=".55"/>
-    <rect class="px" x="-18" y="-11" width="5.5" height="4.5" rx="0.4" opacity=".75"/>
-    <rect class="px" x="-18" y="-17" width="5.5" height="4.5" rx="0.4" opacity=".9"/>
-    <rect class="px" x="-10" y="-5" width="5.5" height="4.5" rx="0.4" opacity=".5"/>
-    <rect class="px" x="-10" y="-11" width="5.5" height="4.5" rx="0.4" opacity=".65"/>
-    <rect class="px" x="-10" y="-17" width="5.5" height="4.5" rx="0.4" opacity=".82"/>
-    <rect class="px" x="-10" y="-23" width="5.5" height="4.5" rx="0.4" opacity=".95"/>
-    <rect class="px" x="-10" y="-29" width="5.5" height="4.5" rx="0.4" opacity="1"/>
-    <rect class="px" x="-2" y="-5" width="5.5" height="4.5" rx="0.4" opacity=".55"/>
-    <rect class="px" x="-2" y="-11" width="5.5" height="4.5" rx="0.4" opacity=".78"/>
-    <rect class="px" x="-2" y="-17" width="5.5" height="4.5" rx="0.4" opacity=".9"/>
-    <rect class="px" x="6" y="-5" width="5.5" height="4.5" rx="0.4" opacity=".5"/>
-    <rect class="px" x="6" y="-11" width="5.5" height="4.5" rx="0.4" opacity=".7"/>
-    <rect class="px" x="6" y="-17" width="5.5" height="4.5" rx="0.4" opacity=".86"/>
-    <rect class="px" x="6" y="-23" width="5.5" height="4.5" rx="0.4" opacity="1"/>
-    <rect class="px" x="14" y="-5" width="5.5" height="4.5" rx="0.4" opacity=".55"/>
-    <rect class="px" x="14" y="-11" width="5.5" height="4.5" rx="0.4" opacity=".75"/>
-    <rect class="px" x="22" y="-5" width="5.5" height="4.5" rx="0.4" opacity=".5"/>
-    <rect class="px" x="22" y="-11" width="5.5" height="4.5" rx="0.4" opacity=".68"/>
-    <rect class="px" x="22" y="-17" width="5.5" height="4.5" rx="0.4" opacity=".85"/>
-    <rect class="px" x="30" y="-5" width="5.5" height="4.5" rx="0.4" opacity=".55"/>
-    <rect class="px" x="30" y="-11" width="5.5" height="4.5" rx="0.4" opacity=".8"/>
-    <rect class="px" x="38" y="-5" width="5.5" height="4.5" rx="0.4" opacity=".5"/>
-    <rect class="px" x="46" y="-5" width="5.5" height="4.5" rx="0.4" opacity=".55"/>
-    <rect class="px" x="46" y="-11" width="5.5" height="4.5" rx="0.4" opacity=".72"/>
-    <rect class="px" x="54" y="-5" width="5.5" height="4.5" rx="0.4" opacity=".5"/>
+  <!-- Pixel spectrum — larger -->
+  <g transform="translate(600 160)">
+    <rect class="px" x="-78" y="-6" width="6.5" height="5.2" rx="0.5" opacity=".5"/>
+    <rect class="px" x="-69" y="-6" width="6.5" height="5.2" rx="0.5" opacity=".55"/>
+    <rect class="px" x="-69" y="-13" width="6.5" height="5.2" rx="0.5" opacity=".7"/>
+    <rect class="px" x="-60" y="-6" width="6.5" height="5.2" rx="0.5" opacity=".5"/>
+    <rect class="px" x="-51" y="-6" width="6.5" height="5.2" rx="0.5" opacity=".55"/>
+    <rect class="px" x="-51" y="-13" width="6.5" height="5.2" rx="0.5" opacity=".72"/>
+    <rect class="px" x="-51" y="-20" width="6.5" height="5.2" rx="0.5" opacity=".88"/>
+    <rect class="px" x="-42" y="-6" width="6.5" height="5.2" rx="0.5" opacity=".55"/>
+    <rect class="px" x="-42" y="-13" width="6.5" height="5.2" rx="0.5" opacity=".75"/>
+    <rect class="px" x="-33" y="-6" width="6.5" height="5.2" rx="0.5" opacity=".5"/>
+    <rect class="px" x="-33" y="-13" width="6.5" height="5.2" rx="0.5" opacity=".68"/>
+    <rect class="px" x="-33" y="-20" width="6.5" height="5.2" rx="0.5" opacity=".85"/>
+    <rect class="px" x="-33" y="-27" width="6.5" height="5.2" rx="0.5" opacity="1"/>
+    <rect class="px" x="-24" y="-6" width="6.5" height="5.2" rx="0.5" opacity=".55"/>
+    <rect class="px" x="-24" y="-13" width="6.5" height="5.2" rx="0.5" opacity=".75"/>
+    <rect class="px" x="-24" y="-20" width="6.5" height="5.2" rx="0.5" opacity=".9"/>
+    <rect class="px" x="-15" y="-6" width="6.5" height="5.2" rx="0.5" opacity=".5"/>
+    <rect class="px" x="-15" y="-13" width="6.5" height="5.2" rx="0.5" opacity=".65"/>
+    <rect class="px" x="-15" y="-20" width="6.5" height="5.2" rx="0.5" opacity=".82"/>
+    <rect class="px" x="-15" y="-27" width="6.5" height="5.2" rx="0.5" opacity=".95"/>
+    <rect class="px" x="-15" y="-34" width="6.5" height="5.2" rx="0.5" opacity="1"/>
+    <rect class="px" x="-6" y="-6" width="6.5" height="5.2" rx="0.5" opacity=".55"/>
+    <rect class="px" x="-6" y="-13" width="6.5" height="5.2" rx="0.5" opacity=".78"/>
+    <rect class="px" x="-6" y="-20" width="6.5" height="5.2" rx="0.5" opacity=".9"/>
+    <rect class="px" x="3" y="-6" width="6.5" height="5.2" rx="0.5" opacity=".5"/>
+    <rect class="px" x="3" y="-13" width="6.5" height="5.2" rx="0.5" opacity=".7"/>
+    <rect class="px" x="3" y="-20" width="6.5" height="5.2" rx="0.5" opacity=".86"/>
+    <rect class="px" x="3" y="-27" width="6.5" height="5.2" rx="0.5" opacity="1"/>
+    <rect class="px" x="12" y="-6" width="6.5" height="5.2" rx="0.5" opacity=".55"/>
+    <rect class="px" x="12" y="-13" width="6.5" height="5.2" rx="0.5" opacity=".75"/>
+    <rect class="px" x="21" y="-6" width="6.5" height="5.2" rx="0.5" opacity=".5"/>
+    <rect class="px" x="21" y="-13" width="6.5" height="5.2" rx="0.5" opacity=".68"/>
+    <rect class="px" x="21" y="-20" width="6.5" height="5.2" rx="0.5" opacity=".85"/>
+    <rect class="px" x="30" y="-6" width="6.5" height="5.2" rx="0.5" opacity=".55"/>
+    <rect class="px" x="30" y="-13" width="6.5" height="5.2" rx="0.5" opacity=".8"/>
+    <rect class="px" x="39" y="-6" width="6.5" height="5.2" rx="0.5" opacity=".5"/>
+    <rect class="px" x="48" y="-6" width="6.5" height="5.2" rx="0.5" opacity=".55"/>
+    <rect class="px" x="48" y="-13" width="6.5" height="5.2" rx="0.5" opacity=".72"/>
+    <rect class="px" x="57" y="-6" width="6.5" height="5.2" rx="0.5" opacity=".5"/>
+    <rect class="px" x="66" y="-6" width="6.5" height="5.2" rx="0.5" opacity=".55"/>
+    <rect class="px" x="66" y="-13" width="6.5" height="5.2" rx="0.5" opacity=".68"/>
   </g>
 </svg>
