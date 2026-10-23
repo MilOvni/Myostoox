@@ -1,11 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="240" viewBox="0 0 1200 240" role="img" aria-labelledby="title desc">
-  <title id="title">Myostoox — audio and video</title>
-  <desc id="desc">Gold ribbon on black: AUDIO and VIDEO drawn toward a central play mark. Secondary line: music, radio, iptv, disc.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="220" viewBox="0 0 1200 220" role="img" aria-labelledby="title desc">
+  <title id="title">Myostoox — audio, music, radio · iptv, cd/dvd, video</title>
+  <desc id="desc">Two thin gold bars flanking a central play medallion with a pixel spectrum, on black.</desc>
   <defs>
-    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="gold-l" x1="0%" y1="0%" x2="100%" y2="0%">
       <stop offset="0%" stop-color="#c9a34a"/>
-      <stop offset="50%" stop-color="#a67e1f"/>
-      <stop offset="100%" stop-color="#7d5c14"/>
+      <stop offset="100%" stop-color="#a67e1f"/>
+    </linearGradient>
+    <linearGradient id="gold-r" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#a67e1f"/>
+      <stop offset="100%" stop-color="#c9a34a"/>
     </linearGradient>
     <radialGradient id="core" cx="50%" cy="42%" r="58%">
       <stop offset="0%" stop-color="#e8cd72"/>
@@ -13,82 +16,40 @@
       <stop offset="100%" stop-color="#5a420e"/>
     </radialGradient>
     <style>
-      .word {
+      .bar-text {
         font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-weight: 800;
+        font-weight: 700;
         fill: #f8efc4;
-        letter-spacing: 0.04em;
-      }
-      .sub {
-        font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-weight: 600;
-        fill: #f8efc4;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
+        letter-spacing: 0.14em;
       }
       .px { fill: #f8efc4; }
     </style>
   </defs>
 
-  <rect width="1200" height="240" fill="#0a0a0a"/>
+  <rect width="1200" height="220" fill="#0a0a0a"/>
 
-  <!-- Ribbon -->
-  <path fill="url(#gold)" d="
-    M 18 32
-    C 160 20, 320 70, 470 100
-    C 530 112, 570 118, 600 118
-    C 630 118, 670 112, 730 100
-    C 880 70, 1040 20, 1182 32
-    L 1182 208
-    C 1040 220, 880 170, 730 140
-    C 670 128, 630 122, 600 122
-    C 570 122, 530 128, 470 140
-    C 320 170, 160 220, 18 208
-    Z"/>
-  <path fill="#0a0a0a" d="
-    M 42 52
-    C 170 42, 330 84, 475 110
-    C 530 120, 570 124, 600 124
-    C 630 124, 670 120, 725 110
-    C 870 84, 1030 42, 1158 52
-    L 1158 188
-    C 1030 198, 870 156, 725 130
-    C 670 120, 630 118, 600 118
-    C 570 118, 530 120, 475 130
-    C 330 156, 170 198, 42 188
-    Z"/>
+  <!-- Left bar (thin, from outer edge to medallion) -->
+  <rect x="48" y="88" width="500" height="28" rx="3" fill="url(#gold-l)"/>
+  <!-- Right bar -->
+  <rect x="652" y="88" width="500" height="28" rx="3" fill="url(#gold-r)"/>
 
-  <!-- Soft rails -->
-  <path d="M56 64 C200 78, 380 108, 520 120" fill="none" stroke="#f8efc4" stroke-width="1.1" opacity=".35" stroke-linecap="round"/>
-  <path d="M56 176 C200 162, 380 132, 520 120" fill="none" stroke="#f8efc4" stroke-width="1.1" opacity=".35" stroke-linecap="round"/>
-  <path d="M1144 64 C1000 78, 820 108, 680 120" fill="none" stroke="#f8efc4" stroke-width="1.1" opacity=".35" stroke-linecap="round"/>
-  <path d="M1144 176 C1000 162, 820 132, 680 120" fill="none" stroke="#f8efc4" stroke-width="1.1" opacity=".35" stroke-linecap="round"/>
+  <!-- Hairline cream edges on the bars -->
+  <rect x="48" y="88" width="500" height="28" rx="3" fill="none" stroke="#f8efc4" stroke-width="0.75" opacity=".25"/>
+  <rect x="652" y="88" width="500" height="28" rx="3" fill="none" stroke="#f8efc4" stroke-width="0.75" opacity=".25"/>
 
-  <!-- AUDIO — size falls toward the waist -->
-  <g class="word" text-anchor="middle">
-    <text x="95"  y="128" font-size="42">A</text>
-    <text x="132" y="129" font-size="38">U</text>
-    <text x="168" y="130" font-size="34">D</text>
-    <text x="200" y="131" font-size="30">I</text>
-    <text x="228" y="132" font-size="26">O</text>
-  </g>
+  <!-- Left labels -->
+  <text class="bar-text" x="298" y="108" text-anchor="middle" font-size="15">AUDIO  ·  MUSIC  ·  RADIO</text>
 
-  <!-- VIDEO — size rises outward -->
-  <g class="word" text-anchor="middle">
-    <text x="972"  y="132" font-size="26">V</text>
-    <text x="1002" y="131" font-size="30">I</text>
-    <text x="1034" y="130" font-size="34">D</text>
-    <text x="1070" y="129" font-size="38">E</text>
-    <text x="1108" y="128" font-size="42">O</text>
-  </g>
+  <!-- Right labels -->
+  <text class="bar-text" x="902" y="108" text-anchor="middle" font-size="15">IPTV  ·  CD/DVD  ·  VIDEO</text>
 
-  <!-- Center medallion -->
-  <circle cx="600" cy="120" r="36" fill="url(#core)"/>
-  <circle cx="600" cy="120" r="36" fill="none" stroke="#f8efc4" stroke-width="2"/>
-  <path fill="#f8efc4" d="M589 104 L618 120 L589 136 Z"/>
+  <!-- Medallion (unchanged spirit) -->
+  <circle cx="600" cy="102" r="36" fill="url(#core)"/>
+  <circle cx="600" cy="102" r="36" fill="none" stroke="#f8efc4" stroke-width="2"/>
+  <path fill="#f8efc4" d="M589 86 L618 102 L589 118 Z"/>
 
-  <!-- Pixel spectrum tucked under the mark, still in the visual field -->
-  <g transform="translate(600 168)">
+  <!-- Pixel spectrum under the medallion -->
+  <g transform="translate(600 152)">
     <rect class="px" x="-48" y="-4" width="4" height="3.5" rx="0.3" opacity=".55"/>
     <rect class="px" x="-42" y="-4" width="4" height="3.5" rx="0.3" opacity=".6"/>
     <rect class="px" x="-42" y="-8.5" width="4" height="3.5" rx="0.3" opacity=".75"/>
@@ -129,7 +90,4 @@
     <rect class="px" x="36" y="-8.5" width="4" height="3.5" rx="0.3" opacity=".75"/>
     <rect class="px" x="42" y="-4" width="4" height="3.5" rx="0.3" opacity=".55"/>
   </g>
-
-  <!-- Secondary capabilities — one calm line under the ribbon -->
-  <text class="sub" x="600" y="222" text-anchor="middle" font-size="13" opacity=".72">music  ·  radio  ·  iptv  ·  cd / dvd</text>
 </svg>
