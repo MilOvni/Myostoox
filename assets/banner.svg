@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="240" viewBox="0 0 1200 240" role="img" aria-labelledby="title desc">
+  <title id="title">Myostoox — music, video, radio, IPTV, optical media</title>
+  <desc id="desc">Amber hourglass ribbon on black: capabilities drawn inward toward a central play mark and spectrum.</desc>
+  <defs>
+    <style>
+      .a { fill: #a67e1c; }
+      .w { fill: #F4F5F6; }
+      .m { fill: #9AA0A6; }
+      .t { font-family: "Arial Narrow","Roboto Condensed","Liberation Sans Narrow",sans-serif; font-weight: 800; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="240" fill="#111111"/>
+
+  <!-- Ribbon -->
+  <path class="a" d="M20 22 L600 106 L1180 22 L1180 218 L600 134 L20 218 Z"/>
+  <path fill="#111111" d="M40 42 L600 110 L1160 42 L1160 198 L600 130 L40 198 Z"/>
+
+  <!-- Soft inner rails -->
+  <path d="M54 54 L470 96 L545 109" fill="none" stroke="#F4F5F6" stroke-width="1.25" opacity=".55"/>
+  <path d="M54 186 L470 144 L545 131" fill="none" stroke="#F4F5F6" stroke-width="1.25" opacity=".55"/>
+  <path d="M1146 54 L730 96 L655 109" fill="none" stroke="#F4F5F6" stroke-width="1.25" opacity=".55"/>
+  <path d="M1146 186 L730 144 L655 131" fill="none" stroke="#F4F5F6" stroke-width="1.25" opacity=".55"/>
+
+  <!-- AUDIO (outer → center) -->
+  <g class="t w" text-anchor="middle">
+    <text x="86"  y="128" font-size="30">A</text>
+    <text x="113" y="127" font-size="27">U</text>
+    <text x="138" y="126" font-size="24">D</text>
+    <text x="160" y="125" font-size="21">I</text>
+    <text x="178" y="124" font-size="18">O</text>
+  </g>
+  <circle cx="202" cy="121" r="2.3" class="a"/>
+
+  <!-- MUSIC -->
+  <g class="t w" text-anchor="middle">
+    <text x="234" y="126" font-size="18">M</text>
+    <text x="253" y="125" font-size="16">U</text>
+    <text x="270" y="124" font-size="14">S</text>
+    <text x="284" y="123" font-size="13">I</text>
+    <text x="296" y="122" font-size="11">C</text>
+  </g>
+  <circle cx="314" cy="120" r="2" class="a"/>
+
+  <!-- RADIO -->
+  <g class="t w" text-anchor="middle">
+    <text x="340" y="124" font-size="14">R</text>
+    <text x="354" y="123" font-size="13">A</text>
+    <text x="367" y="122" font-size="11">D</text>
+    <text x="378" y="121" font-size="10">I</text>
+    <text x="388" y="120" font-size="9">O</text>
+  </g>
+
+  <!-- Center: play + spectrum signature -->
+  <circle cx="600" cy="116" r="26" fill="#111111" stroke="#F4F5F6" stroke-width="2.2"/>
+  <path class="a" d="M591 102 L614 116 L591 130 Z"/>
+  <!-- mini spectrum under the mark -->
+  <g transform="translate(600 156)" class="a">
+    <rect x="-28" y="-6" width="3" height="8" rx="1"/>
+    <rect x="-21" y="-11" width="3" height="13" rx="1"/>
+    <rect x="-14" y="-4" width="3" height="6" rx="1"/>
+    <rect x="-7" y="-14" width="3" height="16" rx="1"/>
+    <rect x="0"  y="-8" width="3" height="10" rx="1"/>
+    <rect x="7"  y="-16" width="3" height="18" rx="1"/>
+    <rect x="14" y="-5" width="3" height="7" rx="1"/>
+    <rect x="21" y="-12" width="3" height="14" rx="1"/>
+  </g>
+
+  <!-- IPTV (center → outer) -->
+  <g class="t w" text-anchor="middle">
+    <text x="812" y="120" font-size="9">I</text>
+    <text x="822" y="121" font-size="10">P</text>
+    <text x="834" y="122" font-size="11">T</text>
+    <text x="847" y="123" font-size="13">V</text>
+  </g>
+  <circle cx="868" cy="120" r="2" class="a"/>
+
+  <!-- CD/DVD -->
+  <g class="t w" text-anchor="middle">
+    <text x="892" y="122" font-size="11">C</text>
+    <text x="905" y="123" font-size="12">D</text>
+    <text x="917" y="124" font-size="11" class="a">/</text>
+    <text x="930" y="125" font-size="14">D</text>
+    <text x="945" y="126" font-size="16">V</text>
+    <text x="961" y="127" font-size="18">D</text>
+  </g>
+  <circle cx="984" cy="121" r="2.3" class="a"/>
+
+  <!-- VIDEO -->
+  <g class="t w" text-anchor="middle">
+    <text x="1016" y="124" font-size="18">V</text>
+    <text x="1036" y="125" font-size="21">I</text>
+    <text x="1055" y="126" font-size="24">D</text>
+    <text x="1080" y="127" font-size="27">E</text>
+    <text x="1108" y="128" font-size="30">O</text>
+  </g>
+</svg>
