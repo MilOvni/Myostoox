@@ -1,182 +1,135 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="260" viewBox="0 0 1200 260" role="img" aria-labelledby="title desc">
-  <title id="title">Myostoox</title>
-  <desc id="desc">Gold brush ribbon on black — music, radio, IPTV, disc and video converging on a pixel spectrum.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="240" viewBox="0 0 1200 240" role="img" aria-labelledby="title desc">
+  <title id="title">Myostoox — audio and video</title>
+  <desc id="desc">Gold ribbon on black: AUDIO and VIDEO drawn toward a central play mark. Secondary line: music, radio, iptv, disc.</desc>
   <defs>
     <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#c9a34a"/>
-      <stop offset="45%" stop-color="#a67e1f"/>
+      <stop offset="50%" stop-color="#a67e1f"/>
       <stop offset="100%" stop-color="#7d5c14"/>
     </linearGradient>
-    <linearGradient id="gold-soft" x1="0%" y1="50%" x2="100%" y2="50%">
-      <stop offset="0%" stop-color="#a67e1f" stop-opacity="0"/>
-      <stop offset="50%" stop-color="#a67e1f" stop-opacity=".3"/>
-      <stop offset="100%" stop-color="#a67e1f" stop-opacity="0"/>
-    </linearGradient>
-    <radialGradient id="core" cx="50%" cy="45%" r="55%">
-      <stop offset="0%" stop-color="#e2c56a"/>
+    <radialGradient id="core" cx="50%" cy="42%" r="58%">
+      <stop offset="0%" stop-color="#e8cd72"/>
       <stop offset="55%" stop-color="#a67e1f"/>
-      <stop offset="100%" stop-color="#5c440e"/>
+      <stop offset="100%" stop-color="#5a420e"/>
     </radialGradient>
     <style>
-      .t {
-        font-family: "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", serif;
-        font-weight: 700;
+      .word {
+        font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-weight: 800;
         fill: #f8efc4;
+        letter-spacing: 0.04em;
       }
-      .dot { fill: #c9a34a; }
+      .sub {
+        font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-weight: 600;
+        fill: #f8efc4;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
       .px { fill: #f8efc4; }
     </style>
   </defs>
 
-  <rect width="1200" height="260" fill="#0a0a0a"/>
-  <ellipse cx="600" cy="128" rx="200" ry="64" fill="url(#gold-soft)"/>
+  <rect width="1200" height="240" fill="#0a0a0a"/>
 
+  <!-- Ribbon -->
   <path fill="url(#gold)" d="
-    M 12 36
-    C 90 22, 200 48, 310 78
-    C 400 98, 500 112, 600 116
-    C 700 112, 800 98, 890 78
-    C 1000 48, 1110 22, 1188 36
-    L 1188 224
-    C 1110 238, 1000 212, 890 182
-    C 800 162, 700 148, 600 144
-    C 500 148, 400 162, 310 182
-    C 200 212, 90 238, 12 224
+    M 18 32
+    C 160 20, 320 70, 470 100
+    C 530 112, 570 118, 600 118
+    C 630 118, 670 112, 730 100
+    C 880 70, 1040 20, 1182 32
+    L 1182 208
+    C 1040 220, 880 170, 730 140
+    C 670 128, 630 122, 600 122
+    C 570 122, 530 128, 470 140
+    C 320 170, 160 220, 18 208
     Z"/>
   <path fill="#0a0a0a" d="
-    M 38 54
-    C 110 42, 220 64, 320 92
-    C 410 110, 510 120, 600 124
-    C 690 120, 790 110, 880 92
-    C 980 64, 1090 42, 1162 54
-    L 1162 206
-    C 1090 218, 980 196, 880 168
-    C 790 150, 690 140, 600 136
-    C 510 140, 410 150, 320 168
-    C 220 196, 110 218, 38 206
+    M 42 52
+    C 170 42, 330 84, 475 110
+    C 530 120, 570 124, 600 124
+    C 630 124, 670 120, 725 110
+    C 870 84, 1030 42, 1158 52
+    L 1158 188
+    C 1030 198, 870 156, 725 130
+    C 670 120, 630 118, 600 118
+    C 570 118, 530 120, 475 130
+    C 330 156, 170 198, 42 188
     Z"/>
 
-  <path d="M50 66 C180 78, 360 108, 520 120" fill="none" stroke="#f8efc4" stroke-width="1.15" opacity=".4" stroke-linecap="round"/>
-  <path d="M50 194 C180 182, 360 152, 520 140" fill="none" stroke="#f8efc4" stroke-width="1.15" opacity=".4" stroke-linecap="round"/>
-  <path d="M1150 66 C1020 78, 840 108, 680 120" fill="none" stroke="#f8efc4" stroke-width="1.15" opacity=".4" stroke-linecap="round"/>
-  <path d="M1150 194 C1020 182, 840 152, 680 140" fill="none" stroke="#f8efc4" stroke-width="1.15" opacity=".4" stroke-linecap="round"/>
+  <!-- Soft rails -->
+  <path d="M56 64 C200 78, 380 108, 520 120" fill="none" stroke="#f8efc4" stroke-width="1.1" opacity=".35" stroke-linecap="round"/>
+  <path d="M56 176 C200 162, 380 132, 520 120" fill="none" stroke="#f8efc4" stroke-width="1.1" opacity=".35" stroke-linecap="round"/>
+  <path d="M1144 64 C1000 78, 820 108, 680 120" fill="none" stroke="#f8efc4" stroke-width="1.1" opacity=".35" stroke-linecap="round"/>
+  <path d="M1144 176 C1000 162, 820 132, 680 120" fill="none" stroke="#f8efc4" stroke-width="1.1" opacity=".35" stroke-linecap="round"/>
 
-  <!-- AUDIO — baseline descends toward center -->
-  <g class="t" text-anchor="middle">
-    <text x="72"  y="126" font-size="34">A</text>
-    <text x="100" y="128" font-size="30">U</text>
-    <text x="126" y="130" font-size="26">D</text>
-    <text x="149" y="132" font-size="22">I</text>
-    <text x="168" y="134" font-size="18">O</text>
-  </g>
-  <circle class="dot" cx="188" cy="132" r="2.2"/>
-
-  <!-- MUSIC -->
-  <g class="t" text-anchor="middle">
-    <text x="218" y="128" font-size="20">M</text>
-    <text x="238" y="130" font-size="17">U</text>
-    <text x="255" y="132" font-size="15">S</text>
-    <text x="270" y="133" font-size="13">I</text>
-    <text x="282" y="135" font-size="11">C</text>
-  </g>
-  <circle class="dot" cx="298" cy="133" r="1.8"/>
-
-  <!-- RADIO -->
-  <g class="t" text-anchor="middle">
-    <text x="322" y="130" font-size="14">R</text>
-    <text x="336" y="132" font-size="12">A</text>
-    <text x="348" y="133" font-size="11">D</text>
-    <text x="359" y="135" font-size="10">I</text>
-    <text x="369" y="136" font-size="9">O</text>
+  <!-- AUDIO — size falls toward the waist -->
+  <g class="word" text-anchor="middle">
+    <text x="95"  y="128" font-size="42">A</text>
+    <text x="132" y="129" font-size="38">U</text>
+    <text x="168" y="130" font-size="34">D</text>
+    <text x="200" y="131" font-size="30">I</text>
+    <text x="228" y="132" font-size="26">O</text>
   </g>
 
-  <!-- Medallion -->
-  <circle cx="600" cy="124" r="32" fill="url(#core)"/>
-  <circle cx="600" cy="124" r="32" fill="none" stroke="#f8efc4" stroke-width="1.8" opacity=".9"/>
-  <circle cx="600" cy="124" r="26" fill="none" stroke="#f8efc4" stroke-width="0.6" opacity=".3"/>
-  <path fill="#f8efc4" d="M591 110 L616 124 L591 138 Z"/>
+  <!-- VIDEO — size rises outward -->
+  <g class="word" text-anchor="middle">
+    <text x="972"  y="132" font-size="26">V</text>
+    <text x="1002" y="131" font-size="30">I</text>
+    <text x="1034" y="130" font-size="34">D</text>
+    <text x="1070" y="129" font-size="38">E</text>
+    <text x="1108" y="128" font-size="42">O</text>
+  </g>
 
-  <!-- Pixel spectrum -->
+  <!-- Center medallion -->
+  <circle cx="600" cy="120" r="36" fill="url(#core)"/>
+  <circle cx="600" cy="120" r="36" fill="none" stroke="#f8efc4" stroke-width="2"/>
+  <path fill="#f8efc4" d="M589 104 L618 120 L589 136 Z"/>
+
+  <!-- Pixel spectrum tucked under the mark, still in the visual field -->
   <g transform="translate(600 168)">
-    <rect class="px" x="-59" y="-5" width="4.5" height="4" rx="0.4" opacity=".7"/>
-    <rect class="px" x="-53" y="-5" width="4.5" height="4" rx="0.4" opacity=".7"/>
-    <rect class="px" x="-53" y="-10" width="4.5" height="4" rx="0.4" opacity=".85"/>
-    <rect class="px" x="-47" y="-5" width="4.5" height="4" rx="0.4" opacity=".65"/>
-    <rect class="px" x="-41" y="-5" width="4.5" height="4" rx="0.4" opacity=".7"/>
-    <rect class="px" x="-41" y="-10" width="4.5" height="4" rx="0.4" opacity=".82"/>
-    <rect class="px" x="-41" y="-15" width="4.5" height="4" rx="0.4" opacity=".95"/>
-    <rect class="px" x="-35" y="-5" width="4.5" height="4" rx="0.4" opacity=".7"/>
-    <rect class="px" x="-35" y="-10" width="4.5" height="4" rx="0.4" opacity=".88"/>
-    <rect class="px" x="-29" y="-5" width="4.5" height="4" rx="0.4" opacity=".68"/>
-    <rect class="px" x="-29" y="-10" width="4.5" height="4" rx="0.4" opacity=".78"/>
-    <rect class="px" x="-29" y="-15" width="4.5" height="4" rx="0.4" opacity=".9"/>
-    <rect class="px" x="-29" y="-20" width="4.5" height="4" rx="0.4" opacity="1"/>
-    <rect class="px" x="-23" y="-5" width="4.5" height="4" rx="0.4" opacity=".7"/>
-    <rect class="px" x="-23" y="-10" width="4.5" height="4" rx="0.4" opacity=".84"/>
-    <rect class="px" x="-23" y="-15" width="4.5" height="4" rx="0.4" opacity=".95"/>
-    <rect class="px" x="-17" y="-5" width="4.5" height="4" rx="0.4" opacity=".65"/>
-    <rect class="px" x="-17" y="-10" width="4.5" height="4" rx="0.4" opacity=".75"/>
-    <rect class="px" x="-17" y="-15" width="4.5" height="4" rx="0.4" opacity=".85"/>
-    <rect class="px" x="-17" y="-20" width="4.5" height="4" rx="0.4" opacity=".95"/>
-    <rect class="px" x="-17" y="-25" width="4.5" height="4" rx="0.4" opacity="1"/>
-    <rect class="px" x="-11" y="-5" width="4.5" height="4" rx="0.4" opacity=".68"/>
-    <rect class="px" x="-11" y="-10" width="4.5" height="4" rx="0.4" opacity=".78"/>
-    <rect class="px" x="-11" y="-15" width="4.5" height="4" rx="0.4" opacity=".9"/>
-    <rect class="px" x="-11" y="-20" width="4.5" height="4" rx="0.4" opacity="1"/>
-    <rect class="px" x="-5" y="-5" width="4.5" height="4" rx="0.4" opacity=".7"/>
-    <rect class="px" x="-5" y="-10" width="4.5" height="4" rx="0.4" opacity=".84"/>
-    <rect class="px" x="-5" y="-15" width="4.5" height="4" rx="0.4" opacity=".95"/>
-    <rect class="px" x="1" y="-5" width="4.5" height="4" rx="0.4" opacity=".65"/>
-    <rect class="px" x="1" y="-10" width="4.5" height="4" rx="0.4" opacity=".75"/>
-    <rect class="px" x="1" y="-15" width="4.5" height="4" rx="0.4" opacity=".85"/>
-    <rect class="px" x="1" y="-20" width="4.5" height="4" rx="0.4" opacity=".95"/>
-    <rect class="px" x="1" y="-25" width="4.5" height="4" rx="0.4" opacity="1"/>
-    <rect class="px" x="7" y="-5" width="4.5" height="4" rx="0.4" opacity=".7"/>
-    <rect class="px" x="7" y="-10" width="4.5" height="4" rx="0.4" opacity=".88"/>
-    <rect class="px" x="13" y="-5" width="4.5" height="4" rx="0.4" opacity=".68"/>
-    <rect class="px" x="13" y="-10" width="4.5" height="4" rx="0.4" opacity=".78"/>
-    <rect class="px" x="13" y="-15" width="4.5" height="4" rx="0.4" opacity=".9"/>
-    <rect class="px" x="13" y="-20" width="4.5" height="4" rx="0.4" opacity="1"/>
-    <rect class="px" x="19" y="-5" width="4.5" height="4" rx="0.4" opacity=".7"/>
-    <rect class="px" x="19" y="-10" width="4.5" height="4" rx="0.4" opacity=".84"/>
-    <rect class="px" x="19" y="-15" width="4.5" height="4" rx="0.4" opacity=".95"/>
-    <rect class="px" x="25" y="-5" width="4.5" height="4" rx="0.4" opacity=".7"/>
-    <rect class="px" x="25" y="-10" width="4.5" height="4" rx="0.4" opacity=".88"/>
-    <rect class="px" x="31" y="-5" width="4.5" height="4" rx="0.4" opacity=".65"/>
-    <rect class="px" x="37" y="-5" width="4.5" height="4" rx="0.4" opacity=".7"/>
-    <rect class="px" x="37" y="-10" width="4.5" height="4" rx="0.4" opacity=".82"/>
-    <rect class="px" x="37" y="-15" width="4.5" height="4" rx="0.4" opacity=".95"/>
-    <rect class="px" x="43" y="-5" width="4.5" height="4" rx="0.4" opacity=".7"/>
-    <rect class="px" x="43" y="-10" width="4.5" height="4" rx="0.4" opacity=".85"/>
-    <rect class="px" x="49" y="-5" width="4.5" height="4" rx="0.4" opacity=".65"/>
+    <rect class="px" x="-48" y="-4" width="4" height="3.5" rx="0.3" opacity=".55"/>
+    <rect class="px" x="-42" y="-4" width="4" height="3.5" rx="0.3" opacity=".6"/>
+    <rect class="px" x="-42" y="-8.5" width="4" height="3.5" rx="0.3" opacity=".75"/>
+    <rect class="px" x="-36" y="-4" width="4" height="3.5" rx="0.3" opacity=".55"/>
+    <rect class="px" x="-30" y="-4" width="4" height="3.5" rx="0.3" opacity=".6"/>
+    <rect class="px" x="-30" y="-8.5" width="4" height="3.5" rx="0.3" opacity=".78"/>
+    <rect class="px" x="-30" y="-13" width="4" height="3.5" rx="0.3" opacity=".9"/>
+    <rect class="px" x="-24" y="-4" width="4" height="3.5" rx="0.3" opacity=".6"/>
+    <rect class="px" x="-24" y="-8.5" width="4" height="3.5" rx="0.3" opacity=".8"/>
+    <rect class="px" x="-18" y="-4" width="4" height="3.5" rx="0.3" opacity=".55"/>
+    <rect class="px" x="-18" y="-8.5" width="4" height="3.5" rx="0.3" opacity=".7"/>
+    <rect class="px" x="-18" y="-13" width="4" height="3.5" rx="0.3" opacity=".85"/>
+    <rect class="px" x="-18" y="-17.5" width="4" height="3.5" rx="0.3" opacity="1"/>
+    <rect class="px" x="-12" y="-4" width="4" height="3.5" rx="0.3" opacity=".6"/>
+    <rect class="px" x="-12" y="-8.5" width="4" height="3.5" rx="0.3" opacity=".78"/>
+    <rect class="px" x="-12" y="-13" width="4" height="3.5" rx="0.3" opacity=".92"/>
+    <rect class="px" x="-6" y="-4" width="4" height="3.5" rx="0.3" opacity=".55"/>
+    <rect class="px" x="-6" y="-8.5" width="4" height="3.5" rx="0.3" opacity=".7"/>
+    <rect class="px" x="-6" y="-13" width="4" height="3.5" rx="0.3" opacity=".85"/>
+    <rect class="px" x="-6" y="-17.5" width="4" height="3.5" rx="0.3" opacity=".95"/>
+    <rect class="px" x="-6" y="-22" width="4" height="3.5" rx="0.3" opacity="1"/>
+    <rect class="px" x="0" y="-4" width="4" height="3.5" rx="0.3" opacity=".6"/>
+    <rect class="px" x="0" y="-8.5" width="4" height="3.5" rx="0.3" opacity=".8"/>
+    <rect class="px" x="0" y="-13" width="4" height="3.5" rx="0.3" opacity=".92"/>
+    <rect class="px" x="6" y="-4" width="4" height="3.5" rx="0.3" opacity=".55"/>
+    <rect class="px" x="6" y="-8.5" width="4" height="3.5" rx="0.3" opacity=".72"/>
+    <rect class="px" x="6" y="-13" width="4" height="3.5" rx="0.3" opacity=".88"/>
+    <rect class="px" x="6" y="-17.5" width="4" height="3.5" rx="0.3" opacity="1"/>
+    <rect class="px" x="12" y="-4" width="4" height="3.5" rx="0.3" opacity=".6"/>
+    <rect class="px" x="12" y="-8.5" width="4" height="3.5" rx="0.3" opacity=".78"/>
+    <rect class="px" x="18" y="-4" width="4" height="3.5" rx="0.3" opacity=".55"/>
+    <rect class="px" x="18" y="-8.5" width="4" height="3.5" rx="0.3" opacity=".7"/>
+    <rect class="px" x="18" y="-13" width="4" height="3.5" rx="0.3" opacity=".88"/>
+    <rect class="px" x="24" y="-4" width="4" height="3.5" rx="0.3" opacity=".6"/>
+    <rect class="px" x="24" y="-8.5" width="4" height="3.5" rx="0.3" opacity=".82"/>
+    <rect class="px" x="30" y="-4" width="4" height="3.5" rx="0.3" opacity=".55"/>
+    <rect class="px" x="36" y="-4" width="4" height="3.5" rx="0.3" opacity=".6"/>
+    <rect class="px" x="36" y="-8.5" width="4" height="3.5" rx="0.3" opacity=".75"/>
+    <rect class="px" x="42" y="-4" width="4" height="3.5" rx="0.3" opacity=".55"/>
   </g>
 
-  <!-- IPTV — nearer center = lower -->
-  <g class="t" text-anchor="middle">
-    <text x="831" y="136" font-size="9">I</text>
-    <text x="841" y="134" font-size="10">P</text>
-    <text x="853" y="132" font-size="11">T</text>
-    <text x="866" y="130" font-size="13">V</text>
-  </g>
-  <circle class="dot" cx="884" cy="133" r="1.8"/>
-
-  <!-- CD/DVD -->
-  <g class="t" text-anchor="middle">
-    <text x="908" y="135" font-size="11">C</text>
-    <text x="922" y="133" font-size="13">D</text>
-    <text x="935" y="132" font-size="12" fill="#c9a34a">/</text>
-    <text x="949" y="130" font-size="15">D</text>
-    <text x="966" y="128" font-size="17">V</text>
-    <text x="984" y="126" font-size="20">D</text>
-  </g>
-  <circle class="dot" cx="1006" cy="132" r="2.2"/>
-
-  <!-- VIDEO — outer high, inner lower -->
-  <g class="t" text-anchor="middle">
-    <text x="1036" y="134" font-size="18">V</text>
-    <text x="1056" y="132" font-size="22">I</text>
-    <text x="1076" y="130" font-size="26">D</text>
-    <text x="1101" y="128" font-size="30">E</text>
-    <text x="1130" y="126" font-size="34">O</text>
-  </g>
+  <!-- Secondary capabilities — one calm line under the ribbon -->
+  <text class="sub" x="600" y="222" text-anchor="middle" font-size="13" opacity=".72">music  ·  radio  ·  iptv  ·  cd / dvd</text>
 </svg>
