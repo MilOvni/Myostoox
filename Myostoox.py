@@ -206,7 +206,6 @@ RESUME_REWIND = 3.0
 RESUME_SAVE_INTERVAL = 15.0
 META_CACHE_FILE = os.path.join(CONFIG_DIR, "meta_cache.json")
 META_DISK_MAX = 5000
-PATREON_URL = "https://www.patreon.com/MilOvni"
 STATE_FILE = os.path.join(CONFIG_DIR, "state.json")
 RADIOS_FILE = os.path.join(CONFIG_DIR, "radios.json")
 TVS_FILE = os.path.join(CONFIG_DIR, "tvs.json")
@@ -233,6 +232,16 @@ DESKTOP_FILE_PATH = os.path.join(
     "applications",
     DESKTOP_FILE_NAME,
 )
+AUTOSTART_DIR = os.path.join(os.path.expanduser("~"), ".config", "autostart")
+AUTOSTART_DESKTOP_PATH = os.path.join(AUTOSTART_DIR, DESKTOP_FILE_NAME)
+WINDOW_PLACEMENTS = (
+    "center",
+    "top-left",
+    "top-right",
+    "bottom-left",
+    "bottom-right",
+)
+WINDOW_PLACEMENT_MARGIN = 48
 AUDIO_EXTENSIONS = {
     ".mp3",
     ".ogg",
@@ -1209,47 +1218,69 @@ def _memlog_tick():
     return True
 
 _CSS_TPL_Z = bytes.fromhex(
-    "78dad51c5d6fdb38ecbdbfc2c01eb61d6c234dd32eeb80fd837bbac7c361b0632531ceb1025b5dd715fdefa70f7fe883a2e524ed767787b611298aa4"
-    "4889a4987b2ceb823e46cfcf5779b6f977d7d087bab88f9e1fe5f0b77cf76dd3b62f5f3460b2a1156d00947efcf8f7fb0eb4ddbdff87035e5eae5246"
-    "8f79d638cb705c05e164246e4e9b8234494e19a3078ed07eb8fef872fc11b5b42a0b035f220ef437fb861e485234d9ce5a843559dd1eb386d40c10c3"
-    "844a9af735ad89f8f02369f71997a31be0cbe40f9cad3addd09a35b432174aca43b623fd644bc89cd5bd849a9ac4e856971b1458ce1da5ed34d46445"
-    "f9d0ca093762c297ab63561465bd1b87c41f6b053b9475f258166c2fa1cb4fe3e89e94bb3d53c32b35bce5e2256df9932876ba5157fc2acb89548212"
-    "a9acf7a42919325f99455a67354d0eb4209166163af7d73df74b9bfb05ff9035bbb2167f41143925137b14d13383efb39c3590ed39f1e0ab3f8f55f6"
-    "54952de396fa237691da0d5750450a1d304c5140efa273f9776c1254e50a3284eb356808d777a0212cd4a86b804bff0efb4c06268d5010da4ba684bc"
-    "05ad7d090bb906855ccee3c427d05223fea816cd6955a8c3ca3407d610125f899fdf4bf20800ad73463b4004143857e47077b078158d2c78df928a6c"
-    "18292656e668bed505683cfe03dd615a48e3841e4fa4f6e9c0b59b080dc7c098b54bc67e58fab9f51c76f77bfa9d80f797389e25d0d68373097614b3"
-    "0d2bbf131f29050d506be786d675d24f376e478f0b49d1b7d9a1ac9eeeffe2d7a0a38ccf3e23064f2b79eface09b656dab1571a29338d2d45b14d039"
-    "e1b2ba4659351736aec680853dc7024aa6dd64153f08e4af744f9bf227c7caaa7e845b182bf95f822a7d605559132452917322cecbc36eefd2b40003"
-    "69633812c2f0b8a8ed861d8b9558df14100e11fd1846b064865dd2ac5bf65499f0f14ef45e408e224c3d593b0dde8863b0a274b0e7e895980228d181"
-    "0d7ab421d1b1a1bb86b4ad4fb5c3048f92b76555612a76e1bf42c1bdd67425750119105d40d8a3a5c19b05cd6979a04c1a607f6c252b4433441cc207"
-    "373ee846a1106d228dc076a153bc0cefad431cc845928a6c99c6ea9d19820966bd501e5b6bb0cf064ce557ce8e8b2996efee1f0eb993752c4e3205a5"
-    "7f7593066f9776f1a23caa3bf8455b79f046d34086e160f380efb43e94ea0c440c255626b6f8021e98bd4abde7a58b708237bb0962e896598a33376c"
-    "427d9e3809da285c7e643fcd4362dca8b52f3fb9190e8fb4285b197ab0f240c6d45505587cc8889abb40e44f5a53ee961b82e40af2be4f698b44cc1c"
-    "08447562148cd4978ba9e06bb44d3db470a5d762fe74dbf6214a7b4699043ddf8095758eef7a866db658c38375568f9bf26e2bfff9e2e75277046b6b"
-    "eea0cbfde60e5c12b2d94eee6697671f96b7b77134fe58a43c4b1888309ab5cc3f77c1f1d57fe99d98658906974af03d5f0f1af46ef9da90d3b47573"
-    "ed491bbfc112d92187db93ac00dc9e6f53f3f44d01d15a228ca8f949078293da6bd7ccc63c4e92063905ce51e47ebba4601e0ff2ca6b5d3d372b5cba"
-    "54cbe6077f896d5c0396b6246b36fba4e1e93984f10aa785ad5f603bf409b384bddfd2cd431bcf99d1d73c664d12c2150d3dbeb17ab4f20d58529f5d"
-    "165aba6521d84e50702a201338d1d748293484d6800c5fabf2847d66cd4b1c3db39dfc99cb9f941f65257b7af9e8d5ef94a49a394cb3198a3ce0f5e6"
-    "3983b49a125e90036de2d4821d6c0b01487c03851447da04e2f7d817dff0c9b79d542fe9079c819731c2b40ba35f7b9dc1d23cf6ea29f94ed9d6c54a"
-    "c25635389e806b76357500ce2f2ae34bcf74066452907360f367b9d6efefafafebdf675f6cbf5cc4373ba4cee572c277d52f5f3bc0e9ae0bd7c1c358"
-    "31caeb56fd67a1d51e03a9e105d0f904fd257881305183b750fc698fb72a0e3f95ace78b31d6d820311414150342992a8e9d259d56debb3e555e6f51"
-    "4c13092f8b418827f0e1797a3c41fd731657ef6317b1dd804d479368d7ab3dbea99770cf38563ad95fc7008cda25ab88165d0dd961973e293662330c"
-    "348133ba998672861de7990a877c1169ec42fb9c16667967287bde794adb60bd0ad64a5fdf467473c2ebbfa90aefe2eaa518df18abcfca570f73aa73"
-    "4ad720d71262f5dcf1bb1dde970ed96ab8f3694402acfb1922dbe199545b5aef1269cc4e715e3370ab78b1c64a949262596fa945500c79e88db5c3b4"
-    "65195359b736550d4e5652527eb494a330f81ef8443d696f0ea47e48e678b5bfacaef125a86af62c3ec651dafd9269ec0f96888fbe2245ba23ec8322"
-    "c3a58e23b3f9f3e38b77b5f0e6c88eaf929143c79bf8d3da3f83345a9cd3c8758e1a0d9fff40a86af3bad3659837e6de918932baf984eed47123d5a7"
-    "9d3e1f279a8f86c58ab2cdf2ca58bf1f024f1ad3dabbf8ff7e917e521721e1baca18d5248c86318f30520a8ee436316910bb2d07ecec1b7ced98d59c"
-    "fdafe3d2b11a1ac37a00a605e95f27987eb790ff9cf1266bdd4f33c4d33b98f4de5747e6fe22f34b6e62c0f223af61ef6e32f12f96fa750151763c26"
-    "45995574175fa9dfda90bf8839b49483254c13ea3576e4b4807bc7e77386b6ba6be46473b03eb06bcac21cc10b28272f9d607573a0edfee24df960b4"
-    "b69eea0ed425080b03b066ce25487753d19604dd8bd09580b6ef4f3460e83a59e21dfaebe90e7d4cf2955f72c4bfe737a15af60edd1fa883c8a7b6b3"
-    "fa9b2ff0c509db69c303275b6f6ff9158f95dd4811e4554842630b13d6d40cd086aa0cb88585f632875b629f4fc5e02852cf0d343bcf72f6f30a8473"
-    "f1ee7a681134b777f3c85352f93133b778d8d0434ec5d76aa616bfa0cb58275d4e8ba7b36f54a3d16a017a53d7b3ed0c0dd11704338bc3dee5a79bbc"
-    "1dd24303b79f210405e80f7757f8ff3485df0437854f9582effc7bafb77a234a47b1e0967277a9b1897c7a5b7ef786f2e0965444a97d5f2f82e2eff1"
-    "fd9d1a73cfed37be80165fa56f173575ffee05b5f0ffc6fbe77959585d74ff3c7df5afba83fa9bc7f8c61103589ec75d5f7e8fd40026db76a0b5c35e"
-    "73e1a9a14fb7b0d09e5bd189b442a2b1d778a985b946ddeaf257c5e51f6431b1a61d23e4cc985ac4fbb47a59f743de534fb3b1377b510d76de996f6e"
-    "21092c9e246139e25419ed94fc2928650b606a5e6e77c147dcc6fc921c5a073cef19374855af53cce8b3d818ce6dbf467ed8f0d571fef94db2dff0f8"
-    "1a4fd515cbf3f42929e63c6249f28aa3c7c6a75e49da882881c3af0babc5eaf676e950b4ab8ac317589c3e0cbe299c1c69da3da54cfcbf45621441d5"
-    "b3711cf1fd4b1ca3e9bfe76ba10805618c8c702f1f238a878d11a17173bd1945eda96f1bfc074e8e3124"
+    "78dad51c5d6fdb38ecbdbfc2c01eb61e6c234dd32eeb80fe837bbac7c361b063c531ceb1025b5ddb"
+    "15fdef274bfed00745cb49daf5b6a14d248a22298a22296a8f4595d1c7e0e5e5224d36ffe6357da8"
+    "b2bbe0e55134ff48f31f9ba679fdae74461b5ad21a00e9db0f7f7feebab6f9e77f78c7ebeb45cce8"
+    "214d6a6b1a0e2b7b381a019bd23a23759452c6e89e03345fae2e5f0f4f4143cb22d3e005e0807fb3"
+    "abe99e44599de4c624ac4eaae690d4a462001b7aafc07957d18ab45f9ea26697703eba063e4dfac0"
+    "c9aae20dad584d4b7da2a8d82739e9071b4ca6acea3954c4d4b66e55be4186c5d891db4e42759215"
+    "0f8d1870dd0ef87e7148b2aca8f2b1a9fdb0967dfba28a1e8b8ced44eff2ebd8ba2345be63b27925"
+    "9bb79cbda8297e11494ed76ab35f26291142902c15d58ed40543c64bb588aba4a2d19e662450d442"
+    "a5feaaa77e6952bfe05f923a2faaf613849163d2a147161d23f83a8b5103da9e1207bcfc782893e7"
+    "b26818d7d4a7d0066a365c4025c9d48e6188ec744e3a977e4b274151ae2045b85a838a70750b2ac2"
+    "42b6da0ab874afb04b6560d40886567ad1149337a0b62f6126d72093cb7994b8185a2ac81fe5a429"
+    "2d3369ac7475603521e145fbf367411e814ec3ce2806a4ed05ec8a68ee0c8b53d0c884770d29c986"
+    "916c62660ee69abded1acdbfe776986652b3d0a3456a9ef75cba512be110683356495b0f433e370e"
+    "6377b7a33f09787eb5e659749a72b00ec10e63b261c54fe242257b3dc4da6d43e338e9876ba7a363"
+    "0b09d6b7c9be289feffee2c7a0258c6f2e2506ad95387756f0c9b236c58a6ca2a32852c49b65909d"
+    "b0495da3a4ea136b47a3c7c40eb380a2693649c90d81f815ef685dfce25049d9b7700d6305ffd462"
+    "a50fac2c2a82782a624cc06979c877364ea36340ad35072d33dc2f6aba664b6305d40fd909bb886e"
+    "08cd59d2dd2ea1d60d7b2ef5fef14c741e4096207439192b0d9e88a3b32265b0e3e0653b0410a2d5"
+    "37c8d1ec090e35cd6bd2342ed10e031c42de16658989d8eeff1d02eea5a60aa973c800ef02821e35"
+    "0d5e2c684cc31d655203eb630a5902ea2ee2e03ed8fe41d70ab968136104b60a9de0857b6f187120"
+    "16894ab2650aa9b7ba0bd612ebece5beb5d2f74deb93f195b5e2ed1063efee1ef6a915752c8e5205"
+    "297f79927a2f9772f0a234ca33f8559979d88dba820ccddeea019f69bd2bd52948db141991d8e23b"
+    "68307b913aeda50d70c46eb60344df253304a72fd884f81c7e12b45038ffc87aea46625ca8b52b3e"
+    "b91e8c479c158d703d58b12763e82a1d2cdea479cd9d23f227ad28df961b82c40ae2bc8f69e3f098"
+    "eb3c4dbe2cc2a0fb17dfdc5c0ebedda7adf863791c8b29e76bd44dd5b5b0b9577cfe78dbf42e4a73"
+    "429a04b56fc0cc2ac5b73dc12659ace6ce3aabc6451904e3a452dd08c6d2dc4287fbf52d3825a4b3"
+    "1ddf62e19637376130fe58c457edf219482222f318301dea2a0615adf749e922ceed3a5bd3b9824f"
+    "6c528e472062346918acadf8620752deb8f65e018e6e60a8ef62cc7a597e6c3098a4b87cae8b0da7"
+    "7724ea04aa39c2ac4e78649673c0e438dc83043513a20b62d2745c63f9812134de912403ac2927a3"
+    "7efe213bd1142d0ca8d8bcae0bce155cd9bb770c8f056a9052e07842dc867332e6304c4e7e8dad76"
+    "bdc2b98b9524c9a00fa109abf5c50ddfa79b5d54d34710e20d8cb0295f6039d401b398bddbd2cd43"
+    "13ce19d1a792660d6a99cb6a7a7867f1285931f0a66276b66d6967db603d41bbe3b6670226b80fa4"
+    "407d700dc088b7f2c2ead7307861b9f8998a9f949bb2823dbf5e3ae53bc5a9a20ed364fa020f70bd"
+    "7ace402d87f8e739419d38360f0aeb8207105fc0968b03ad3de17be8b32ff8e49559acde9478d8c0"
+    "f32861dc45276f3dcfa0690e7d7564d2a774eb6c997623c91e4ef42b7a356500e7e7eaf1a9676e06"
+    "6490d7e6c0c6cfda5a1f7fbfbeedfe3ef960fbed2cbe9b913a95ca89bd2b7fb9aa2c8edfbaf0f582"
+    "1f29daad8591565b28295d4f6c785e793e42f7cd460b3071b56180b8c31ee765037c03b59ecfc698"
+    "ba84d890bd281b10c854cef124ee94ace9d5b1fc3a738d0a4b78b611023c820ec78dee11e29f33b9"
+    "bc763c8bee7a2c3a1a44dbbbdab137d5ccf80966a5e3fd6d14404b09b39228ded5101d76e1932423"
+    "d4dd40bd734691d890ce30fd3c5de0d05e44eae5d0f2b1859ede19b2c9b78e1b03305f054ba5bf36"
+    "4064734451852e0ae7e432358a2f8c51bee6ca8759d939296b906ad1639432f2b31d5e970ed8a863"
+    "7449447418e73384b683d3b136b4ca23a1ccd69d87a2e046f2628da52805c6a2da520361dbe4c037"
+    "e60ee386254c46ddca50d938994989b969294666f03570b17ad4daec49f510cdd9d5eedb0a85ae16"
+    "aba2cfedd73088bb5f228c7d6251fbd595a48873c2be48349ceb30d06b6a2f5f9db3f9d79c767415"
+    "8cec3bdada8fc6fa69a8d1e49c82aedba8c1f0fd0f04ab32aeb32ec3b831f60e7490719b4fc84e9a"
+    "1b213ec5fa5c4ed4740d93654593a4a5367fdf045a1a5ddb3bffff6e117f950721e1b24a1855380c"
+    "86360733820b0e64d786293de6ed12583039ecb5435271f2efc7a943d934baf5409fe2a4df4f10fd"
+    "6921fe9c70d56d9c4f33d8530bc3d492628be7fe207373ae43c0fc23978c9fae93f62f16fa750e51"
+    "723844599194340f2fe46fa5c99dc41c2af5c114a6deeb5476c45ac025f9f329435f1028e844cdb5"
+    "da90d745a6b7e00994a3a78eb0bc39f09ae1ec6f1d406f6d3d7973ac70e0e7066035b24b10efa6a4"
+    "0df13a17a123017d153151d7a2ca64893f7c584f3f7cc0385fb93947f6f7fcda5e43dfa1f303dd20"
+    "e2aaeda4b2f133bc473137adbfe364caed3d5fceacccfa14af5d85043426337eb5e2006e28cb806b"
+    "986f89b8bf26f6f15408b622f95c4fb5734c675eaf4030677fb4004d82c6f6761c794c283f46e606"
+    "0d1bba4f69fb5a696af2336e19c3d2a5347b3ef944d5ead716e06eea4ae1ada6c1fb82faf4e4b073"
+    "fae9da790bf55017ef26080101caeeed19fe3fb5f6d7deb5f653a9e05bf7daab15f488d05128b852"
+    "df9e6aaccd9f5e968f5ea7ef5de98b08b52f974640dca5d31fa9def9d432ee3348f14dcaa1515577"
+    "af9ed7cb880fbc7e8e9b85d559d7cff15ce14d5750bdf318ef384200ca71b9eb8aef911cc064d90e"
+    "34b7df6d2e3cd4f7ea1666da712a5a9e968f37f61637b530d5e8b63aff5171fe0b598cade98de163"
+    "33a626715ead9e77fb21f7a9c7e9d8bbdda87a6fde99776e3e012c1e246131e2541aed98f8c92b64"
+    "f3206a5e6c77c64bdc5a7f7b88e6014fbbc6f512d5db2433fa28368463dbfbc0dd37bcc8e7dfdf25"
+    "faf5f7aff1505d923c4f9e0263ca3d96282d3978a87deb85a4b4b42970f87661b558dddc2c2d8c66"
+    "567178c062d561f045e1e848ddec2865ed7fd912a200329f8dc3b4cf5a7188ba7f3e6d80b402c208"
+    "19fb9d748c200e324680da8ef56624b5a75e1bfc073102aae8"
 )
 
 class Myostoox(Gtk.Window):
@@ -1259,7 +1290,6 @@ class Myostoox(Gtk.Window):
     COL_ALBUM = 3
     COL_DURATION_TEXT = 4
     COL_DURATION = 5
-    # --- Mini-lecteur : bannière défilante (dessinée en GTK) ---
     _MINI_MARQUEE_HEIGHT = 20           # hauteur de la bande (px)
     _MINI_MARQUEE_FONT = "Sans Bold 9"
     _MINI_MARQUEE_SPEED = 40.0          # vitesse de défilement (px / seconde)
@@ -1348,6 +1378,7 @@ class Myostoox(Gtk.Window):
         self._resume_prompt_open = False
         self._resume_last_tick = 0.0
         self._resume_reset = False
+        self._factory_reset = False
         try:
             self._load_resume_data()
         except Exception:
@@ -1382,6 +1413,18 @@ class Myostoox(Gtk.Window):
             "volume",
             0.75
         )
+        self._gapless_pending = None
+        self._gapless_next = None
+        self._gapless_next_for = None
+        self._gapless_refresh_t = 0.0
+        self._fade_gain = 1.0
+        self._fade_out_active = False
+        self._fade_in_pending = False
+        self._fade_in_tid = 0
+        try:
+            self.player.connect("about-to-finish", self._on_about_to_finish)
+        except Exception as exc:
+            print("about-to-finish indisponible :", exc, file=sys.stderr)
         self.performance_mode = self._load_performance_mode()
         self._hw_fallback_path = None  # chemin pour lequel le soft a déjà été forcé
         self._apply_decoder_performance_mode()
@@ -1417,6 +1460,7 @@ class Myostoox(Gtk.Window):
         self.is_fullscreen = False
         self.subtitles_enabled = True
         self.current_is_video = False
+        self._current_video_dims = None  # (w, h, par_n, par_d)
         self._resume_prefer_video = False
         self._mini_title_scroll_id = 0
         self._mini_title_text = ""
@@ -1426,6 +1470,8 @@ class Myostoox(Gtk.Window):
         self.lyrics_current_index = -1
         self.lyrics_mode = False
         self.desktop_notifications = True
+        self.autostart_enabled = False
+        self.window_placement = "center"
         self.window_borders = True
         self.window_layer = "normal"
         self.playlist_transparency = False
@@ -1435,9 +1481,14 @@ class Myostoox(Gtk.Window):
         self.spectrum_style = "pixel"
         self.playlist_only_mode = False
         self.playlist_only_maximized = False
+        self.hide_playlist_mode = False  # Pure vidéo
+        self.lyrics_transparent_bg = False
         self._playlist_only_prev_size = None
+        self._playlist_only_prev_pos = None
         self._playlist_only_prev_layer = None
+        self._playlist_only_restore_tid = 0
         self.playback_rate = 1.0
+        self._need_rate_reset = False
         self.speed_window = None
         self.nano_player_mode = False
         self.nano_banner_enabled = False
@@ -1499,7 +1550,6 @@ class Myostoox(Gtk.Window):
         self.eq_saved_gains = []
         self.is_muted = False
         self._volume_before_mute = 0.75
-        # --- ReplayGain / normalisation ---
         self.replaygain_mode = "off"          # off | track | album | auto
         self.rgvolume = None
         try:
@@ -1512,20 +1562,16 @@ class Myostoox(Gtk.Window):
                 self.rgvolume.set_property("pre-amp", 0.0)
                 self.rgvolume.set_property("fallback-gain", -6.0)
             except Exception: pass
-        # --- Crossfade / gapless ---
         self.crossfade_seconds = 0.0          # 0 = off
         self.gapless_enabled = False
         self._crossfade_active = False
         self._crossfade_timeout_id = 0
-        # --- Sleep timer ---
         self.sleep_timer_id = 0
         self.sleep_timer_end = 0.0            # monotonic deadline
         self.sleep_timer_minutes = 0
         self.sleep_end_of_track = False
-        # --- Sortie audio (Pulse / PipeWire sink name, "" = auto) ---
         self.audio_sink_name = ""
         self._audio_sink_element = None
-        # --- Scrobbling (ListenBrainz / Last.fm) ---
         self.scrobble_enabled = False
         self.scrobble_service = "listenbrainz"  # listenbrainz | lastfm
         self.scrobble_token = ""                 # LB token or Last.fm session key
@@ -1535,7 +1581,6 @@ class Myostoox(Gtk.Window):
         self._scrobble_sent_for = None           # path already scrobbled this play
         self._scrobble_started_at = 0.0
         self._nowplaying_sent_for = None
-        # --- File d'attente « Lire ensuite » ---
         self.play_next_queue = []                # list of paths, FIFO front = next
         self.chapters = []
         self._osd_timeout_id = 0
@@ -1599,6 +1644,11 @@ class Myostoox(Gtk.Window):
         self.bus.connect("sync-message::element", self.on_sync_message)
         self.restore_state()
         try:
+            # Align state with real autostart file on disk
+            self.autostart_enabled = bool(self._is_autostart_enabled())
+        except Exception:
+            pass
+        try:
             if not bool(getattr(self, "window_borders", True)):
                 self.set_decorated(False)
         except Exception: pass
@@ -1612,6 +1662,8 @@ class Myostoox(Gtk.Window):
             if getattr(self, "nano_player_mode", False) or getattr(self, "mini_player_mode", False):
                 GLib.idle_add(self._apply_compact_player_mode)
             try: GLib.idle_add(self._apply_window_layer)
+            except Exception: pass
+            try: GLib.idle_add(self._apply_hide_playlist_mode)
             except Exception: pass
         except Exception: pass
         self.connect("destroy", self.on_destroy)
@@ -1664,6 +1716,8 @@ class Myostoox(Gtk.Window):
 
     def apply_language(self):
         self.set_title(APP_NAME)
+        try: self._fs_update_video_buttons()
+        except Exception: pass
         if hasattr(self, "add_files_button"):
             self.add_files_button.set_tooltip_text(self.tr("Ajout des fichiers"))
         if hasattr(self, "record_button"):
@@ -2493,6 +2547,260 @@ class Myostoox(Gtk.Window):
             print("Impossible d'écrire le fichier .desktop :", exc, file=sys.stderr)
             return False
 
+    def _is_autostart_enabled(self):
+        try:
+            return os.path.isfile(AUTOSTART_DESKTOP_PATH)
+        except Exception:
+            return False
+
+    def _set_autostart_enabled(self, enabled):
+        """Crée ou retire le .desktop dans ~/.config/autostart."""
+        enabled = bool(enabled)
+        self.autostart_enabled = enabled
+        try:
+            if enabled:
+                os.makedirs(AUTOSTART_DIR, exist_ok=True)
+                script = self._script_path().replace('"', '\\"')
+                interpreter = sys.executable.replace('"', '\\"')
+                exec_line = f'"{interpreter}" "{script}"'
+                content = (
+                    "[Desktop Entry]\n"
+                    "Type=Application\n"
+                    f"Name={APP_NAME}\n"
+                    "Comment=Lecteur audio et vidéo\n"
+                    f"Exec={exec_line}\n"
+                    "Icon=myostoox\n"
+                    "Terminal=false\n"
+                    "Categories=AudioVideo;Player;Audio;Video;\n"
+                    "X-GNOME-Autostart-enabled=true\n"
+                    "StartupNotify=false\n"
+                )
+                with open(AUTOSTART_DESKTOP_PATH, "w", encoding="utf-8") as f:
+                    f.write(content)
+                try:
+                    os.chmod(AUTOSTART_DESKTOP_PATH, 0o755)
+                except Exception:
+                    pass
+            else:
+                try:
+                    if os.path.isfile(AUTOSTART_DESKTOP_PATH):
+                        os.unlink(AUTOSTART_DESKTOP_PATH)
+                except Exception:
+                    pass
+        except Exception as e:
+            print("autostart:", e, file=sys.stderr)
+        try:
+            self.save_state()
+        except Exception:
+            pass
+
+    def toggle_autostart(self, menuitem):
+        try:
+            enabled = bool(menuitem.get_active())
+        except Exception:
+            return
+        self._set_autostart_enabled(enabled)
+        try:
+            self.status_label.set_text(
+                self.tr("Lancement au démarrage activé")
+                if enabled
+                else self.tr("Lancement au démarrage désactivé")
+            )
+        except Exception:
+            pass
+
+    def _apply_window_placement(self, placement=None):
+        """Place la fenêtre selon le réglage mémorisé (marges aux coins)."""
+        if placement is None:
+            placement = str(getattr(self, "window_placement", "center") or "center")
+        if placement not in WINDOW_PLACEMENTS:
+            placement = "center"
+        try:
+            if getattr(self, "is_fullscreen", False):
+                return False
+        except Exception:
+            pass
+        try:
+            if self.is_maximized():
+                return False
+        except Exception:
+            pass
+        try:
+            screen = self.get_screen()
+            win = self.get_window()
+            mon = 0
+            if screen is not None and win is not None:
+                mon = screen.get_monitor_at_window(win)
+            if screen is None:
+                return False
+            try:
+                geo = screen.get_monitor_workarea(mon)
+            except Exception:
+                geo = screen.get_monitor_geometry(mon)
+            try:
+                ww, wh = self.get_size()
+            except Exception:
+                ww, wh = self._ui_s(950), self._ui_s(620)
+            margin = int(WINDOW_PLACEMENT_MARGIN)
+            mx, my = int(geo.x), int(geo.y)
+            mw, mh = int(geo.width), int(geo.height)
+            if placement == "top-left":
+                x, y = mx + margin, my + margin
+            elif placement == "top-right":
+                x, y = mx + max(margin, mw - ww - margin), my + margin
+            elif placement == "bottom-left":
+                x, y = mx + margin, my + max(margin, mh - wh - margin)
+            elif placement == "bottom-right":
+                x = mx + max(margin, mw - ww - margin)
+                y = my + max(margin, mh - wh - margin)
+            else:
+                x = mx + max(0, (mw - ww) // 2)
+                y = my + max(0, (mh - wh) // 2)
+            self.move(int(x), int(y))
+        except Exception as e:
+            print("window placement:", e, file=sys.stderr)
+        return False
+
+    def show_window_placement_dialog(self, *args):
+        dialog = Gtk.Dialog(
+            title=self.tr("Placement"),
+            parent=self,
+            flags=Gtk.DialogFlags.MODAL,
+        )
+        dialog.add_button(self.tr("Annuler"), Gtk.ResponseType.CANCEL)
+        dialog.add_button(self.tr("OK"), Gtk.ResponseType.OK)
+        dialog.set_default_response(Gtk.ResponseType.OK)
+        try:
+            dialog.set_default_size(self._ui_s(360), self._ui_s(280))
+        except Exception:
+            pass
+        try:
+            self._style_app_dialog(dialog)
+        except Exception:
+            pass
+        area = dialog.get_content_area()
+        area.set_spacing(10)
+        try:
+            area.set_margin_start(14)
+            area.set_margin_end(14)
+            area.set_margin_top(12)
+            area.set_margin_bottom(8)
+        except Exception:
+            area.set_border_width(12)
+        info = Gtk.Label(
+            label=self.tr(
+                "Position de la fenêtre au lancement de l'application."
+            ),
+            xalign=0,
+        )
+        info.set_line_wrap(True)
+        try:
+            info.get_style_context().add_class("status")
+        except Exception:
+            pass
+        area.pack_start(info, False, False, 0)
+        grid = Gtk.Grid()
+        grid.set_row_spacing(8)
+        grid.set_column_spacing(8)
+        grid.set_halign(Gtk.Align.CENTER)
+        area.pack_start(grid, True, True, 8)
+        current = str(getattr(self, "window_placement", "center") or "center")
+        if current not in WINDOW_PLACEMENTS:
+            current = "center"
+        group = None
+        radios = {}
+        layout = (
+            (("top-left", "Haut-gauche"), ("top-right", "Haut-droit")),
+            (("center", "Centre"),),
+            (("bottom-left", "Bas-gauche"), ("bottom-right", "Bas-droit")),
+        )
+        for row_i, row in enumerate(layout):
+            for col_i, (key, label_key) in enumerate(row):
+                item = Gtk.RadioButton.new_with_label_from_widget(
+                    group, self.tr(label_key)
+                )
+                if group is None:
+                    group = item
+                item.set_active(key == current)
+                radios[key] = item
+                if key == "center":
+                    grid.attach(item, 0, row_i, 2, 1)
+                    item.set_halign(Gtk.Align.CENTER)
+                else:
+                    grid.attach(item, col_i, row_i, 1, 1)
+        sketch = Gtk.DrawingArea()
+        sketch.set_size_request(self._ui_s(220), self._ui_s(130))
+
+        def _draw_sketch(widget, cr):
+            alloc = widget.get_allocation()
+            w, h = alloc.width, alloc.height
+            cr.set_source_rgb(0.15, 0.15, 0.18)
+            cr.rectangle(0, 0, w, h)
+            cr.fill()
+            pad = 10
+            cr.set_source_rgb(0.35, 0.38, 0.45)
+            cr.set_line_width(2)
+            cr.rectangle(pad, pad, w - 2 * pad, h - 2 * pad)
+            cr.stroke()
+            sel = "center"
+            for k, r in radios.items():
+                if r.get_active():
+                    sel = k
+                    break
+            bw, bh = (w - 2 * pad) * 0.32, (h - 2 * pad) * 0.28
+            m = 8
+            if sel == "top-left":
+                bx, by = pad + m, pad + m
+            elif sel == "top-right":
+                bx, by = w - pad - m - bw, pad + m
+            elif sel == "bottom-left":
+                bx, by = pad + m, h - pad - m - bh
+            elif sel == "bottom-right":
+                bx, by = w - pad - m - bw, h - pad - m - bh
+            else:
+                bx, by = (w - bw) / 2, (h - bh) / 2
+            cr.set_source_rgba(0.31, 0.71, 0.94, 0.85)
+            cr.rectangle(bx, by, bw, bh)
+            cr.fill()
+            return False
+
+        sketch.connect("draw", _draw_sketch)
+        for r in radios.values():
+            r.connect("toggled", lambda *a: sketch.queue_draw())
+        area.pack_start(sketch, False, False, 4)
+        dialog.show_all()
+        resp = dialog.run()
+        if resp == Gtk.ResponseType.OK:
+            chosen = "center"
+            for k, r in radios.items():
+                if r.get_active():
+                    chosen = k
+                    break
+            self.window_placement = chosen
+            try:
+                self.save_state()
+            except Exception:
+                pass
+            try:
+                self._apply_window_placement(chosen)
+            except Exception:
+                pass
+            try:
+                self.status_label.set_text(
+                    self.tr("Placement") + " : " + self.tr(
+                        {
+                            "center": "Centre",
+                            "top-left": "Haut-gauche",
+                            "top-right": "Haut-droit",
+                            "bottom-left": "Bas-gauche",
+                            "bottom-right": "Bas-droit",
+                        }.get(chosen, "Centre")
+                    )
+                )
+            except Exception:
+                pass
+        dialog.destroy()
+
     def _xdg_mime_default(self, mime_type, enable=True):
         try:
             if enable:
@@ -3030,6 +3338,7 @@ class Myostoox(Gtk.Window):
         except Exception: pass
 
     def save_state(self):
+        if getattr(self, "_factory_reset", False): return
         try:
             directory = os.path.dirname(STATE_FILE)
             os.makedirs(directory, exist_ok=True)
@@ -3057,6 +3366,8 @@ class Myostoox(Gtk.Window):
                 "scrobble_service": str(getattr(self, "scrobble_service", "listenbrainz") or "listenbrainz"),
                 "scrobble_token": str(getattr(self, "scrobble_token", "") or ""),
                 "scrobble_username": str(getattr(self, "scrobble_username", "") or ""),
+                "scrobble_api_key": str(getattr(self, "scrobble_api_key", "") or ""),
+                "scrobble_api_secret": str(getattr(self, "scrobble_api_secret", "") or ""),
                 "last_path": last_path,
                 "equalizer": eq_gains,
                 "pitch": self.pitch_value,
@@ -3070,6 +3381,8 @@ class Myostoox(Gtk.Window):
                 "mini_player_mode": bool(getattr(self, "mini_player_mode", False)),
                 "mini_banner_enabled": bool(getattr(self, "mini_banner_enabled", True)),
                 "desktop_notifications": bool(getattr(self, "desktop_notifications", True)),
+                "autostart_enabled": bool(getattr(self, "autostart_enabled", False)),
+                "window_placement": str(getattr(self, "window_placement", "center") or "center"),
                 "window_borders": bool(getattr(self, "window_borders", True)),
                 "window_layer": str(getattr(self, "window_layer", "normal") or "normal"),
                 "playlist_transparency": bool(getattr(self, "playlist_transparency", False)),
@@ -3084,6 +3397,21 @@ class Myostoox(Gtk.Window):
                 ),
                 "playlist_only_mode": bool(getattr(self, "playlist_only_mode", False)),
                 "playlist_only_maximized": bool(getattr(self, "playlist_only_maximized", False)),
+                "playlist_only_prev_size": (
+                    list(self._playlist_only_prev_size)
+                    if getattr(self, "_playlist_only_prev_size", None)
+                    else None
+                ),
+                "playlist_only_prev_pos": (
+                    list(self._playlist_only_prev_pos)
+                    if getattr(self, "_playlist_only_prev_pos", None)
+                    else None
+                ),
+                "playlist_only_prev_layer": (
+                    getattr(self, "_playlist_only_prev_layer", None) or None
+                ),
+                "hide_playlist_mode": bool(getattr(self, "hide_playlist_mode", False)),
+                "lyrics_transparent_bg": bool(getattr(self, "lyrics_transparent_bg", False)),
                 "playback_rate": float(getattr(self, "playback_rate", 1.0) or 1.0),
                 "resume_prompt_enabled": bool(
                     getattr(self, "resume_prompt_enabled", True)
@@ -3110,6 +3438,8 @@ class Myostoox(Gtk.Window):
             with open(temporary_file, "w", encoding="utf-8") as file:
                 json.dump(state, file, ensure_ascii=False, indent=2)
             os.replace(temporary_file, STATE_FILE)
+            try: os.chmod(STATE_FILE, 0o600)
+            except Exception: pass
         except Exception as e:
             print("Impossible de sauvegarder l'état :", e, file=sys.stderr)
 
@@ -3163,6 +3493,12 @@ class Myostoox(Gtk.Window):
             user = state.get("scrobble_username")
             if isinstance(user, str):
                 self.scrobble_username = user
+            akey = state.get("scrobble_api_key")
+            if isinstance(akey, str):
+                self.scrobble_api_key = akey.strip()
+            asec = state.get("scrobble_api_secret")
+            if isinstance(asec, str):
+                self.scrobble_api_secret = asec.strip()
         except Exception: pass
         eq_gains = state.get("equalizer")
         if isinstance(eq_gains, list) and self.equalizer is not None:
@@ -3218,7 +3554,7 @@ class Myostoox(Gtk.Window):
         path = getattr(self, "_pending_restore_path", None)
         if not path: return False
         try:
-            if not self.get_realized(): return True  # réessayer au prochain idle
+            if not self.get_realized(): return True
             if not self.get_window(): return True
         except Exception: pass
         try:
@@ -3227,17 +3563,24 @@ class Myostoox(Gtk.Window):
                 or is_dvd(path)
                 or is_bluray(path)
             ):
-                self.show_video_area(True)
+                try: self.show_video_area(True)
+                except Exception: pass
+                try: self._ensure_video_sink()
+                except Exception: pass
                 try:
                     while Gtk.events_pending():
                         Gtk.main_iteration_do(False)
                 except Exception: pass
-                self._cache_video_window_handle()
+                try:
+                    self._cache_video_window_handle()
+                    self._apply_video_overlay_handle()
+                except Exception: pass
                 if not getattr(self, "_video_window_handle", None):
                     if not hasattr(self, "_restore_handle_tries"):
                         self._restore_handle_tries = 0
                     self._restore_handle_tries += 1
-                    if self._restore_handle_tries < 20: return True
+                    if self._restore_handle_tries < 25:
+                        return True
         except Exception: pass
         self._pending_restore_path = None
         self._restore_handle_tries = 0
@@ -3248,25 +3591,32 @@ class Myostoox(Gtk.Window):
         return False
 
     def load_file_paused(self, filename):
-        if not filename: return
+        """Restauration de session : précharge en pause avec sink vidéo réel."""
+        if not filename:
+            return
         try:
             if is_cdda(filename) or is_stream(filename) or is_dvd(filename) or is_bluray(filename):
                 uri = filename
             else:
+                if not os.path.isfile(filename):
+                    return
                 uri = GLib.filename_to_uri(os.path.abspath(filename), None)
             self._playback_generation += 1
-            self.player.set_state(Gst.State.NULL)
+            gen = self._playback_generation
+            try:
+                self._destroy_custom_pipeline()
+            except Exception:
+                pass
+            try:
+                self.player.set_state(Gst.State.NULL)
+                self.player.get_state(200 * Gst.MSECOND)
+            except Exception:
+                pass
+            if gen != self._playback_generation:
+                return
             self.current_path = filename
             self.current_duration = 0
             self.current_is_cdda = is_cdda(filename)
-            if getattr(self, "_need_playbin_rebind", False):
-                self._need_playbin_rebind = False
-                try:
-                    self._video_sink_is_real = False
-                    self._ensure_video_sink()
-                except Exception: pass
-                try: self.rebuild_audio_filter(force=True, restart=False)
-                except Exception: pass
             self.icy_title = ""
             self.icy_artist = ""
             if is_stream(filename):
@@ -3276,60 +3626,173 @@ class Myostoox(Gtk.Window):
             else:
                 self.current_radio_name = None
                 self.current_tv_name = None
-            self.position_scale.set_range(0, 1)
-            self.position_scale.set_value(0)
+            try:
+                self.position_scale.set_range(0, 1)
+                self.position_scale.set_value(0)
+            except Exception:
+                pass
             self._last_known_position = 0.0
             self._pending_seek_delta = 0.0
             self._seek_in_progress = False
-            self.reset_spectrum()
-            if is_video_file(filename) or is_dvd(filename):
-                self.show_video_area(True)
+            try:
+                self.reset_spectrum()
+            except Exception:
+                pass
+            is_vid = bool(
+                is_video_file(filename)
+                or is_dvd(filename)
+                or is_bluray(filename)
+            )
+            if is_vid:
+                try:
+                    self.show_video_area(True)
+                except Exception:
+                    pass
+                try:
+                    self._ensure_video_sink()
+                except Exception as e:
+                    print("restore ensure sink:", e, file=sys.stderr)
+                try:
+                    while Gtk.events_pending():
+                        Gtk.main_iteration_do(False)
+                except Exception:
+                    pass
+                try:
+                    self._cache_video_window_handle()
+                    self._apply_video_overlay_handle()
+                except Exception:
+                    pass
             else:
-                self.show_video_area(False)
-            try: self.rebuild_audio_filter(force=True, restart=False)
-            except Exception: pass
-            self.set_subtitles_enabled(self.subtitles_enabled)
+                try:
+                    self.show_video_area(False)
+                except Exception:
+                    pass
+                try:
+                    self._release_real_video_sink()
+                except Exception:
+                    pass
+            try:
+                self.rebuild_audio_filter(force=True, restart=False)
+            except Exception:
+                pass
+            try:
+                self.set_subtitles_enabled(self.subtitles_enabled)
+            except Exception:
+                pass
             self.subtitle_tracks = []
             self.current_subtitle_index = -1
             self.audio_tracks = []
             self.current_audio_index = -1
-            self._prepare_external_subtitles_for(filename)
-            try: self._register_external_subtitle_tracks()
-            except Exception: pass
-            try: self.player.set_property("current-text", -1)
-            except Exception: pass
-            if self.current_is_video:
-                self._cache_video_window_handle()
-            self._destroy_custom_pipeline()
-            if self.current_is_video:
+            try:
+                self._prepare_external_subtitles_for(filename)
+            except Exception:
+                pass
+            try:
+                self._register_external_subtitle_tracks()
+            except Exception:
+                pass
+            try:
+                self.player.set_property("current-text", -1)
+            except Exception:
+                pass
+            # Playbin classique (pas de pipeline MKV custom en restauration pause)
+            try:
+                self.player.set_property("uri", uri)
+            except Exception as e:
+                print("restore uri:", e, file=sys.stderr)
+                return
+            # Rebind sink après set_uri (certains backends le perdent)
+            if is_vid:
                 try:
-                    while Gtk.events_pending():
-                        Gtk.main_iteration_do(False)
-                except Exception: pass
-                self._cache_video_window_handle()
-                self._apply_video_overlay_handle()
-            self.player.set_property("uri", uri)
-            self.player.set_state(Gst.State.PAUSED)
+                    self._ensure_video_sink()
+                    self._apply_video_overlay_handle()
+                except Exception:
+                    pass
+            try:
+                ret = self.player.set_state(Gst.State.PAUSED)
+            except Exception as e:
+                print("restore PAUSED:", e, file=sys.stderr)
+                ret = Gst.StateChangeReturn.FAILURE
+            if ret == Gst.StateChangeReturn.FAILURE:
+                try:
+                    self.status_label.set_text(self.tr("Impossible de restaurer la session"))
+                except Exception:
+                    pass
+                self.is_playing = False
+                self.is_paused = False
+                return
             self.is_playing = True
             self.is_paused = True
-            self.play_button.set_label("▶")
-            self.status_label.set_text(self.tr("Session restaurée (en pause)"))
             try:
-                if (
-                    getattr(self, "resume_prompt_enabled", True)
-                    and self._resume_eligible(filename)
-                ):
-                    p = self._resume_lookup(filename)
-                    if p is not None:
-                        self._resume_apply_later(
-                            filename, max(0.0, p - RESUME_REWIND)
-                        )
-            except Exception: pass
-            self.update_information(filename)
-            self.select_filename(filename)
+                self.play_button.set_label("▶")
+            except Exception:
+                pass
+            try:
+                self.status_label.set_text(self.tr("Session restaurée (en pause)"))
+            except Exception:
+                pass
+            # Preroll + durée + éventuelle reprise de position (sans spammer le seek)
+            def _after_preroll():
+                if gen != self._playback_generation:
+                    return False
+                if getattr(self, "current_path", None) != filename:
+                    return False
+                try:
+                    self._try_update_duration()
+                except Exception:
+                    pass
+                if is_vid:
+                    try:
+                        self._cache_video_window_handle()
+                        self._apply_video_overlay_handle()
+                        self._nudge_video_redraw()
+                    except Exception:
+                        pass
+                # Appliquer le taux de lecture une seule fois (évite accélération)
+                try:
+                    rate = float(getattr(self, "playback_rate", 1.0) or 1.0)
+                    if abs(rate - 1.0) > 0.001 and self._is_speed_media(filename):
+                        self._apply_playback_rate()
+                except Exception:
+                    pass
+                try:
+                    if (
+                        getattr(self, "resume_prompt_enabled", True)
+                        and self._resume_eligible(filename)
+                    ):
+                        p = self._resume_lookup(filename)
+                        if p is not None and p > 1.0:
+                            self._resume_apply_later(
+                                filename, max(0.0, float(p) - float(RESUME_REWIND))
+                            )
+                except Exception:
+                    pass
+                return False
+            try:
+                GLib.timeout_add(400, _after_preroll)
+            except Exception:
+                _after_preroll()
+            try:
+                self.update_information(filename)
+            except Exception:
+                pass
+            try:
+                self.select_filename(filename)
+            except Exception:
+                pass
+            try:
+                self._update_pitch_menu_sensitivity()
+                self._update_colorimetry_menu_sensitivity()
+            except Exception:
+                pass
         except Exception as e:
-            self.status_label.set_text(self.tr("Erreur : ") + str(e))
+            try:
+                self.status_label.set_text(self.tr("Erreur : ") + str(e))
+            except Exception:
+                pass
             print("Erreur restauration de session:", e, file=sys.stderr)
+            self.is_playing = False
+            self.is_paused = False
 
     def _load_ui_prefs(self):
         try:
@@ -3348,6 +3811,14 @@ class Myostoox(Gtk.Window):
                 self.desktop_notifications = bool(
                     state.get("desktop_notifications")
                 )
+            if "autostart_enabled" in state:
+                self.autostart_enabled = bool(state.get("autostart_enabled"))
+            if "window_placement" in state:
+                pl = str(state.get("window_placement") or "center")
+                if pl in WINDOW_PLACEMENTS:
+                    self.window_placement = pl
+                else:
+                    self.window_placement = "center"
             if "window_borders" in state:
                 self.window_borders = bool(state.get("window_borders"))
             if "window_layer" in state:
@@ -3406,6 +3877,29 @@ class Myostoox(Gtk.Window):
                 self.playlist_only_maximized = bool(
                     state.get("playlist_only_maximized")
                 )
+            try:
+                v = state.get("playlist_only_prev_size")
+                if isinstance(v, (list, tuple)) and len(v) == 2:
+                    pw, ph = int(v[0]), int(v[1])
+                    if pw > 0 and ph > 0:
+                        self._playlist_only_prev_size = (pw, ph)
+            except Exception: pass
+            try:
+                v = state.get("playlist_only_prev_pos")
+                if isinstance(v, (list, tuple)) and len(v) == 2:
+                    self._playlist_only_prev_pos = (int(v[0]), int(v[1]))
+            except Exception: pass
+            try:
+                v = state.get("playlist_only_prev_layer")
+                if v in ("normal", "below"):
+                    self._playlist_only_prev_layer = v
+            except Exception: pass
+            if "hide_playlist_mode" in state:
+                self.hide_playlist_mode = bool(state.get("hide_playlist_mode"))
+            if "lyrics_transparent_bg" in state:
+                self.lyrics_transparent_bg = bool(state.get("lyrics_transparent_bg"))
+                try: GLib.idle_add(lambda: (self._apply_lyrics_transparent_surface() or False))
+                except Exception: pass
             if "playback_rate" in state:
                 try:
                     r = float(state.get("playback_rate") or 1.0)
@@ -3923,28 +4417,16 @@ class Myostoox(Gtk.Window):
         self.osd_label.hide()
         self.osd_label.get_style_context().add_class("osd")
         self.video_overlay.add_overlay(self.osd_label)
-        self.fs_toast_tl = Gtk.Label(label="")
-        self.fs_toast_tl.set_halign(Gtk.Align.START)
-        self.fs_toast_tl.set_valign(Gtk.Align.START)
-        self.fs_toast_tl.set_margin_start(18)
-        self.fs_toast_tl.set_margin_top(16)
-        self.fs_toast_tl.set_no_show_all(True)
-        self.fs_toast_tl.hide()
-        try: self.fs_toast_tl.get_style_context().add_class("fs-toast")
-        except Exception: pass
-        self.video_overlay.add_overlay(self.fs_toast_tl)
-        self.fs_toast_tr = Gtk.Label(label="")
-        self.fs_toast_tr.set_halign(Gtk.Align.END)
-        self.fs_toast_tr.set_valign(Gtk.Align.START)
-        self.fs_toast_tr.set_margin_end(18)
-        self.fs_toast_tr.set_margin_top(16)
-        self.fs_toast_tr.set_no_show_all(True)
-        self.fs_toast_tr.hide()
-        try: self.fs_toast_tr.get_style_context().add_class("fs-toast")
-        except Exception: pass
-        self.video_overlay.add_overlay(self.fs_toast_tr)
+        self.fs_toast_tl = None
+        self.fs_toast_tr = None
+        self.fs_toast_tl_label = None
+        self.fs_toast_tr_label = None
         self._fs_toast_tl_timeout = 0
         self._fs_toast_tr_timeout = 0
+        try:
+            self._ensure_fs_toast_windows()
+        except Exception as e:
+            print("init toasts:", e, file=sys.stderr)
         self._build_fullscreen_controls()
         self.content_paned.pack1(self.video_overlay, True, True)
         self.connect("window-state-event", self.on_window_state_event)
@@ -3986,6 +4468,15 @@ class Myostoox(Gtk.Window):
         except Exception: pass
         try: scroll.set_overlay_scrolling(False)
         except Exception: pass
+        try:
+            scroll.set_policy(
+                Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC
+            )
+        except Exception: pass
+        try:
+            scroll.set_vexpand(True)
+            scroll.set_hexpand(True)
+        except Exception: pass
         playlist_box.pack_start(scroll, True, True, 0)
         self.playlist_scroll = scroll
         self.playlist_filter = self.playlist.filter_new()
@@ -4020,7 +4511,7 @@ class Myostoox(Gtk.Window):
         )
         bottom_wrap.connect("button-press-event", self._on_chrome_press_for_move)
         self.bottom_bar_wrap = bottom_wrap
-        main.pack_start(bottom_wrap, False, False, 0)
+        main.pack_end(bottom_wrap, False, False, 0)
         self.cover = Gtk.Image()
         self.cover.set_size_request(self._ui_s(105), self._ui_s(105))
         self.cover.get_style_context().add_class("cover")
@@ -6972,7 +7463,20 @@ class Myostoox(Gtk.Window):
 
     def on_video_draw(self, widget, cr):
         if getattr(self, "lyrics_mode", False):
-            self._draw_lyrics(widget, cr)
+            try:
+                self._draw_lyrics(widget, cr)
+            except Exception as e:
+                print("lyrics draw:", e, file=sys.stderr)
+            return True
+        if (
+            bool(getattr(self, "hide_playlist_mode", False))
+            and not getattr(self, "current_is_video", False)
+            and not (self.is_playing and not self.is_paused)
+        ):
+            allocation = widget.get_allocation()
+            cr.set_source_rgb(0.06, 0.07, 0.09)
+            cr.rectangle(0, 0, allocation.width, allocation.height)
+            cr.fill()
             return True
         if self.current_is_video and self.is_playing and not self.is_paused: return False
         if self.current_is_video and self.is_playing and self.is_paused:
@@ -7128,6 +7632,10 @@ class Myostoox(Gtk.Window):
                 self.video_overlay.show()
             self.video_area.show()
             self.video_area.set_size_request(-1, -1)
+            try:
+                if getattr(self, "lyrics_mode", False):
+                    self.video_area.queue_draw()
+            except Exception: pass
             alloc = self.get_allocation()
             h = max(alloc.height, self.get_allocated_height() or 800)
             self.content_paned.set_position(max(h - 2, 400))
@@ -7140,6 +7648,13 @@ class Myostoox(Gtk.Window):
                 self._fullscreen_ui_state = {
                     "paned_pos": self.content_paned.get_position(),
                 }
+            if bool(getattr(self, "hide_playlist_mode", False)):
+                try:
+                    self._pure_video_saved_pos = self.get_position()
+                    self._pure_video_saved_size = self.get_size()
+                except Exception:
+                    self._pure_video_saved_pos = None
+                    self._pure_video_saved_size = None
             self._apply_fullscreen_ui_layout()
             self.fullscreen()
             self.is_fullscreen = True
@@ -7164,16 +7679,17 @@ class Myostoox(Gtk.Window):
                 self._hide_fs_controls()
                 return
             playlist_only = bool(getattr(self, "playlist_only_mode", False))
+            pure_video = bool(getattr(self, "hide_playlist_mode", False)) and not playlist_only
             for attr in ("top_bar_wrap", "top_bar"):
                 w = getattr(self, attr, None)
                 if w is not None:
                     try:
-                        if playlist_only:
+                        if playlist_only or pure_video:
                             w.hide()
                         else:
                             w.show()
                     except Exception: pass
-            if playlist_only:
+            if playlist_only or pure_video:
                 for attr in ("bottom_bar_wrap", "bottom_bar"):
                     w = getattr(self, attr, None)
                     if w is not None:
@@ -7192,12 +7708,20 @@ class Myostoox(Gtk.Window):
                         else:
                             bar.hide()
             if hasattr(self, "playlist_box"):
-                self.playlist_box.show()
+                try:
+                    if pure_video:
+                        self.playlist_box.hide()
+                    else:
+                        self.playlist_box.show()
+                except Exception: pass
             if self.current_is_video:
                 if hasattr(self, "video_overlay"):
                     self.video_overlay.show()
                 self.video_area.show()
-                if playlist_only:
+                if pure_video:
+                    try: self._apply_hide_playlist_mode()
+                    except Exception: pass
+                elif playlist_only:
                     try:
                         self._apply_playlist_only_mode()
                     except Exception:
@@ -7223,13 +7747,17 @@ class Myostoox(Gtk.Window):
                         self.video_overlay.show()
                     if self.video_area is not None:
                         self.video_area.show()
-                        self.video_area.set_size_request(-1, 120)
+                        self.video_area.set_size_request(-1, -1 if pure_video else 120)
                         self.video_area.queue_draw()
-                    try:
-                        self._apply_video_playlist_split()
-                        GLib.idle_add(self._apply_video_playlist_split)
+                    if not pure_video:
+                        try:
+                            self._apply_video_playlist_split()
+                            GLib.idle_add(self._apply_video_playlist_split)
+                        except Exception: pass
+                if pure_video:
+                    try: self._apply_hide_playlist_mode()
                     except Exception: pass
-                if playlist_only:
+                elif playlist_only:
                     try: self._apply_playlist_only_mode()
                     except Exception: pass
             else:
@@ -7246,8 +7774,21 @@ class Myostoox(Gtk.Window):
                     return False
                 try: GLib.idle_add(_re_apply_po)
                 except Exception: pass
+            if pure_video:
+                def _re_apply_pv():
+                    try:
+                        if bool(getattr(self, "hide_playlist_mode", False)):
+                            self._apply_hide_playlist_mode()
+                            # Taille raisonnable + position stable (pas de saut)
+                            self._apply_pure_video_window_geometry(force_base=True)
+                    except Exception: pass
+                    return False
+                try: GLib.idle_add(_re_apply_pv)
+                except Exception: pass
             self._show_cursor()
-            self._hide_fs_controls()
+            # En Pure vidéo, garder l'OSD disponible après sortie du plein écran
+            if not pure_video:
+                self._hide_fs_controls()
             self._cache_video_window_handle()
             self._nudge_video_redraw()
             if self.video_area is not None:
@@ -7416,7 +7957,13 @@ class Myostoox(Gtk.Window):
                 self.video_overlay.show()
             if self.video_area is not None:
                 self.video_area.show()
-                self.video_area.set_size_request(-1, 120)
+                # Plein écran / pure vidéo : zone entière ; sinon bande raisonnable
+                if getattr(self, "is_fullscreen", False) or bool(
+                    getattr(self, "hide_playlist_mode", False)
+                ):
+                    self.video_area.set_size_request(-1, -1)
+                else:
+                    self.video_area.set_size_request(-1, 120)
             self.current_is_video = False
             if bool(getattr(self, "playlist_only_mode", False)):
                 try:
@@ -7465,9 +8012,16 @@ class Myostoox(Gtk.Window):
         allocation = widget.get_allocation()
         w = max(1, allocation.width)
         h = max(1, allocation.height)
-        cr.set_source_rgb(0.04, 0.05, 0.07)
-        cr.rectangle(0, 0, w, h)
-        cr.fill()
+        transparent = bool(getattr(self, "lyrics_transparent_bg", False))
+        cr.save()
+        cr.set_operator(cairo.OPERATOR_SOURCE)
+        if transparent:
+            cr.set_source_rgba(0.0, 0.0, 0.0, 0.0)
+        else:
+            cr.set_source_rgb(0.04, 0.05, 0.07)
+        cr.paint()
+        cr.restore()
+        cr.set_operator(cairo.OPERATOR_OVER)
         data = getattr(self, "lyrics_data", None)
         if not data or not data.get("lines"):
             self._cairo_center_text(
@@ -8040,7 +8594,21 @@ class Myostoox(Gtk.Window):
                         fps = num / float(den)
                 except Exception:
                     fps = None
-                result = {"width": w, "height": h, "fps": fps}
+                par_n, par_d = 1, 1
+                try:
+                    par_n = int(stream.get_par_num()) or 1
+                    par_d = int(stream.get_par_denom()) or 1
+                except Exception:
+                    par_n = par_d = 1
+                if par_n <= 0: par_n = 1
+                if par_d <= 0: par_d = 1
+                result = {
+                    "width": w,
+                    "height": h,
+                    "fps": fps,
+                    "par_n": par_n,
+                    "par_d": par_d,
+                }
                 break
             except Exception:
                 continue
@@ -8446,7 +9014,6 @@ class Myostoox(Gtk.Window):
                 return
             if track_list_index >= len(self.subtitle_tracks): return
             track = self.subtitle_tracks[track_list_index]
-            # ---- Pipeline MKV custom (E-AC3) ----
             if (
                 self._custom_pipeline is not None
                 and track.get("kind") == "embedded"
@@ -8490,7 +9057,6 @@ class Myostoox(Gtk.Window):
                     self.tr("Sous-titres") + " : " + track["label"]
                 )
                 return
-            # ---- Playbin : pistes intégrées ----
             if track.get("kind") == "embedded":
                 self.subtitles_enabled = True
                 if self._active_external_sub_path:
@@ -9455,7 +10021,6 @@ class Myostoox(Gtk.Window):
                 try: GLib.idle_add(self._ensure_video_sink_geometry)
                 except Exception: pass
                 return
-            # ---- Audio : 1re piste + spectre dédié + gain E-AC3 ----
             if media.startswith("audio/"):
                 idx = len(self._custom_audio_pads)
                 lang = _pad_language(pad, struct)
@@ -9647,7 +10212,6 @@ class Myostoox(Gtk.Window):
                 if DEBUG_MYOSTOOX:
                     print("Myostoox: MKV audio (%s)" % alabel, file=sys.stderr)
                 return
-            # ---- Sous-titres TEXTE uniquement → textoverlay ----
             media_l = (media or "").lower()
             is_bitmap_sub = any(
                 tok in media_l
@@ -9874,6 +10438,11 @@ class Myostoox(Gtk.Window):
 
     def _set_playback_volume(self, value):
         value = max(0.0, min(1.0, float(value)))
+        try:
+            gain = max(0.0, min(1.0, float(getattr(self, "_fade_gain", 1.0))))
+        except Exception:
+            gain = 1.0
+        value = value * gain
         if self._custom_volume is not None:
             try:
                 boost = 1.0
@@ -9888,9 +10457,16 @@ class Myostoox(Gtk.Window):
     def play_file(self, filename, resume=True):
         if not filename: return
         if getattr(self, "_resume_prompt_open", False): return
+        fade_in = bool(getattr(self, "_fade_in_pending", False))
+        self._fade_in_pending = False
+        try: self._gapless_cancel()
+        except Exception: pass
+        if not fade_in:
+            try: self._fade_cancel()
+            except Exception: pass
         start_at = 0.0
         try:
-            self._resume_save_current()
+            self._resume_save_current(force=True)
             try:
                 if (
                     isinstance(filename, str)
@@ -9898,7 +10474,8 @@ class Myostoox(Gtk.Window):
                     and os.path.isfile(filename)
                 ):
                     filename = os.path.abspath(filename)
-            except Exception: pass
+            except Exception:
+                pass
             if (
                 resume
                 and getattr(self, "resume_prompt_enabled", True)
@@ -9926,6 +10503,8 @@ class Myostoox(Gtk.Window):
             except Exception: pass
             self._playback_generation += 1
             gen = self._playback_generation
+            try: self._hide_fs_toasts()
+            except Exception: pass
             self._destroy_custom_pipeline()
             try:
                 self.player.set_state(Gst.State.NULL)
@@ -10028,6 +10607,25 @@ class Myostoox(Gtk.Window):
                 self.lyrics_data = None
                 self.lyrics_current_index = -1
                 self.show_video_area(True)
+                self._current_video_dims = None
+                try:
+                    info = self._probe_video_info(filename)
+                    if info and info.get("width") and info.get("height"):
+                        self._current_video_dims = (
+                            int(info["width"]),
+                            int(info["height"]),
+                            int(info.get("par_n") or 1),
+                            int(info.get("par_d") or 1),
+                        )
+                except Exception:
+                    pass
+                if bool(getattr(self, "hide_playlist_mode", False)):
+                    try: self._apply_pure_video_window_geometry()
+                    except Exception: pass
+                    try: self._schedule_pure_video_geometry(400)
+                    except Exception: pass
+                    try: self._schedule_pure_video_geometry(1200)
+                    except Exception: pass
             else:
                 if not (
                     getattr(self, "lyrics_enabled", False)
@@ -10037,6 +10635,15 @@ class Myostoox(Gtk.Window):
                     self.lyrics_data = None
                     self.lyrics_current_index = -1
                     self.show_video_area(False)
+                self._current_video_dims = None
+                # Fin de vidéo → audio local : quitter Pure vidéo
+                if bool(getattr(self, "hide_playlist_mode", False)):
+                    try:
+                        # Ne pas restaurer Sans lecteur automatiquement ici :
+                        # retour au mode lecteur configuré hors Pure vidéo
+                        self._pure_video_prev_playlist_only = False
+                        self.set_hide_playlist_mode(False)
+                    except Exception: pass
             self._prefer_video = False
             self._resume_prefer_video = False
             try:
@@ -10139,6 +10746,9 @@ class Myostoox(Gtk.Window):
             self.update_information(filename)
             self.select_filename(filename)
             self._mpris_notify_playback()
+            if fade_in:
+                try: self._fade_in_start()
+                except Exception as exc: print("fade in:", exc, file=sys.stderr)
             if start_at > 0.0:
                 try: self._resume_apply_later(filename, start_at)
                 except Exception: pass
@@ -10154,6 +10764,8 @@ class Myostoox(Gtk.Window):
                     GLib.timeout_add(350, self._apply_playback_rate_idle)
             except Exception: pass
         except Exception as e:
+            try: self._fade_cancel()
+            except Exception: pass
             self.status_label.set_text(self.tr("Erreur : ") + str(e))
             print("Erreur lecture:", e, file=sys.stderr)
 
@@ -10228,6 +10840,10 @@ class Myostoox(Gtk.Window):
         if self.is_playing and not self.is_paused:
             self._active_pipeline().set_state(Gst.State.PAUSED)
             self.is_paused = True
+            try:
+                self._resume_save_current(force=True)
+            except Exception:
+                pass
             try: self._sync_spectrum_activity()
             except Exception: pass
             self.play_button.set_label("▶")
@@ -10274,6 +10890,13 @@ class Myostoox(Gtk.Window):
                     self._cache_video_window_handle()
                 else:
                     self.show_video_area(True)
+                if getattr(self, "video_sink", None) is None:
+                    try:
+                        self._ensure_video_sink()
+                        self._cache_video_window_handle()
+                        self._apply_video_overlay_handle()
+                    except Exception:
+                        pass
             self._active_pipeline().set_state(Gst.State.PLAYING)
             self.is_playing = True
             self.is_paused = False
@@ -10282,14 +10905,29 @@ class Myostoox(Gtk.Window):
             except Exception: pass
             self.play_button.set_label("❚❚")
             self.status_label.set_text(self.tr("Lecture"))
+            try: self._hide_fs_toasts()
+            except Exception: pass
             if self.current_is_video:
-                self._nudge_video_redraw()
+                try: self._nudge_video_redraw()
+                except Exception: pass
+            # Ne retoucher le rate que s'il n'est pas 1.0 (évite micro-seek / glitch)
+            try:
+                rate = float(getattr(self, "playback_rate", 1.0) or 1.0)
+                if abs(rate - 1.0) > 0.001 and self._is_speed_media():
+                    GLib.timeout_add(150, self._apply_playback_rate_idle)
+            except Exception:
+                pass
             self.show_osd("▶  " + self.tr("Lecture"))
             self._mpris_notify_playback()
             try: self._update_screensaver_inhibit()
             except Exception: pass
     def stop(self, *args):
-        try: self._resume_save_current()
+        try: self._resume_save_current(force=True)
+        except Exception: pass
+        self._fade_in_pending = False
+        try: self._gapless_cancel()
+        except Exception: pass
+        try: self._fade_cancel()
         except Exception: pass
         self._playback_generation += 1
         self._cancel_seek_release_timeout()
@@ -10345,7 +10983,22 @@ class Myostoox(Gtk.Window):
         self.lyrics_current_index = -1
         try: self._inhibit_screensaver(False)
         except Exception: pass
-        self.show_video_area(False)
+        if bool(getattr(self, "hide_playlist_mode", False)):
+            self.current_is_video = False
+            try:
+                if hasattr(self, "video_overlay") and self.video_overlay is not None:
+                    self.video_overlay.show()
+                if getattr(self, "video_area", None) is not None:
+                    self.video_area.show()
+                    self.video_area.set_size_request(-1, -1)
+                    self.video_area.queue_draw()
+            except Exception: pass
+            try: self._apply_hide_playlist_mode()
+            except Exception: pass
+            try: self._show_fs_controls()
+            except Exception: pass
+        else:
+            self.show_video_area(False)
         try: self._update_pitch_menu_sensitivity()
         except Exception: pass
         try: self._update_colorimetry_menu_sensitivity()
@@ -10454,46 +11107,108 @@ class Myostoox(Gtk.Window):
             button.set_tooltip_text(self.tr("Lecture aléatoire"))
             self.status_label.set_text(self.tr("Lecture aléatoire désactivée"))
 
-    def toggle_repeat(self, button):
-        if self.repeat_track_path is not None:
-            self.repeat_track_path = None
-            self.repeat_mode = False
-            button.get_style_context().remove_class("active")
-            button.set_tooltip_text(self.tr("Répéter la playlist"))
-            self.status_label.set_text(self.tr("Répétition désactivée"))
-            return
-        selection = self.tree.get_selection()
-        model, paths = selection.get_selected_rows()
-        selected_path = None
-        if paths:
+    def _selected_playlist_path(self):
+        try:
+            selection = self.tree.get_selection()
+            model, paths = selection.get_selected_rows()
+            if not paths:
+                return None
             try:
                 cursor_path, _ = self.tree.get_cursor()
             except Exception:
                 cursor_path = None
             path = cursor_path if cursor_path is not None else paths[0]
-            try:
-                iterator = model.get_iter(path)
-                if iterator is not None:
-                    selected_path = model[iterator][self.COL_PATH]
-            except Exception:
-                selected_path = None
-        if self.repeat_mode:
-            if selected_path is not None:
-                self.repeat_mode = False
-                self.repeat_track_path = selected_path
-                button.get_style_context().add_class("active")
-                button.set_tooltip_text(self.tr("Répétition du morceau sélectionné activée"))
-                self.status_label.set_text(self.tr("Répétition du morceau sélectionné"))
-            else:
-                self.repeat_mode = False
-                button.get_style_context().remove_class("active")
-                button.set_tooltip_text(self.tr("Répéter la playlist"))
-                self.status_label.set_text(self.tr("Répétition désactivée"))
+            iterator = model.get_iter(path)
+            if iterator is not None:
+                return model[iterator][self.COL_PATH]
+        except Exception:
+            pass
+        return None
+
+    def _sync_repeat_ui(self):
+        """Met à jour le bouton lecteur selon le mode de répétition."""
+        btn = getattr(self, "repeat_button", None)
+        if btn is None:
             return
-        self.repeat_mode = True
-        button.get_style_context().add_class("active")
-        button.set_tooltip_text(self.tr("Répétition de la playlist activée"))
-        self.status_label.set_text(self.tr("Répétition de la playlist"))
+        try:
+            ctx = btn.get_style_context()
+            if self.repeat_track_path is not None:
+                ctx.add_class("active")
+                btn.set_tooltip_text(self.tr("Répéter morceau"))
+            elif self.repeat_mode:
+                ctx.add_class("active")
+                btn.set_tooltip_text(self.tr("Répéter playlist"))
+            else:
+                ctx.remove_class("active")
+                btn.set_tooltip_text(self.tr("Répéter la playlist"))
+        except Exception:
+            pass
+        try:
+            self._mpris_properties_changed(
+                {
+                    "LoopStatus": GLib.Variant(
+                        "s",
+                        "Track"
+                        if self.repeat_track_path
+                        else ("Playlist" if self.repeat_mode else "None"),
+                    )
+                }
+            )
+        except Exception:
+            pass
+
+    def set_repeat_track_mode(self, enabled, path=None):
+        """Active/désactive la répétition d'un morceau (exclut la playlist)."""
+        enabled = bool(enabled)
+        if enabled:
+            p = path or getattr(self, "current_path", None) or self._selected_playlist_path()
+            if not p:
+                return
+            self.repeat_track_path = p
+            self.repeat_mode = False
+            try:
+                self.status_label.set_text(self.tr("Répétition du morceau sélectionné"))
+            except Exception:
+                pass
+        else:
+            self.repeat_track_path = None
+            try:
+                self.status_label.set_text(self.tr("Répétition désactivée"))
+            except Exception:
+                pass
+        self._sync_repeat_ui()
+
+    def set_repeat_playlist_mode(self, enabled):
+        """Active/désactive la répétition de la playlist (exclut le morceau)."""
+        enabled = bool(enabled)
+        if enabled:
+            self.repeat_mode = True
+            self.repeat_track_path = None
+            try:
+                self.status_label.set_text(self.tr("Répétition de la playlist"))
+            except Exception:
+                pass
+        else:
+            self.repeat_mode = False
+            try:
+                self.status_label.set_text(self.tr("Répétition désactivée"))
+            except Exception:
+                pass
+        self._sync_repeat_ui()
+
+    def toggle_repeat(self, button):
+        # Cycle : off → playlist → morceau → off
+        if self.repeat_track_path is not None:
+            self.set_repeat_track_mode(False)
+            return
+        if self.repeat_mode:
+            p = self._selected_playlist_path() or getattr(self, "current_path", None)
+            if p is not None:
+                self.set_repeat_track_mode(True, p)
+            else:
+                self.set_repeat_playlist_mode(False)
+            return
+        self.set_repeat_playlist_mode(True)
 
     def _active_playlist_tree(self):
         try:
@@ -10566,23 +11281,12 @@ class Myostoox(Gtk.Window):
             if getattr(self, "sleep_end_of_track", False):
                 self.sleep_end_of_track = False
                 try:
-                    self.toggle_pause()
-                except Exception:
-                    try:
-                        self.player.set_state(Gst.State.PAUSED)
-                        self.is_paused = True
-                        self.play_button.set_label("▶")
-                    except Exception: pass
+                    self.stop()
+                except Exception: pass
                 try: self.status_label.set_text(self.tr("Minuteur : arrêt"))
                 except Exception: pass
                 return
-            cf = float(getattr(self, "crossfade_seconds", 0.0) or 0.0)
-            if cf >= 0.15 and self.is_playing and not self.is_paused:
-                def _after_fade():
-                    self.next(auto=True)
-                self._start_crossfade_out(then_callback=_after_fade)
-                return
-            self.next(auto=True)
+            self._auto_next_with_fade()
             return
         if message.type == Gst.MessageType.TOC:
             try:
@@ -10740,6 +11444,9 @@ class Myostoox(Gtk.Window):
                 self._try_update_duration()
                 return True
             position_seconds = position / Gst.SECOND
+            if getattr(self, "_gapless_pending", None):
+                try: self._gapless_check_transition(position_seconds)
+                except Exception as exc: print("gapless:", exc, file=sys.stderr)
             if not self._seek_in_progress:
                 if position_seconds > 0.05 or self._last_known_position <= 0.05:
                     self._last_known_position = position_seconds
@@ -10750,6 +11457,8 @@ class Myostoox(Gtk.Window):
                         self.video_area.queue_draw()
                 except Exception: pass
             self._try_update_duration()
+            try: self._transition_tick(position_seconds)
+            except Exception as exc: print("transition:", exc, file=sys.stderr)
             display_position = self._last_known_position
             if not self.user_seeking and self.current_duration > 0:
                 value = min(max(0.0, display_position), self.current_duration)
@@ -11073,6 +11782,26 @@ class Myostoox(Gtk.Window):
             self.mute_button.set_label("♪")
             self.mute_button.set_tooltip_text(self.tr("Muet") + " (M)")
 
+    def _is_osd_video_media(self, path=None):
+        """Vidéo locale, DVD ou Blu-ray (pas radios / IPTV / audio pur)."""
+        path = path if path is not None else getattr(self, "current_path", None)
+        if not path or not isinstance(path, str):
+            return False
+        try:
+            if is_dvd(path) or is_bluray(path):
+                return True
+        except Exception:
+            pass
+        try:
+            if is_stream(path) or is_cdda(path):
+                return False
+        except Exception:
+            pass
+        try:
+            return bool(is_video_file(path))
+        except Exception:
+            return False
+
     def _build_fullscreen_controls(self):
         bar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         try: bar.get_style_context().add_class("fs-controls")
@@ -11116,12 +11845,91 @@ class Myostoox(Gtk.Window):
         self.fs_time_label.set_margin_start(6)
         self.fs_time_label.set_margin_end(6)
         bar.pack_start(self.fs_time_label, False, False, 0)
-        self.fs_shot_btn = Gtk.Button(label="⎙")
-        self.fs_shot_btn.set_relief(Gtk.ReliefStyle.NONE)
-        self.fs_shot_btn.connect("clicked", self._fs_quick_screenshot)
-        try: self.fs_shot_btn.get_style_context().add_class("fs-ctrl-btn")
-        except Exception: pass
+        def _icon_btn(icon_names, fallback_label, cb, tooltip):
+            b = Gtk.Button()
+            b.set_relief(Gtk.ReliefStyle.NONE)
+            b.connect("clicked", cb)
+            try: b.get_style_context().add_class("fs-ctrl-btn")
+            except Exception: pass
+            img = None
+            for name in icon_names:
+                if not name:
+                    continue
+                try:
+                    theme = Gtk.IconTheme.get_default()
+                    if theme is not None and not theme.has_icon(name):
+                        continue
+                    img = Gtk.Image.new_from_icon_name(name, Gtk.IconSize.BUTTON)
+                    if img is not None:
+                        break
+                except Exception:
+                    img = None
+            if img is not None:
+                b.set_image(img)
+                try: b.set_always_show_image(True)
+                except Exception: pass
+            else:
+                b.set_label(fallback_label)
+            b.set_tooltip_text(tooltip)
+            return b
+        self.fs_shot_btn = _icon_btn(
+            (
+                "camera-photo-symbolic",
+                "camera-photo",
+                "applets-screenshooter-symbolic",
+                "applets-screenshooter",
+                "camera-video-symbolic",
+                "camera",
+            ),
+            "📷",
+            self._fs_quick_screenshot,
+            self.tr("Capture d'écran"),
+        )
         bar.pack_start(self.fs_shot_btn, False, False, 0)
+        self.fs_audio_btn = _icon_btn(
+            (),
+            "👂",
+            lambda *a: self._fs_popup_audio_menu(),
+            self.tr("Pistes audio"),
+        )
+        try:
+            self.fs_audio_btn.get_style_context().add_class("fs-ctrl-btn-ear")
+        except Exception:
+            pass
+        try:
+            lab = self.fs_audio_btn.get_child()
+            if isinstance(lab, Gtk.Label):
+                lab.set_markup(
+                    '<span size="16000" weight="normal">👂</span>'
+                )
+        except Exception:
+            pass
+        bar.pack_start(self.fs_audio_btn, False, False, 0)
+        self.fs_subs_btn = _btn(
+            self.tr("ST"),
+            lambda *a: self._fs_popup_subtitle_menu(),
+        )
+        self.fs_subs_btn.set_tooltip_text(self.tr("Sous-titres"))
+        bar.pack_start(self.fs_subs_btn, False, False, 0)
+        self.fs_full_btn = _btn(
+            "⛶",
+            lambda *a: self._fs_toggle_fullscreen(),
+        )
+        self.fs_full_btn.set_tooltip_text(self.tr("Plein écran"))
+        bar.pack_start(self.fs_full_btn, False, False, 0)
+        self.fs_playlist_btn = _icon_btn(
+            (
+                "view-list-symbolic",
+                "view-list",
+                "open-menu-symbolic",
+                "media-playlist-consecutive-symbolic",
+                "media-playlist-consecutive",
+            ),
+            "☰",
+            lambda *a: self._fs_return_to_playlist_mode(),
+            self.tr("Revenir au mode avec playlist"),
+        )
+        bar.pack_start(self.fs_playlist_btn, False, False, 0)
         for child in bar.get_children():
             child.show_all()
         popup = Gtk.Window(type=Gtk.WindowType.POPUP)
@@ -11151,35 +11959,167 @@ class Myostoox(Gtk.Window):
         self.fs_controls = popup
         self._fs_controls_visible = False
         self._fs_popup_geom = None
+        try: self._fs_update_video_buttons()
+        except Exception: pass
+
+    def _ensure_fs_toast_windows(self):
+        """Popups toast : même fond semi-transparent cairo que la barre OSD."""
+        for corner in ("tl", "tr"):
+            attr = "fs_toast_%s" % corner
+            if getattr(self, attr, None) is not None:
+                continue
+            popup = Gtk.Window(type=Gtk.WindowType.POPUP)
+            popup.set_transient_for(self)
+            popup.set_accept_focus(False)
+            popup.set_focus_on_map(False)
+            popup.set_decorated(False)
+            popup.set_skip_taskbar_hint(True)
+            popup.set_skip_pager_hint(True)
+            popup.set_app_paintable(True)
+            try:
+                visual = popup.get_screen().get_rgba_visual()
+                if visual is not None:
+                    popup.set_visual(visual)
+            except Exception:
+                pass
+            popup.connect("draw", self._on_fs_popup_draw)
+            lab = Gtk.Label(label="")
+            lab.set_halign(Gtk.Align.CENTER)
+            lab.set_valign(Gtk.Align.CENTER)
+            try:
+                lab.get_style_context().add_class("fs-toast")
+            except Exception:
+                pass
+            try:
+                s = self._ui_s
+                lab.set_margin_start(s(12))
+                lab.set_margin_end(s(12))
+                lab.set_margin_top(s(6))
+                lab.set_margin_bottom(s(6))
+            except Exception:
+                lab.set_margin_start(12)
+                lab.set_margin_end(12)
+                lab.set_margin_top(6)
+                lab.set_margin_bottom(6)
+            popup.add(lab)
+            lab.show()
+            popup.hide()
+            setattr(self, attr, popup)
+            setattr(self, "fs_toast_%s_label" % corner, lab)
+
+    def _position_fs_toast(self, corner):
+        """Place le toast en haut à gauche/droite de la zone vidéo."""
+        popup = getattr(self, "fs_toast_%s" % corner, None)
+        if popup is None:
+            return
+        try:
+            va = getattr(self, "video_area", None)
+            if va is None:
+                return
+            gw = va.get_window()
+            if gw is None:
+                return
+            res = gw.get_origin()
+            ox, oy = res[-2], res[-1]
+            vw = va.get_allocated_width() or 0
+            popup.show()
+            try:
+                while Gtk.events_pending():
+                    Gtk.main_iteration_do(False)
+            except Exception:
+                pass
+            tw, th = 120, 28
+            try:
+                nat = popup.get_preferred_size()[1]
+                tw = max(nat.width, 40)
+                th = max(nat.height, 24)
+            except Exception:
+                try:
+                    a = popup.get_allocation()
+                    tw = max(a.width, 40)
+                    th = max(a.height, 24)
+                except Exception:
+                    pass
+            margin = 16
+            try:
+                margin = int(self._ui_s(16))
+            except Exception:
+                pass
+            if corner == "tl":
+                x = ox + margin
+                y = oy + margin
+            else:
+                x = ox + max(0, vw - tw - margin)
+                y = oy + margin
+            popup.move(int(x), int(y))
+            try:
+                popup.resize(int(tw), int(th))
+            except Exception:
+                pass
+        except Exception as e:
+            print("position toast:", e, file=sys.stderr)
+
+    def _hide_fs_toasts(self):
+        """Masque immédiatement tous les toasts OSD."""
+        for corner in ("tl", "tr"):
+            attr_t = "_fs_toast_%s_timeout" % corner
+            tid = getattr(self, attr_t, 0) or 0
+            if tid:
+                try:
+                    GLib.source_remove(tid)
+                except Exception:
+                    pass
+                try:
+                    setattr(self, attr_t, 0)
+                except Exception:
+                    pass
+            popup = getattr(self, "fs_toast_%s" % corner, None)
+            if popup is not None:
+                try:
+                    popup.hide()
+                except Exception:
+                    pass
 
     def _show_fs_toast(self, corner, text, duration_ms=1800):
-        if not getattr(self, "is_fullscreen", False): return
-        label = (
-            getattr(self, "fs_toast_tl", None)
-            if corner == "tl"
-            else getattr(self, "fs_toast_tr", None)
-        )
-        if label is None: return
-        try:
-            label.set_text(str(text))
-            label.show()
-        except Exception:
+        """Toast OSD semi-transparent (identique à la barre de navigation OSD)."""
+        if not (
+            getattr(self, "is_fullscreen", False)
+            or bool(getattr(self, "current_is_video", False))
+            or bool(getattr(self, "hide_playlist_mode", False))
+        ):
             return
-        attr = (
-            "_fs_toast_tl_timeout"
-            if corner == "tl"
-            else "_fs_toast_tr_timeout"
-        )
+        try:
+            self._ensure_fs_toast_windows()
+        except Exception:
+            pass
+        popup = getattr(self, "fs_toast_%s" % corner, None)
+        lab = getattr(self, "fs_toast_%s_label" % corner, None)
+        if popup is None or lab is None:
+            return
+        try:
+            lab.set_text(str(text))
+            lab.show()
+            self._position_fs_toast(corner)
+            popup.show()
+            popup.queue_draw()
+        except Exception as e:
+            print("show toast:", e, file=sys.stderr)
+            return
+        attr = "_fs_toast_%s_timeout" % corner
         tid = getattr(self, attr, 0) or 0
         if tid:
-            try: GLib.source_remove(tid)
-            except Exception: pass
-        def _hide(a=attr, lab=label):
+            try:
+                GLib.source_remove(tid)
+            except Exception:
+                pass
+        def _hide(a=attr, p=popup):
             setattr(self, a, 0)
-            try: lab.hide()
-            except Exception: pass
+            try:
+                p.hide()
+            except Exception:
+                pass
             return False
-        setattr(self, attr, GLib.timeout_add(duration_ms, _hide))
+        setattr(self, attr, GLib.timeout_add(max(200, int(duration_ms)), _hide))
 
     def _fs_quick_screenshot(self, *args):
         if not self.current_is_video or self.video_area is None: return
@@ -11247,21 +12187,161 @@ class Myostoox(Gtk.Window):
         except Exception: pass
         self._show_fs_toast("tl", name, 2000)
 
+    def _local_video_display_title(self):
+        """Nom du fichier vidéo local sans extension (pas DVD/stream)."""
+        path = getattr(self, "current_path", None)
+        if not path or not isinstance(path, str):
+            return None
+        try:
+            if is_stream(path) or is_cdda(path) or is_dvd(path) or is_bluray(path):
+                return None
+        except Exception:
+            return None
+        try:
+            if not is_video_file(path):
+                return None
+        except Exception:
+            return None
+        try:
+            base = os.path.basename(path)
+            name, _ext = os.path.splitext(base)
+            name = (name or "").strip()
+            return name or None
+        except Exception:
+            return None
+
+    def _fs_maybe_show_pause_title(self):
+        """En pause, affiche le titre fichier en haut à gauche au survol OSD."""
+        try:
+            if not bool(getattr(self, "is_paused", False)):
+                return
+            if not (
+                bool(getattr(self, "current_is_video", False))
+                or bool(getattr(self, "hide_playlist_mode", False))
+            ):
+                return
+            title = self._local_video_display_title()
+            if not title:
+                return
+            self._show_fs_toast("tl", title, duration_ms=3500)
+        except Exception:
+            pass
+
     def _on_fs_controls_enter(self, *args):
         self._show_cursor()
+        try: self._fs_maybe_show_pause_title()
+        except Exception: pass
         return False
+
+    def _pointer_over_fs_controls(self):
+        """True si le pointeur est encore sur la barre OSD (popup)."""
+        bar = getattr(self, "fs_controls", None)
+        if bar is None or not bar.get_visible():
+            return False
+        try:
+            display = bar.get_display()
+            if display is None:
+                return False
+            seat = display.get_default_seat()
+            if seat is None:
+                return False
+            ptr = seat.get_pointer()
+            if ptr is None:
+                return False
+            _screen, x, y = ptr.get_position()
+            try:
+                wx, wy = bar.get_position()
+            except Exception:
+                win = bar.get_window()
+                if win is None:
+                    return False
+                origin = win.get_origin()
+                wx, wy = origin[-2], origin[-1]
+            ww = bar.get_allocated_width() or 0
+            wh = bar.get_allocated_height() or 0
+            if ww <= 1 or wh <= 1:
+                try:
+                    sz = bar.get_size()
+                    ww = max(ww, int(sz[0] or 0))
+                    wh = max(wh, int(sz[1] or 0))
+                except Exception:
+                    pass
+            margin = 8
+            return (
+                (wx - margin) <= x <= (wx + ww + margin)
+                and (wy - margin) <= y <= (wy + wh + margin)
+            )
+        except Exception:
+            return False
+
+    def _start_fs_pointer_watch(self):
+        """Surveille le pointeur tant que l'OSD est visible (sortie hors fenêtre / autre app)."""
+        try:
+            if getattr(self, "_fs_ptr_watch_tid", 0):
+                return
+            def _tick():
+                try:
+                    if not getattr(self, "_fs_controls_visible", False):
+                        self._fs_ptr_watch_tid = 0
+                        return False
+                    if getattr(self, "user_seeking", False):
+                        return True
+                    if not self._pointer_over_fs_controls():
+                        self._hide_fs_controls()
+                        self._fs_ptr_watch_tid = 0
+                        return False
+                except Exception:
+                    pass
+                return True
+            self._fs_ptr_watch_tid = GLib.timeout_add(250, _tick)
+        except Exception:
+            self._fs_ptr_watch_tid = 0
+
+    def _stop_fs_pointer_watch(self):
+        for attr in ("_fs_ptr_watch_tid", "_fs_leave_tid"):
+            tid = getattr(self, attr, 0) or 0
+            if tid:
+                try: GLib.source_remove(tid)
+                except Exception: pass
+            try: setattr(self, attr, 0)
+            except Exception: pass
 
     def _on_fs_controls_leave(self, widget, event):
         try:
-            if getattr(event, "detail", None) == Gdk.NotifyType.INFERIOR: return False
-        except Exception: pass
-        if getattr(self, "user_seeking", False): return False
-        if self._fs_osd_nav_allowed():
-            self._hide_fs_controls()
+            if getattr(event, "detail", None) == Gdk.NotifyType.INFERIOR:
+                return False
+        except Exception:
+            pass
+        if getattr(self, "user_seeking", False):
+            return False
+        try:
+            tid = getattr(self, "_fs_leave_tid", 0) or 0
+            if tid:
+                try: GLib.source_remove(tid)
+                except Exception: pass
+            def _check():
+                self._fs_leave_tid = 0
+                try:
+                    if getattr(self, "user_seeking", False):
+                        return False
+                    if not getattr(self, "_fs_controls_visible", False):
+                        return False
+                    if not self._pointer_over_fs_controls():
+                        self._hide_fs_controls()
+                except Exception:
+                    try: self._hide_fs_controls()
+                    except Exception: pass
+                return False
+            self._fs_leave_tid = GLib.timeout_add(120, _check)
+        except Exception:
+            try: self._hide_fs_controls()
+            except Exception: pass
         return False
 
     def _on_fs_controls_motion(self, *args):
         self._show_cursor()
+        try: self._fs_maybe_show_pause_title()
+        except Exception: pass
         return False
 
     def _sync_fs_transport_ui(self):
@@ -11300,6 +12380,8 @@ class Myostoox(Gtk.Window):
             bool(getattr(self, "playlist_only_mode", False))
             and bool(getattr(self, "current_is_video", False))
         ):
+            return True
+        if bool(getattr(self, "hide_playlist_mode", False)):
             return True
         return False
 
@@ -11372,6 +12454,165 @@ class Myostoox(Gtk.Window):
             except Exception: pass
         return False
 
+    def _fs_update_video_buttons(self):
+        """Affiche les boutons vidéo OSD et rafraîchit leurs libellés traduits."""
+        show = False
+        try:
+            if bool(getattr(self, "hide_playlist_mode", False)):
+                show = True
+            else:
+                show = bool(self._is_osd_video_media()) and bool(
+                    getattr(self, "current_is_video", False)
+                )
+        except Exception:
+            show = False
+        try:
+            b = getattr(self, "fs_audio_btn", None)
+            if b is not None:
+                b.set_tooltip_text(self.tr("Pistes audio"))
+            b = getattr(self, "fs_subs_btn", None)
+            if b is not None:
+                b.set_label(self.tr("ST"))
+                b.set_tooltip_text(self.tr("Sous-titres"))
+            b = getattr(self, "fs_playlist_btn", None)
+            if b is not None:
+                b.set_tooltip_text(self.tr("Revenir au mode avec playlist"))
+            b = getattr(self, "fs_full_btn", None)
+            if b is not None:
+                fs = bool(getattr(self, "is_fullscreen", False))
+                b.set_label("🡽" if fs else "⛶")
+                b.set_tooltip_text(
+                    self.tr("Quitter le plein écran") if fs else self.tr("Plein écran")
+                )
+        except Exception: pass
+        for attr in ("fs_audio_btn", "fs_subs_btn", "fs_full_btn", "fs_playlist_btn"):
+            w = getattr(self, attr, None)
+            if w is None: continue
+            try:
+                if show:
+                    w.show()
+                else:
+                    w.hide()
+            except Exception: pass
+
+    def _fs_toggle_fullscreen(self, *args):
+        try:
+            self.toggle_video_fullscreen()
+        except Exception as e:
+            print("fs fullscreen:", e, file=sys.stderr)
+        try: self._fs_update_video_buttons()
+        except Exception: pass
+
+    def _fs_return_to_playlist_mode(self, *args):
+        """Quitte le plein écran / Pure vidéo et réaffiche la playlist (taille normale)."""
+        was_pure = bool(getattr(self, "hide_playlist_mode", False))
+        try:
+            if was_pure:
+                self.set_hide_playlist_mode(False)
+        except Exception as e:
+            print("return playlist pure:", e, file=sys.stderr)
+        try:
+            if getattr(self, "is_fullscreen", False):
+                self.toggle_video_fullscreen()
+        except Exception: pass
+        try:
+            if bool(getattr(self, "playlist_only_mode", False)):
+                try: self._apply_playlist_only_mode()
+                except Exception: pass
+            else:
+                if hasattr(self, "playlist_box") and self.playlist_box is not None:
+                    self.playlist_box.show()
+                try: self._apply_video_playlist_split()
+                except Exception: pass
+        except Exception: pass
+        if was_pure:
+            try:
+                GLib.idle_add(lambda: (self._restore_pre_pure_video_window() or False))
+                GLib.timeout_add(120, lambda: (self._restore_pre_pure_video_window() or False))
+            except Exception:
+                pass
+        try: self._hide_fs_controls()
+        except Exception: pass
+        try:
+            self.status_label.set_text(self.tr("Mode playlist"))
+        except Exception: pass
+
+    def _fs_popup_audio_menu(self, *args):
+        menu = Gtk.Menu()
+        tracks = list(getattr(self, "audio_tracks", None) or [])
+        if not tracks:
+            empty = Gtk.MenuItem(label=self.tr("Aucune piste disponible"))
+            empty.set_sensitive(False)
+            menu.append(empty)
+        else:
+            group = None
+            cur = int(getattr(self, "current_audio_index", 0) or 0)
+            for idx, label in tracks:
+                item = Gtk.RadioMenuItem.new_with_label_from_widget(group, label)
+                item.set_active(idx == cur)
+                if group is None:
+                    group = item
+                item.connect(
+                    "toggled",
+                    lambda m, i=idx: self.set_audio_track(i) if m.get_active() else None,
+                )
+                menu.append(item)
+        menu.show_all()
+        try:
+            menu.popup_at_widget(
+                getattr(self, "fs_audio_btn", self),
+                Gdk.Gravity.NORTH,
+                Gdk.Gravity.SOUTH,
+                None,
+            )
+        except Exception:
+            try: menu.popup(None, None, None, None, 0, Gtk.get_current_event_time())
+            except Exception: pass
+
+    def _fs_popup_subtitle_menu(self, *args):
+        menu = Gtk.Menu()
+        on = Gtk.CheckMenuItem(label=self.tr("Activer les sous-titres"))
+        on.set_active(bool(getattr(self, "subtitles_enabled", False)))
+        on.connect("toggled", self.toggle_subtitles)
+        menu.append(on)
+        tracks = list(getattr(self, "subtitle_tracks", None) or [])
+        if tracks:
+            menu.append(Gtk.SeparatorMenuItem())
+            none_item = Gtk.RadioMenuItem.new_with_label_from_widget(
+                None, self.tr("Aucun")
+            )
+            none_item.set_active(int(getattr(self, "current_subtitle_index", -1)) < 0)
+            none_item.connect(
+                "toggled",
+                lambda m: self.set_subtitle_track(-1) if m.get_active() else None,
+            )
+            menu.append(none_item)
+            group = none_item
+            for list_idx, track in enumerate(tracks):
+                label = track.get("label") if isinstance(track, dict) else str(track)
+                item = Gtk.RadioMenuItem.new_with_label_from_widget(group, label)
+                item.set_active(list_idx == int(getattr(self, "current_subtitle_index", -1)))
+                item.connect(
+                    "toggled",
+                    lambda m, i=list_idx: self.set_subtitle_track(i) if m.get_active() else None,
+                )
+                menu.append(item)
+        else:
+            empty = Gtk.MenuItem(label=self.tr("Aucune piste disponible"))
+            empty.set_sensitive(False)
+            menu.append(empty)
+        menu.show_all()
+        try:
+            menu.popup_at_widget(
+                getattr(self, "fs_subs_btn", self),
+                Gdk.Gravity.NORTH,
+                Gdk.Gravity.SOUTH,
+                None,
+            )
+        except Exception:
+            try: menu.popup(None, None, None, None, 0, Gtk.get_current_event_time())
+            except Exception: pass
+
     def _show_fs_controls(self):
         if not self._fs_osd_nav_allowed(): return
         bar = getattr(self, "fs_controls", None)
@@ -11402,10 +12643,16 @@ class Myostoox(Gtk.Window):
             self._position_fs_popup()
             bar.show()
             self._fs_controls_visible = True
+            try: self._fs_update_video_buttons()
+            except Exception: pass
+            try: self._start_fs_pointer_watch()
+            except Exception: pass
         except Exception: pass
 
     def _hide_fs_controls(self):
         if getattr(self, "user_seeking", False): return
+        try: self._stop_fs_pointer_watch()
+        except Exception: pass
         bar = getattr(self, "fs_controls", None)
         if bar is None: return
         try: bar.hide()
@@ -15079,54 +16326,88 @@ class Myostoox(Gtk.Window):
                 self._save_resume_data()
         except Exception: pass
 
+    def _query_pipeline_position_sec(self):
+        """Position courante du pipeline actif (secondes), ou None."""
+        try:
+            pipe = self._active_pipeline()
+            if pipe is None:
+                return None
+            ok, cur = pipe.query_position(Gst.Format.TIME)
+            if ok and cur is not None and cur >= 0:
+                return float(cur) / float(Gst.SECOND)
+        except Exception:
+            pass
+        return None
+
     def _resume_lookup(self, path):
         rec = self._resume_data.get(self._resume_key(path))
-        if not isinstance(rec, dict): return None
+        if not isinstance(rec, dict):
+            return None
         try:
             st = os.stat(path)
-            if (
-                int(rec.get("m", -1)) != int(st.st_mtime)
-                or int(rec.get("s", -1)) != int(st.st_size)
-            ):
-                raise ValueError("fichier modifié")
-            pos = float(rec.get("pos", 0))
-            dur = float(rec.get("dur", 0))
+            if int(rec.get("s", -1)) != int(st.st_size):
+                self._resume_forget(path)
+                return None
+            pos = float(rec.get("pos", 0) or 0)
+            dur = float(rec.get("dur", 0) or 0)
         except Exception:
             self._resume_forget(path)
             return None
-        if pos < RESUME_MIN_POS or (dur > 0 and pos > dur - RESUME_END_MARGIN):
+        if pos < RESUME_MIN_POS:
+            self._resume_forget(path)
+            return None
+        if dur > 0 and pos > dur - RESUME_END_MARGIN:
             self._resume_forget(path)
             return None
         return pos
 
     def _resume_save_current(self, force=False):
-        if getattr(self, "_resume_reset", False): return
-        if not getattr(self, "resume_prompt_enabled", True): return
+        if getattr(self, "_resume_reset", False):
+            return
+        if not getattr(self, "resume_prompt_enabled", True):
+            return
         path = getattr(self, "current_path", None)
-        if not self._resume_eligible(path): return
-        if not force and not self.is_playing: return
+        if not self._resume_eligible(path):
+            return
+        # Sauvegarder en lecture, en pause, ou si force (stop / destroy / changement de piste)
+        if not force and not (
+            getattr(self, "is_playing", False) or getattr(self, "is_paused", False)
+        ):
+            return
         pos = float(getattr(self, "_last_known_position", 0.0) or 0.0)
+        live = self._query_pipeline_position_sec()
+        if live is not None and live > 0.5:
+            pos = max(pos, live)
         dur = float(getattr(self, "current_duration", 0.0) or 0.0)
         if dur <= 0:
             try:
                 adj = self.position_scale.get_adjustment()
                 dur = float(adj.get_upper() or 0.0)
-            except Exception: pass
-        if dur > 0 and dur < RESUME_MIN_DURATION: return
+            except Exception:
+                pass
+            if dur <= 0 and live is not None:
+                try:
+                    ok, d = self._active_pipeline().query_duration(Gst.Format.TIME)
+                    if ok and d and d > 0:
+                        dur = float(d) / float(Gst.SECOND)
+                except Exception:
+                    pass
+        if dur > 0 and dur < RESUME_MIN_DURATION:
+            return
         if dur > 0 and pos > dur - RESUME_END_MARGIN:
             self._resume_forget(path)
             return
-        if pos < RESUME_MIN_POS: return
+        if pos < RESUME_MIN_POS:
+            return
         try:
             st = os.stat(path)
             path = os.path.abspath(path)
         except OSError:
             return
         key = self._resume_key(path)
-        self._resume_data.pop(key, None)
         self._resume_data[key] = {
-            "pos": pos,
-            "dur": dur,
+            "pos": float(pos),
+            "dur": float(dur) if dur > 0 else 0.0,
             "m": int(st.st_mtime),
             "s": int(st.st_size),
             "t": time.time(),
@@ -15196,8 +16477,13 @@ class Myostoox(Gtk.Window):
             if ready:
                 try: self._try_update_duration()
                 except Exception: pass
+                # Attendre une durée valide pour éviter seeks aberrants
+                dur = float(getattr(self, "current_duration", 0) or 0)
+                if dur <= 1.0 and tries["n"] < 15:
+                    return True
                 try:
-                    self.seek_to(pos)
+                    if pos >= 0 and (dur <= 0 or pos < dur):
+                        self.seek_to(min(pos, max(0.0, dur - 0.5) if dur > 1 else pos))
                     return False
                 except Exception: pass
             return tries["n"] < 40
@@ -15415,7 +16701,6 @@ class Myostoox(Gtk.Window):
         nano_menu.append(nano_vertical_root)
         menu.append(nano_root)
         menu.append(Gtk.SeparatorMenuItem())
-        # --- Options audio (Égaliseur / Pitch en tête) ---
         audio_opts_root = Gtk.MenuItem(label=self.tr("Options audio"))
         try:
             audio_opts_root.set_submenu(self._build_audio_options_submenu())
@@ -15431,39 +16716,17 @@ class Myostoox(Gtk.Window):
                 menu.append(_mi)
         except Exception as e:
             print("tracks menu:", e, file=sys.stderr)
-        lyrics_item = Gtk.CheckMenuItem(label=self.tr("Paroles"))
-        lyrics_item.set_active(bool(getattr(self, "lyrics_enabled", False)))
-        lyrics_item.connect("toggled", self.toggle_lyrics)
-        menu.append(lyrics_item)
         try:
             menu.append(self._build_colorimetry_menu_item())
         except Exception as e:
             print("colorimetry menu:", e, file=sys.stderr)
         menu.append(Gtk.SeparatorMenuItem())
-        # ---- Apparence (partagé avec le menu contextuel playlist) ----
         try:
             appearance_item = self._build_appearance_menu_item()
             if appearance_item is not None:
                 menu.append(appearance_item)
         except Exception as e:
             print("appearance menu:", e, file=sys.stderr)
-        assoc_menu = Gtk.Menu()
-        assoc_item = Gtk.MenuItem(label=self.tr("Associer les formats"))
-        assoc_item.set_submenu(assoc_menu)
-        self._building_assoc_menu = True
-        all_item = Gtk.MenuItem(label=self.tr("Tout sélectionner"))
-        all_item.connect("activate", self.associate_all_formats)
-        assoc_menu.append(all_item)
-        assoc_menu.append(Gtk.SeparatorMenuItem())
-        for ext, _mimes in ASSOCIABLE_FORMATS:
-            label = ext.lstrip(".").upper()
-            check = Gtk.CheckMenuItem(label=label)
-            check.set_active(self.is_format_associated(ext))
-            check.connect("toggled", self.toggle_format_association, ext)
-            assoc_menu.append(check)
-        self._building_assoc_menu = False
-        menu.append(assoc_item)
-        # ---- Performances (décodage Logiciel / Matériel) ----
         perf_menu = Gtk.Menu()
         perf_item = Gtk.MenuItem(label=self.tr("Performances"))
         perf_item.set_submenu(perf_menu)
@@ -15484,9 +16747,64 @@ class Myostoox(Gtk.Window):
             perf_menu.append(item)
         menu.append(perf_item)
         menu.append(Gtk.SeparatorMenuItem())
+        prefs_menu = Gtk.Menu()
+        prefs_root = Gtk.MenuItem(label=self.tr("Préférences"))
+        prefs_root.set_submenu(prefs_menu)
+        assoc_menu = Gtk.Menu()
+        assoc_item = Gtk.MenuItem(label=self.tr("Associer les formats"))
+        assoc_item.set_submenu(assoc_menu)
+        self._building_assoc_menu = True
+        all_item = Gtk.MenuItem(label=self.tr("Tout sélectionner"))
+        all_item.connect("activate", self.associate_all_formats)
+        assoc_menu.append(all_item)
+        assoc_menu.append(Gtk.SeparatorMenuItem())
+        for ext, _mimes in ASSOCIABLE_FORMATS:
+            label = ext.lstrip(".").upper()
+            check = Gtk.CheckMenuItem(label=label)
+            check.set_active(self.is_format_associated(ext))
+            check.connect("toggled", self.toggle_format_association, ext)
+            assoc_menu.append(check)
+        self._building_assoc_menu = False
+        prefs_menu.append(assoc_item)
+        autostart_item = Gtk.CheckMenuItem(label=self.tr("Au démarrage"))
+        try:
+            autostart_item.set_active(
+                bool(self._is_autostart_enabled())
+                or bool(getattr(self, "autostart_enabled", False))
+            )
+        except Exception:
+            autostart_item.set_active(bool(getattr(self, "autostart_enabled", False)))
+        autostart_item.connect("toggled", self.toggle_autostart)
+        prefs_menu.append(autostart_item)
+        placement_item = Gtk.MenuItem(label=self.tr("Placement"))
+        placement_item.connect("activate", self.show_window_placement_dialog)
+        prefs_menu.append(placement_item)
         shortcuts_item = Gtk.MenuItem(label=self.tr("Raccourcis clavier"))
         shortcuts_item.connect("activate", self.show_keyboard_shortcuts)
-        menu.append(shortcuts_item)
+        prefs_menu.append(shortcuts_item)
+        notifications_item = Gtk.CheckMenuItem(label=self.tr("Notifications"))
+        notifications_item.set_active(
+            bool(getattr(self, "desktop_notifications", True))
+        )
+        notifications_item.connect("toggled", self.toggle_desktop_notifications)
+        prefs_menu.append(notifications_item)
+        resume_menu = Gtk.Menu()
+        resume_root = Gtk.MenuItem(label=self.tr("Reprise de lecture"))
+        resume_root.set_submenu(resume_menu)
+        resume_check = Gtk.CheckMenuItem(label=self.tr("Activer"))
+        resume_check.set_active(
+            bool(getattr(self, "resume_prompt_enabled", True))
+        )
+        resume_check.connect("toggled", self.toggle_resume_prompt)
+        resume_menu.append(resume_check)
+        resume_clear = Gtk.MenuItem(
+            label=self.tr("Effacer les positions mémorisées")
+        )
+        resume_clear.set_sensitive(bool(getattr(self, "_resume_data", None)))
+        resume_clear.connect("activate", self.clear_resume_data)
+        resume_menu.append(resume_clear)
+        prefs_menu.append(resume_root)
+        menu.append(prefs_root)
         recent_menu = Gtk.Menu()
         recent_root = Gtk.MenuItem(label=self.tr("Historique récent"))
         recent_root.set_submenu(recent_menu)
@@ -15526,22 +16844,6 @@ class Myostoox(Gtk.Window):
             empty_r.set_sensitive(False)
             recent_menu.append(empty_r)
         menu.append(recent_root)
-        resume_menu = Gtk.Menu()
-        resume_root = Gtk.MenuItem(label=self.tr("Reprise de lecture"))
-        resume_root.set_submenu(resume_menu)
-        resume_check = Gtk.CheckMenuItem(label=self.tr("Activer"))
-        resume_check.set_active(
-            bool(getattr(self, "resume_prompt_enabled", True))
-        )
-        resume_check.connect("toggled", self.toggle_resume_prompt)
-        resume_menu.append(resume_check)
-        resume_clear = Gtk.MenuItem(
-            label=self.tr("Effacer les positions mémorisées")
-        )
-        resume_clear.set_sensitive(bool(getattr(self, "_resume_data", None)))
-        resume_clear.connect("activate", self.clear_resume_data)
-        resume_menu.append(resume_clear)
-        menu.append(resume_root)
         menu.append(Gtk.SeparatorMenuItem())
         about_item = Gtk.MenuItem()
         about_label = Gtk.Label()
@@ -15637,7 +16939,6 @@ class Myostoox(Gtk.Window):
 
     def _build_media_track_menu_items(self):
         items = []
-        # Audio
         audio_menu = Gtk.Menu()
         audio_root = Gtk.MenuItem(label=self.tr("Pistes audio"))
         audio_root.set_submenu(audio_menu)
@@ -15655,7 +16956,6 @@ class Myostoox(Gtk.Window):
             empty.set_sensitive(False)
             audio_menu.append(empty)
         items.append(audio_root)
-        # Chapters
         ch_menu = Gtk.Menu()
         ch_root = Gtk.MenuItem(label=self.tr("Chapitres"))
         ch_root.set_submenu(ch_menu)
@@ -15670,7 +16970,6 @@ class Myostoox(Gtk.Window):
             empty.set_sensitive(False)
             ch_menu.append(empty)
         items.append(ch_root)
-        # Subtitles
         sub_menu = Gtk.Menu()
         sub_root = Gtk.MenuItem(label=self.tr("Sous-titres"))
         sub_root.set_submenu(sub_menu)
@@ -15696,6 +16995,18 @@ class Myostoox(Gtk.Window):
             empty.set_sensitive(False)
             sub_menu.append(empty)
         items.append(sub_root)
+        lyrics_root = Gtk.MenuItem(label=self.tr("Paroles"))
+        lyrics_sub = Gtk.Menu()
+        lyrics_item = Gtk.CheckMenuItem(label=self.tr("Activer"))
+        lyrics_item.set_active(bool(getattr(self, "lyrics_enabled", False)))
+        lyrics_item.connect("toggled", self.toggle_lyrics)
+        lyrics_sub.append(lyrics_item)
+        lyrics_tr = Gtk.CheckMenuItem(label=self.tr("Fond transparent"))
+        lyrics_tr.set_active(bool(getattr(self, "lyrics_transparent_bg", False)))
+        lyrics_tr.connect("toggled", self._on_lyrics_transparent_toggled)
+        lyrics_sub.append(lyrics_tr)
+        lyrics_root.set_submenu(lyrics_sub)
+        items.append(lyrics_root)
         return items
 
     def _build_colorimetry_menu_item(self):
@@ -15793,7 +17104,6 @@ class Myostoox(Gtk.Window):
         appearance_menu = Gtk.Menu()
         appearance_item = Gtk.MenuItem(label=self.tr("Apparence"))
         appearance_item.set_submenu(appearance_menu)
-        # ---- Langue (en tête) ----
         language_menu = Gtk.Menu()
         language_item = Gtk.MenuItem(
             label="Language" if self.language == "English" else self.tr("Langue")
@@ -15810,7 +17120,6 @@ class Myostoox(Gtk.Window):
             item.connect("toggled", self._language_menu_toggled, language)
             language_menu.append(item)
         appearance_menu.append(language_item)
-        # ---- Thèmes (en tête) ----
         themes_menu = Gtk.Menu()
         themes_item = Gtk.MenuItem(label=self.tr("Thèmes"))
         themes_item.set_submenu(themes_menu)
@@ -15877,7 +17186,6 @@ class Myostoox(Gtk.Window):
             radio_below.set_active(True)
         layer_menu.append(radio_normal)
         layer_menu.append(radio_below)
-        appearance_menu.append(layer_root)
         playlist_only_root = Gtk.MenuItem(label=self.tr("Sans lecteur"))
         playlist_only_sub = Gtk.Menu()
         playlist_only_check = Gtk.CheckMenuItem(label=self.tr("Activer"))
@@ -15901,6 +17209,10 @@ class Myostoox(Gtk.Window):
         playlist_only_sub.append(playlist_only_max)
         playlist_only_root.set_submenu(playlist_only_sub)
         appearance_menu.append(playlist_only_root)
+        hide_pl_item = Gtk.CheckMenuItem(label=self.tr("Pure vidéo"))
+        hide_pl_item.set_active(bool(getattr(self, "hide_playlist_mode", False)))
+        hide_pl_item.connect("toggled", self._on_hide_playlist_menu_toggled)
+        appearance_menu.append(hide_pl_item)
         transparency_root = Gtk.MenuItem(label=self.tr("Transparence"))
         transparency_sub = Gtk.Menu()
         transparency_check = Gtk.CheckMenuItem(label=self.tr("Activer"))
@@ -15914,16 +17226,11 @@ class Myostoox(Gtk.Window):
         transparency_sub.append(transparency_settings)
         transparency_root.set_submenu(transparency_sub)
         appearance_menu.append(transparency_root)
+        appearance_menu.append(layer_root)
         metadata_item = Gtk.CheckMenuItem(label=self.tr("Métadonnées"))
         metadata_item.set_active(bool(getattr(self, "show_metadata_panel", True)))
         metadata_item.connect("toggled", self._on_metadata_panel_menu_toggled)
         appearance_menu.append(metadata_item)
-        notifications_item = Gtk.CheckMenuItem(label=self.tr("Notifications"))
-        notifications_item.set_active(
-            bool(getattr(self, "desktop_notifications", True))
-        )
-        notifications_item.connect("toggled", self.toggle_desktop_notifications)
-        appearance_menu.append(notifications_item)
         reset_appearance = Gtk.MenuItem(label=self.tr("Réinitialisation"))
         reset_appearance.connect("activate", self.reset_appearance_defaults)
         appearance_menu.append(reset_appearance)
@@ -15946,6 +17253,8 @@ class Myostoox(Gtk.Window):
         self.playlist_transparency_opacity = 0.35
         self.show_metadata_panel = True
         self.desktop_notifications = True
+        self.autostart_enabled = False
+        self.window_placement = "center"
         self.mini_banner_enabled = True
         self.nano_banner_enabled = False
         try: self.set_decorated(True)
@@ -16006,6 +17315,16 @@ class Myostoox(Gtk.Window):
             self._apply_playlist_only_mode()
         except Exception as e:
             print("playlist_only:", e, file=sys.stderr)
+        # Sans lecteur : playlist visible, Pure vidéo désactivé
+        if enabled and bool(getattr(self, "hide_playlist_mode", False)):
+            self.hide_playlist_mode = False
+            self._pure_video_prev_playlist_only = False
+            try: self._apply_pure_video_opacity(False)
+            except Exception: pass
+        elif not enabled:
+            # Réappliquer Pure vidéo s'il est encore demandé
+            try: self._apply_hide_playlist_mode()
+            except Exception: pass
         try: self.save_state()
         except Exception: pass
         try:
@@ -16016,49 +17335,669 @@ class Myostoox(Gtk.Window):
             )
         except Exception: pass
 
-    def set_playlist_only_maximized(self, enabled):
+    def _query_live_video_dims(self):
+        """Lit width/height (+ PAR si dispo) depuis le pipeline actif."""
+        width = height = 0
+        par_n = par_d = 1
+        try:
+            pipe = self._active_pipeline()
+            if pipe is None:
+                return None
+            pad = None
+            try:
+                pad = pipe.emit("get-video-pad", 0)
+            except Exception:
+                pad = None
+            if pad is None:
+                try:
+                    vs = getattr(self, "video_sink", None)
+                    if vs is not None:
+                        pad = vs.get_static_pad("sink")
+                except Exception:
+                    pad = None
+            caps = None
+            if pad is not None:
+                caps = pad.get_current_caps()
+                if caps is None:
+                    caps = pad.query_caps(None)
+            if caps is None or caps.is_empty():
+                return None
+            st = caps.get_structure(0)
+            if st is None:
+                return None
+            ok, width = st.get_int("width")
+            if not ok:
+                width = 0
+            ok, height = st.get_int("height")
+            if not ok:
+                height = 0
+            try:
+                ok, pn, pd = st.get_fraction("pixel-aspect-ratio")
+                if ok and pn > 0 and pd > 0:
+                    par_n, par_d = int(pn), int(pd)
+            except Exception:
+                pass
+        except Exception:
+            return None
+        if width <= 0 or height <= 0:
+            return None
+        return (int(width), int(height), int(par_n), int(par_d))
+
+    def _resolve_video_display_aspect(self):
+        """Ratio d'affichage (largeur/hauteur) de l'image vidéo courante."""
+        dims = getattr(self, "_current_video_dims", None)
+        if not dims:
+            dims = self._query_live_video_dims()
+            if dims:
+                self._current_video_dims = dims
+        if not dims:
+            path = getattr(self, "current_path", None)
+            try:
+                info = self._probe_video_info(path) if path else None
+            except Exception:
+                info = None
+            if info and info.get("width") and info.get("height"):
+                dims = (
+                    int(info["width"]),
+                    int(info["height"]),
+                    int(info.get("par_n") or 1),
+                    int(info.get("par_d") or 1),
+                )
+                self._current_video_dims = dims
+        if dims:
+            w, h, pn, pd = dims
+            if w > 0 and h > 0 and pn > 0 and pd > 0:
+                return (w * float(pn)) / (h * float(pd))
+        return 16.0 / 9.0
+
+    def _apply_pure_video_window_geometry(self, force_base=False):
+        """Adapte la fenêtre fenêtrée au ratio réel de la vidéo.
+
+        Taille de base raisonnable (~55 % de la largeur moniteur, type
+        lecteurs modernes), position conservée pour éviter les sauts
+        après sortie du plein écran.
+        """
+        if not bool(getattr(self, "hide_playlist_mode", False)):
+            return
+        if getattr(self, "is_fullscreen", False):
+            return
+        try:
+            if self.is_maximized():
+                return
+        except Exception:
+            pass
+        try:
+            aspect = float(self._resolve_video_display_aspect())
+            if aspect <= 0.05 or aspect > 20.0:
+                aspect = 16.0 / 9.0
+            mon_w = mon_h = 1280
+            mon_x = mon_y = 0
+            try:
+                screen = self.get_screen()
+                win = self.get_window()
+                mon = 0
+                if screen is not None and win is not None:
+                    mon = screen.get_monitor_at_window(win)
+                if screen is not None:
+                    try:
+                        geo = screen.get_monitor_workarea(mon)
+                    except Exception:
+                        geo = screen.get_monitor_geometry(mon)
+                    mon_w = max(640, int(geo.width) - 32)
+                    mon_h = max(360, int(geo.height) - 56)
+                    mon_x = int(geo.x)
+                    mon_y = int(geo.y)
+            except Exception:
+                pass
+            base_w = int(round(mon_w * 0.55))
+            base_w = max(640, min(base_w, mon_w))
+            try:
+                cur_w, cur_h = self.get_size()
+            except Exception:
+                cur_w, cur_h = base_w, int(round(base_w / aspect))
+            try:
+                cur_x, cur_y = self.get_position()
+            except Exception:
+                cur_x = cur_y = None
+            if force_base or cur_w >= int(mon_w * 0.90) or cur_h >= int(mon_h * 0.90):
+                target_w = base_w
+            else:
+                target_w = int(cur_w)
+                if target_w < 480:
+                    target_w = base_w
+                if target_w > mon_w:
+                    target_w = mon_w
+            target_h = int(round(target_w / aspect))
+            if target_h > mon_h:
+                target_h = mon_h
+                target_w = int(round(target_h * aspect))
+            if target_w > mon_w:
+                target_w = mon_w
+                target_h = int(round(target_w / aspect))
+            target_w = max(480, min(target_w, mon_w))
+            target_h = max(270, min(target_h, mon_h))
+            need_resize = abs(cur_w - target_w) > 6 or abs(cur_h - target_h) > 6
+            if need_resize:
+                self.resize(target_w, target_h)
+            try:
+                saved = getattr(self, "_pure_video_saved_pos", None)
+                if force_base and saved is not None:
+                    sx, sy = saved
+                    nx = int(sx + (cur_w - target_w) / 2) if cur_w else sx
+                    ny = int(sy + (cur_h - target_h) / 2) if cur_h else sy
+                elif cur_x is not None and cur_y is not None and not force_base:
+                    nx, ny = int(cur_x), int(cur_y)
+                else:
+                    nx = mon_x + max(0, (mon_w - target_w) // 2)
+                    ny = mon_y + max(0, (mon_h - target_h) // 2)
+                nx = max(mon_x, min(nx, mon_x + mon_w - target_w))
+                ny = max(mon_y, min(ny, mon_y + mon_h - target_h))
+                self.move(nx, ny)
+            except Exception:
+                pass
+        except Exception as e:
+            print("pure video geometry:", e, file=sys.stderr)
+
+    def _refine_pure_video_client_aspect(self):
+        """Assure que le paned vidéo occupe toute la hauteur (sans retoucher le ratio fenêtre)."""
+        if not bool(getattr(self, "hide_playlist_mode", False)):
+            return False
+        if getattr(self, "is_fullscreen", False):
+            return False
+        try:
+            paned = getattr(self, "content_paned", None)
+            if paned is not None:
+                ph = int(paned.get_allocated_height() or 0)
+                if ph > 10:
+                    paned.set_position(max(ph - 2, 1))
+            va = getattr(self, "video_area", None)
+            if va is not None:
+                va.set_size_request(-1, -1)
+        except Exception:
+            pass
+        return False
+
+    def _schedule_pure_video_geometry(self, delay_ms=350):
+        """Recalcule le cadre Pure vidéo quand les caps vidéo sont prêts."""
+        if not bool(getattr(self, "hide_playlist_mode", False)):
+            return
+        if getattr(self, "is_fullscreen", False):
+            return
+        try:
+            def _run():
+                if not bool(getattr(self, "hide_playlist_mode", False)):
+                    return False
+                if getattr(self, "is_fullscreen", False):
+                    return False
+                try:
+                    live = self._query_live_video_dims()
+                    if live:
+                        self._current_video_dims = live
+                    self._apply_pure_video_window_geometry(force_base=False)
+                    GLib.timeout_add(80, self._refine_pure_video_client_aspect)
+                except Exception:
+                    pass
+                return False
+            GLib.timeout_add(max(50, int(delay_ms)), _run)
+        except Exception:
+            pass
+
+    def _apply_pure_video_opacity(self, enabled):
+        """Semi-transparence de la fenêtre principale en Pure vidéo."""
+        try:
+            if enabled:
+                cur = 1.0
+                try: cur = float(self.get_opacity())
+                except Exception: pass
+                target = 0.98
+                if bool(getattr(self, "playlist_transparency", False)):
+                    try:
+                        self._pure_video_prev_opacity = cur
+                    except Exception: pass
+                else:
+                    try:
+                        self._pure_video_prev_opacity = cur
+                    except Exception: pass
+                    try: self.set_opacity(target)
+                    except Exception: pass
+            else:
+                prev = getattr(self, "_pure_video_prev_opacity", None)
+                if prev is not None and not bool(getattr(self, "playlist_transparency", False)):
+                    try: self.set_opacity(float(prev))
+                    except Exception: pass
+                self._pure_video_prev_opacity = None
+        except Exception: pass
+
+    def _on_hide_playlist_menu_toggled(self, menuitem):
+        try:
+            self.set_hide_playlist_mode(bool(menuitem.get_active()))
+        except Exception as e:
+            print("hide_playlist menu:", e, file=sys.stderr)
+
+    def _save_pre_pure_video_window(self):
+        """Mémorise taille/position avant de réduire la fenêtre en Pure vidéo."""
+        try:
+            if getattr(self, "is_fullscreen", False):
+                return
+        except Exception:
+            pass
+        if bool(getattr(self, "hide_playlist_mode", False)):
+            return
+        if (
+            bool(getattr(self, "playlist_only_maximized", False))
+            and getattr(self, "_playlist_only_prev_size", None)
+        ):
+            self._pre_pure_video_size = tuple(self._playlist_only_prev_size)
+            self._pre_pure_video_pos = getattr(self, "_playlist_only_prev_pos", None)
+            return
+        try:
+            self._pre_pure_video_size = self.get_size()
+        except Exception:
+            self._pre_pure_video_size = None
+        try:
+            self._pre_pure_video_pos = self.get_position()
+        except Exception:
+            self._pre_pure_video_pos = None
+
+    def _restore_pre_pure_video_window(self):
+        """Restaure la fenêtre normale après Pure vidéo (pas le cadre vidéo)."""
+        try:
+            if getattr(self, "is_fullscreen", False):
+                return
+        except Exception:
+            pass
+        try:
+            if self.is_maximized():
+                return
+        except Exception:
+            pass
+        sz = getattr(self, "_pre_pure_video_size", None)
+        try:
+            if not sz or int(sz[0]) < 500 or int(sz[1]) < 320:
+                try:
+                    sz = (int(self._ui_s(900)), int(self._ui_s(600)))
+                except Exception:
+                    sz = (900, 600)
+            self.resize(int(sz[0]), int(sz[1]))
+        except Exception:
+            pass
+        pos = getattr(self, "_pre_pure_video_pos", None)
+        if pos is not None:
+            try:
+                self.move(int(pos[0]), int(pos[1]))
+            except Exception:
+                pass
+        try:
+            GLib.idle_add(self._apply_video_playlist_split)
+        except Exception:
+            pass
+
+    def set_hide_playlist_mode(self, enabled, restore_playlist_only=None):
+        enabled = bool(enabled)
+        if enabled:
+            path = getattr(self, "current_path", None)
+            try:
+                if path and is_pure_audio_file(path) and not (
+                    is_video_file(path) or is_dvd(path) or is_bluray(path)
+                ):
+                    try:
+                        self.status_label.set_text(
+                            self.tr("Pure vidéo indisponible pour l'audio")
+                        )
+                    except Exception: pass
+                    return
+            except Exception: pass
+            try:
+                self._save_pre_pure_video_window()
+            except Exception:
+                pass
+            self._pure_video_prev_playlist_only = bool(
+                getattr(self, "playlist_only_mode", False)
+            )
+            if bool(getattr(self, "playlist_only_mode", False)):
+                self.playlist_only_mode = False
+                try:
+                    if getattr(self, "playlist_only_maximized", False):
+                        self.set_playlist_only_maximized(False)
+                except Exception: pass
+        else:
+            prev_po = getattr(self, "_pure_video_prev_playlist_only", False)
+            if restore_playlist_only is not None:
+                prev_po = bool(restore_playlist_only)
+            self.hide_playlist_mode = False
+            try:
+                self._apply_hide_playlist_mode()
+            except Exception as e:
+                print("hide_playlist:", e, file=sys.stderr)
+            self._pure_video_prev_playlist_only = False
+            try:
+                self._restore_pre_pure_video_window()
+            except Exception as e:
+                print("restore pre pure:", e, file=sys.stderr)
+            if prev_po:
+                try:
+                    self.set_playlist_only_mode(True)
+                except Exception: pass
+            try: self.save_state()
+            except Exception: pass
+            try:
+                self.status_label.set_text(self.tr("Pure vidéo désactivé"))
+            except Exception: pass
+            return
+        self.hide_playlist_mode = enabled
+        try:
+            self._apply_hide_playlist_mode()
+        except Exception as e:
+            print("hide_playlist:", e, file=sys.stderr)
+        if enabled:
+            try: self._apply_pure_video_window_geometry(force_base=True)
+            except Exception: pass
+            try: self._schedule_pure_video_geometry(280)
+            except Exception: pass
+            try: self._schedule_pure_video_geometry(900)
+            except Exception: pass
+        try: self.save_state()
+        except Exception: pass
+        try:
+            self.status_label.set_text(
+                self.tr("Pure vidéo activé")
+                if enabled
+                else self.tr("Pure vidéo désactivé")
+            )
+        except Exception: pass
+
+    def _apply_hide_playlist_mode(self):
+        """Mode « Pure vidéo » : lecteur vidéo moderne en fenêtre 16:9.
+        - Masque playlist + ligne recherche/spectre
+        - Masque barres de navigation haut/bas
+        - Garde la zone vidéo visible, ratio ~16:9, fenêtre semi-transparente
+        - Autorise la barre OSD (fs_controls)
+        Ne doit PAS écraser le layout « Sans lecteur ».
+        """
+        if bool(getattr(self, "playlist_only_mode", False)):
+            return
+        enabled = bool(getattr(self, "hide_playlist_mode", False))
+        for attr in ("playlist_box", "search_row", "search_entry", "visualizer", "playlist_scroll"):
+            w = getattr(self, attr, None)
+            if w is None: continue
+            try:
+                if enabled:
+                    w.hide()
+                else:
+                    w.show()
+            except Exception: pass
+        if not getattr(self, "is_fullscreen", False):
+            for attr in ("top_bar_wrap", "top_bar", "bottom_bar_wrap", "bottom_bar"):
+                w = getattr(self, attr, None)
+                if w is None: continue
+                try:
+                    if enabled:
+                        w.hide()
+                    else:
+                        if attr in ("bottom_bar_wrap", "bottom_bar"):
+                            try:
+                                self._apply_metadata_panel_visibility()
+                            except Exception:
+                                w.show()
+                        else:
+                            w.show()
+                except Exception: pass
+        try:
+            if hasattr(self, "video_overlay") and self.video_overlay is not None:
+                self.video_overlay.show()
+            if getattr(self, "video_area", None) is not None:
+                self.video_area.show()
+                self.video_area.set_size_request(-1, -1)
+                try: self.video_area.queue_draw()
+                except Exception: pass
+        except Exception: pass
+        if enabled:
+            try:
+                GLib.timeout_add(200, lambda: (self._show_fs_controls() or False))
+            except Exception: pass
+        try:
+            if enabled:
+                if hasattr(self, "content_paned") and self.content_paned is not None:
+                    try:
+                        h = self.content_paned.get_allocated_height() or 600
+                        self.content_paned.set_position(max(h - 2, 400))
+                    except Exception: pass
+                try:
+                    self.video_area.set_size_request(-1, -1)
+                except Exception:
+                    pass
+                try:
+                    self._apply_pure_video_window_geometry(force_base=True)
+                except Exception:
+                    pass
+                try:
+                    self._schedule_pure_video_geometry(200)
+                    self._schedule_pure_video_geometry(700)
+                except Exception:
+                    pass
+                try:
+                    GLib.timeout_add(250, self._refine_pure_video_client_aspect)
+                except Exception:
+                    pass
+                try: self._apply_pure_video_opacity(True)
+                except Exception: pass
+            else:
+                try: self._apply_pure_video_opacity(False)
+                except Exception: pass
+                try: self._apply_video_playlist_split()
+                except Exception: pass
+        except Exception: pass
+        try: self.queue_resize()
+        except Exception: pass
+
+    def _apply_lyrics_transparent_surface(self):
+        """Rend la zone paroles capable d'afficher un vrai fond transparent."""
+        transparent = bool(getattr(self, "lyrics_transparent_bg", False))
+        for attr in ("video_area", "video_overlay"):
+            w = getattr(self, attr, None)
+            if w is None:
+                continue
+            try:
+                w.set_app_paintable(True)
+            except Exception:
+                pass
+            try:
+                ctx = w.get_style_context()
+                if transparent:
+                    ctx.add_class("lyrics-transparent")
+                else:
+                    ctx.remove_class("lyrics-transparent")
+            except Exception:
+                pass
+            try:
+                if transparent:
+                    rgba = Gdk.RGBA(red=0, green=0, blue=0, alpha=0)
+                    w.override_background_color(Gtk.StateFlags.NORMAL, rgba)
+                    w.override_background_color(Gtk.StateFlags.ACTIVE, rgba)
+                    w.override_background_color(Gtk.StateFlags.PRELIGHT, rgba)
+                else:
+                    w.override_background_color(Gtk.StateFlags.NORMAL, None)
+                    w.override_background_color(Gtk.StateFlags.ACTIVE, None)
+                    w.override_background_color(Gtk.StateFlags.PRELIGHT, None)
+            except Exception:
+                pass
+            try:
+                w.queue_draw()
+                win = w.get_window()
+                if win is not None:
+                    win.invalidate_rect(None, True)
+            except Exception:
+                pass
+
+    def _on_lyrics_transparent_toggled(self, menuitem):
+        self.lyrics_transparent_bg = bool(menuitem.get_active())
+        try: self.save_state()
+        except Exception: pass
+        try:
+            self._apply_lyrics_transparent_surface()
+        except Exception as e:
+            print("lyrics transparent surface:", e, file=sys.stderr)
+        try:
+            self.status_label.set_text(
+                self.tr("Fond transparent des paroles activé")
+                if self.lyrics_transparent_bg
+                else self.tr("Fond transparent des paroles désactivé")
+            )
+        except Exception: pass
+
+    def _playlist_only_monitor_geometry(self):
+        try:
+            screen = self.get_screen()
+            win = self.get_window()
+            mon = screen.get_monitor_at_window(win) if win is not None else 0
+            return screen.get_monitor_geometry(mon)
+        except Exception:
+            return None
+
+    def _playlist_only_remember_geometry(self):
+        """Mémorise taille/position AVANT agrandissement (jamais une taille plein écran)."""
+        geo = self._playlist_only_monitor_geometry()
+        try:
+            w, h = self.get_size()
+        except Exception:
+            w = h = 0
+        try:
+            x, y = self.get_position()
+        except Exception:
+            x = y = None
+        try:
+            wm_max = bool(self.is_maximized())
+        except Exception:
+            wm_max = False
+        too_big = wm_max or (
+            geo is not None
+            and w >= int(geo.width) - 8
+            and h >= int(geo.height) - 8
+        )
+        if w > 0 and h > 0 and not too_big:
+            self._playlist_only_prev_size = (int(w), int(h))
+            if x is not None and y is not None:
+                self._playlist_only_prev_pos = (int(x), int(y))
+            else:
+                self._playlist_only_prev_pos = None
+        else:
+            self._playlist_only_prev_size = None
+            self._playlist_only_prev_pos = None
+
+    def _playlist_only_apply_maximized_geometry(self):
+        geo = self._playlist_only_monitor_geometry()
+        if geo is None:
+            try: self.maximize()
+            except Exception: pass
+            return
+        try:
+            if self.is_maximized():
+                self.unmaximize()
+        except Exception: pass
+        try: self.resize(int(geo.width), int(geo.height))
+        except Exception: pass
+        try: self.move(int(geo.x), int(geo.y))
+        except Exception: pass
+
+    def _playlist_only_restore_geometry(self, size=None, pos=None):
+        """Restaure la taille d'avant (2 passes pour résister aux délais du WM)."""
+        tid = getattr(self, "_playlist_only_restore_tid", 0) or 0
+        if tid:
+            try: GLib.source_remove(tid)
+            except Exception: pass
+            self._playlist_only_restore_tid = 0
+        min_w = self._ui_s(700)
+        min_h = self._ui_s(430)
+        geo = self._playlist_only_monitor_geometry()
+        w = h = None
+        try:
+            if size is not None and len(size) == 2:
+                w, h = int(size[0]), int(size[1])
+        except Exception:
+            w = h = None
+        if (
+            not w or not h
+            or w < min_w or h < min_h
+            or (
+                geo is not None
+                and w >= int(geo.width) - 8
+                and h >= int(geo.height) - 8
+            )
+        ):
+            # Taille inconnue ou aberrante : repli sur la taille par défaut, centrée
+            w, h = self._ui_s(950), self._ui_s(620)
+            pos = None
+        x = y = None
+        try:
+            if pos is not None and len(pos) == 2:
+                x, y = int(pos[0]), int(pos[1])
+        except Exception:
+            x = y = None
+        if geo is not None:
+            if x is None or y is None:
+                x = int(geo.x) + max(0, (int(geo.width) - w) // 2)
+                y = int(geo.y) + max(0, (int(geo.height) - h) // 2)
+            else:
+                x = max(int(geo.x), min(x, int(geo.x) + int(geo.width) - w))
+                y = max(int(geo.y), min(y, int(geo.y) + int(geo.height) - h))
+        def _apply():
+            if getattr(self, "playlist_only_maximized", False): return
+            if getattr(self, "is_fullscreen", False): return
+            if getattr(self, "mini_player_mode", False) or getattr(
+                self, "nano_player_mode", False
+            ):
+                return
+            try:
+                if self.is_maximized():
+                    self.unmaximize()
+            except Exception: pass
+            try: self.resize(int(w), int(h))
+            except Exception: pass
+            if x is not None and y is not None:
+                try: self.move(int(x), int(y))
+                except Exception: pass
+        _apply()
+        state = {"n": 0}
+        def _tick():
+            self._playlist_only_restore_tid = 0
+            _apply()
+            state["n"] += 1
+            if state["n"] < 2:
+                self._playlist_only_restore_tid = GLib.timeout_add(300, _tick)
+            return False
+        self._playlist_only_restore_tid = GLib.timeout_add(150, _tick)
+
+    def set_playlist_only_maximized(self, enabled, force=False):
         enabled = bool(enabled)
         if enabled and not bool(getattr(self, "playlist_only_mode", False)): return
         prev = bool(getattr(self, "playlist_only_maximized", False))
         self.playlist_only_maximized = enabled
         try:
-            if enabled and not prev:
-                try:
-                    self._playlist_only_prev_pos = self.get_position()
-                except Exception:
-                    self._playlist_only_prev_pos = None
-                try:
-                    self._playlist_only_prev_size = self.get_size()
-                except Exception:
-                    self._playlist_only_prev_size = None
-                self._playlist_only_prev_layer = str(
-                    getattr(self, "window_layer", "normal") or "normal"
+            if enabled and (not prev or force):
+                already = bool(
+                    force and getattr(self, "_playlist_only_prev_size", None)
                 )
+                if not already:
+                    self._playlist_only_remember_geometry()
+                    layer = str(getattr(self, "window_layer", "normal") or "normal")
+                    if layer == "above" or (force and layer == "below"):
+                        layer = "normal"
+                    self._playlist_only_prev_layer = layer
+                elif not getattr(self, "_playlist_only_prev_layer", None):
+                    self._playlist_only_prev_layer = "normal"
                 self.set_window_layer("below")
-                try:
-                    screen = self.get_screen()
-                    mon = screen.get_monitor_at_window(self.get_window()) if self.get_window() else 0
-                    geo = screen.get_monitor_geometry(mon)
-                    self.resize(geo.width, geo.height)
-                    self.move(geo.x, geo.y)
-                except Exception:
-                    try: self.maximize()
-                    except Exception: pass
+                self._playlist_only_apply_maximized_geometry()
             elif not enabled and prev:
-                prev_layer = getattr(self, "_playlist_only_prev_layer", None) or "normal"
-                if prev_layer == "above":
-                    prev_layer = "normal"
-                self.set_window_layer(prev_layer)
-                try: self.unmaximize()
-                except Exception: pass
-                prev_size = getattr(self, "_playlist_only_prev_size", None)
-                if prev_size and len(prev_size) == 2:
-                    try: self.resize(int(prev_size[0]), int(prev_size[1]))
-                    except Exception: pass
-                prev_pos = getattr(self, "_playlist_only_prev_pos", None)
-                if prev_pos and len(prev_pos) == 2:
-                    try: self.move(int(prev_pos[0]), int(prev_pos[1]))
-                    except Exception: pass
+                size = getattr(self, "_playlist_only_prev_size", None)
+                pos = getattr(self, "_playlist_only_prev_pos", None)
+                layer = getattr(self, "_playlist_only_prev_layer", None) or "normal"
+                if layer == "above":
+                    layer = "normal"
+                self._playlist_only_prev_size = None
+                self._playlist_only_prev_pos = None
+                self._playlist_only_prev_layer = None
+                self.set_window_layer(layer)
+                self._playlist_only_restore_geometry(size, pos)
         except Exception as e:
             print("playlist_only maximize:", e, file=sys.stderr)
         try: self.save_state()
@@ -16158,6 +18097,8 @@ class Myostoox(Gtk.Window):
             except Exception: pass
         try: self.queue_resize()
         except Exception: pass
+        try: self._apply_hide_playlist_mode()
+        except Exception: pass
     def _build_playlist_context_menu(self, filename=None, multi=False):
         old = getattr(self, "_playlist_context_menu", None)
         if old is not None:
@@ -16181,6 +18122,38 @@ class Myostoox(Gtk.Window):
                 "activate", lambda item, p=filename: self.play_file(p)
             )
             menu.append(play)
+            stop_item = Gtk.MenuItem(label=self.tr("Stop"))
+            stop_item.connect("activate", lambda item: self.stop())
+            menu.append(stop_item)
+            rep_track = Gtk.CheckMenuItem(label=self.tr("Répéter morceau"))
+            rep_track.set_active(self.repeat_track_path is not None)
+            def _on_rep_track(m, p=filename):
+                try:
+                    if m.get_active():
+                        self.set_repeat_track_mode(True, p)
+                    else:
+                        # Ne désactiver que si c'était vraiment le mode morceau
+                        if self.repeat_track_path is not None:
+                            self.set_repeat_track_mode(False)
+                except Exception:
+                    pass
+            rep_track.connect("toggled", _on_rep_track)
+            menu.append(rep_track)
+            rep_pl = Gtk.CheckMenuItem(label=self.tr("Répéter playlist"))
+            rep_pl.set_active(
+                bool(self.repeat_mode) and self.repeat_track_path is None
+            )
+            def _on_rep_pl(m):
+                try:
+                    if m.get_active():
+                        self.set_repeat_playlist_mode(True)
+                    else:
+                        if self.repeat_mode and self.repeat_track_path is None:
+                            self.set_repeat_playlist_mode(False)
+                except Exception:
+                    pass
+            rep_pl.connect("toggled", _on_rep_pl)
+            menu.append(rep_pl)
             if not multi:
                 metadata = Gtk.MenuItem(label=self.tr("Métadonnées…"))
                 metadata.connect(
@@ -16256,7 +18229,6 @@ class Myostoox(Gtk.Window):
         bouquets_sub.append(manage_bq)
         menu.append(bouquets_root)
         menu.append(Gtk.SeparatorMenuItem())
-        # --- Options audio (Égaliseur / Pitch en tête) ---
         audio_opts_root = Gtk.MenuItem(label=self.tr("Options audio"))
         try:
             audio_opts_root.set_submenu(self._build_audio_options_submenu())
@@ -16378,9 +18350,33 @@ class Myostoox(Gtk.Window):
                     )
                 except Exception as e:
                     print("playlist menu shortcut:", e, file=sys.stderr)
-    # ------------------------------------------------------------------
-    # ------------------------------------------------------------------
+    def _lastfm_call(self, params, secret):
+        """Appel signé de l'API Last.fm (à lancer hors thread GTK). Retourne le JSON."""
+        import hashlib
+        import json as _json
+        import urllib.request
+        import urllib.parse
+        import urllib.error
+        p = {k: str(v) for k, v in params.items()}
+        sig = "".join(k + p[k] for k in sorted(p.keys())) + secret
+        p["api_sig"] = hashlib.md5(sig.encode("utf-8")).hexdigest()
+        p["format"] = "json"
+        req = urllib.request.Request(
+            "https://ws.audioscrobbler.com/2.0/",
+            data=urllib.parse.urlencode(p).encode("utf-8"),
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                body = resp.read()
+        except urllib.error.HTTPError as exc:
+            body = exc.read()   # Last.fm renvoie le détail de l'erreur en JSON
+        try:
+            return _json.loads(body.decode("utf-8", "replace"))
+        except Exception:
+            raise RuntimeError("Réponse Last.fm illisible")
     def show_scrobbling_dialog(self, *args):
+        import urllib.parse
         dialog = Gtk.Dialog(
             title=self.tr("Scrobbling"),
             parent=self,
@@ -16388,7 +18384,7 @@ class Myostoox(Gtk.Window):
         )
         dialog.add_button(self.tr("Annuler"), Gtk.ResponseType.CANCEL)
         dialog.add_button(self.tr("Enregistrer"), Gtk.ResponseType.OK)
-        dialog.set_default_size(self._ui_s(460), self._ui_s(320))
+        dialog.set_default_size(self._ui_s(480), self._ui_s(440))
         dialog.set_border_width(0)
         box = dialog.get_content_area()
         box.set_spacing(8)
@@ -16414,6 +18410,27 @@ class Myostoox(Gtk.Window):
         cur = str(getattr(self, "scrobble_service", "listenbrainz") or "listenbrainz")
         svc_combo.set_active(0 if cur != "lastfm" else 1)
         box.pack_start(svc_combo, False, False, 0)
+        lfm_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        lfm_box.set_no_show_all(True)
+        key_lab = Gtk.Label(label=self.tr("Clé API Last.fm :"), xalign=0)
+        lfm_box.pack_start(key_lab, False, False, 0)
+        key_entry = Gtk.Entry()
+        key_entry.set_text(str(getattr(self, "scrobble_api_key", "") or ""))
+        lfm_box.pack_start(key_entry, False, False, 0)
+        sec_lab = Gtk.Label(label=self.tr("Secret partagé Last.fm :"), xalign=0)
+        lfm_box.pack_start(sec_lab, False, False, 0)
+        secret_entry = Gtk.Entry()
+        secret_entry.set_visibility(False)
+        secret_entry.set_text(str(getattr(self, "scrobble_api_secret", "") or ""))
+        lfm_box.pack_start(secret_entry, False, False, 0)
+        lfm_btn = Gtk.Button(label=self.tr("Se connecter à Last.fm"))
+        lfm_box.pack_start(lfm_btn, False, False, 0)
+        lfm_status = Gtk.Label(label="", xalign=0)
+        lfm_status.set_line_wrap(True)
+        try: lfm_status.get_style_context().add_class("status")
+        except Exception: pass
+        lfm_box.pack_start(lfm_status, False, False, 0)
+        box.pack_start(lfm_box, False, False, 0)
         user_lab = Gtk.Label(label=self.tr("Nom d'utilisateur :"), xalign=0)
         box.pack_start(user_lab, False, False, 0)
         user_entry = Gtk.Entry()
@@ -16440,11 +18457,122 @@ class Myostoox(Gtk.Window):
         try: hint.get_style_context().add_class("status")
         except Exception: pass
         box.pack_start(hint, False, False, 0)
+        lfm_state = {"token": None, "alive": True}
+        dialog.connect(
+            "destroy", lambda *_a: lfm_state.__setitem__("alive", False)
+        )
+        def _lfm_reset_button():
+            lfm_state["token"] = None
+            lfm_btn.set_label(self.tr("Se connecter à Last.fm"))
+        def _lfm_token_done(tok, err, key):
+            if not lfm_state["alive"]: return False
+            lfm_btn.set_sensitive(True)
+            if err is not None or not tok:
+                lfm_status.set_text(self.tr("Échec") + " : " + str(err))
+                return False
+            lfm_state["token"] = tok
+            url = "https://www.last.fm/api/auth/?api_key=%s&token=%s" % (
+                urllib.parse.quote(key, safe=""),
+                urllib.parse.quote(tok, safe=""),
+            )
+            try:
+                Gtk.show_uri_on_window(dialog, url, Gdk.CURRENT_TIME)
+            except Exception:
+                try:
+                    subprocess.Popen(
+                        ["xdg-open", url],
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                        start_new_session=True,
+                    )
+                except Exception: pass
+            lfm_btn.set_label(self.tr("Terminer la connexion"))
+            lfm_status.set_text(
+                self.tr("Autorisez Myostoox dans le navigateur, puis cliquez sur « Terminer la connexion ».")
+            )
+            return False
+        def _lfm_session_done(res, err):
+            if not lfm_state["alive"]: return False
+            lfm_btn.set_sensitive(True)
+            if err is not None:
+                lfm_status.set_text(self.tr("Échec") + " : " + str(err))
+                return False
+            sess = res.get("session") if isinstance(res, dict) else None
+            if isinstance(sess, dict) and sess.get("key"):
+                tok_entry.set_text(str(sess["key"]))
+                name = str(sess.get("name") or "")
+                if name:
+                    user_entry.set_text(name)
+                _lfm_reset_button()
+                lfm_status.set_text(
+                    self.tr("Connecté") + (" : " + name if name else "")
+                    + " — " + self.tr("cliquez sur Enregistrer")
+                )
+                return False
+            code = res.get("error") if isinstance(res, dict) else None
+            msg = res.get("message") if isinstance(res, dict) else None
+            if code in (4, 15):
+                _lfm_reset_button()
+            lfm_status.set_text(
+                self.tr("Échec") + " : " + str(msg or code or "?")
+            )
+            return False
+        def _lfm_worker_token(key, secret):
+            try:
+                res = self._lastfm_call(
+                    {"method": "auth.getToken", "api_key": key}, secret
+                )
+                tok = res.get("token") if isinstance(res, dict) else None
+                err = None if tok else (
+                    (res.get("message") if isinstance(res, dict) else None)
+                    or "auth.getToken"
+                )
+                GLib.idle_add(_lfm_token_done, tok, err, key)
+            except Exception as exc:
+                GLib.idle_add(_lfm_token_done, None, exc, key)
+        def _lfm_worker_session(key, secret, tok):
+            try:
+                res = self._lastfm_call(
+                    {"method": "auth.getSession", "api_key": key, "token": tok},
+                    secret,
+                )
+                GLib.idle_add(_lfm_session_done, res, None)
+            except Exception as exc:
+                GLib.idle_add(_lfm_session_done, None, exc)
+        def _lfm_on_click(btn):
+            key = key_entry.get_text().strip()
+            secret = secret_entry.get_text().strip()
+            if not key or not secret:
+                lfm_status.set_text(self.tr("Clé API et secret requis"))
+                return
+            btn.set_sensitive(False)
+            lfm_status.set_text("…")
+            if lfm_state["token"] is None:
+                target, args = _lfm_worker_token, (key, secret)
+            else:
+                target, args = _lfm_worker_session, (key, secret, lfm_state["token"])
+            try:
+                threading.Thread(target=target, args=args, daemon=True).start()
+            except Exception as exc:
+                btn.set_sensitive(True)
+                lfm_status.set_text(str(exc))
+        lfm_btn.connect("clicked", _lfm_on_click)
+        def _sync_service_ui(*_a):
+            it = svc_combo.get_active_iter()
+            is_lfm = bool(it is not None and svc_store[it][0] == "lastfm")
+            if is_lfm:
+                lfm_box.set_no_show_all(False)
+                lfm_box.show_all()
+            else:
+                lfm_box.hide()
+                lfm_box.set_no_show_all(True)
+        svc_combo.connect("changed", _sync_service_ui)
         try: self._style_app_dialog(dialog)
         except Exception: pass
         try: self._translate_dialog_action_buttons(dialog)
         except Exception: pass
         dialog.show_all()
+        _sync_service_ui()
         resp = dialog.run()
         if resp == Gtk.ResponseType.OK:
             self.scrobble_enabled = enable.get_active()
@@ -16453,14 +18581,30 @@ class Myostoox(Gtk.Window):
                 self.scrobble_service = svc_store[it][0]
             self.scrobble_username = user_entry.get_text().strip()
             self.scrobble_token = tok_entry.get_text().strip()
+            self.scrobble_api_key = key_entry.get_text().strip()
+            self.scrobble_api_secret = secret_entry.get_text().strip()
             try: self.save_state()
             except Exception: pass
-            try:
-                self.status_label.set_text(
-                    self.tr("Scrobbling activé")
-                    if self.scrobble_enabled
-                    else self.tr("Scrobbling désactivé")
+            incomplete = bool(
+                self.scrobble_enabled
+                and self.scrobble_service == "lastfm"
+                and not (
+                    self.scrobble_api_key
+                    and self.scrobble_api_secret
+                    and self.scrobble_token
                 )
+            )
+            try:
+                if incomplete:
+                    self.status_label.set_text(
+                        self.tr("Last.fm : clé API, secret et session key requis")
+                    )
+                else:
+                    self.status_label.set_text(
+                        self.tr("Scrobbling activé")
+                        if self.scrobble_enabled
+                        else self.tr("Scrobbling désactivé")
+                    )
             except Exception: pass
         dialog.destroy()
 
@@ -16549,7 +18693,17 @@ class Myostoox(Gtk.Window):
                         method="POST",
                     )
                     with urllib.request.urlopen(req, timeout=8) as resp:
-                        resp.read()
+                        body = resp.read().decode("utf-8", "replace")
+                    try:
+                        res = _json.loads(body)
+                        if isinstance(res, dict) and res.get("error"):
+                            print(
+                                "scrobble Last.fm:",
+                                res.get("error"),
+                                res.get("message"),
+                                file=sys.stderr,
+                            )
+                    except Exception: pass
             except Exception as exc:
                 print("scrobble:", exc, file=sys.stderr)
         try:
@@ -16589,8 +18743,6 @@ class Myostoox(Gtk.Window):
         artist, title, album, _d = info
         self._scrobble_sent_for = path
         self._scrobble_send_async("scrobble", artist, title, album, dur)
-    # ------------------------------------------------------------------
-    # ------------------------------------------------------------------
     def play_next_add(self, path):
         if not path or not isinstance(path, str): return
         q = getattr(self, "play_next_queue", None)
@@ -16598,7 +18750,7 @@ class Myostoox(Gtk.Window):
             self.play_next_queue = []
             q = self.play_next_queue
         if q and q[0] == path: return
-        q.insert(0, path)  # front = next to play (LIFO of "play next" clicks = last wins as immediate next)
+        q.insert(0, path)
         try:
             base = os.path.basename(path)
             self.status_label.set_text(
@@ -16628,8 +18780,6 @@ class Myostoox(Gtk.Window):
             self.play_file(path)
             return True
         return False
-    # ------------------------------------------------------------------
-    # ------------------------------------------------------------------
     def set_replaygain_mode(self, mode):
         mode = str(mode or "off").lower()
         if mode not in ("off", "track", "album", "auto"):
@@ -16650,8 +18800,6 @@ class Myostoox(Gtk.Window):
         }
         try: self.status_label.set_text(labels.get(mode, mode))
         except Exception: pass
-    # ------------------------------------------------------------------
-    # ------------------------------------------------------------------
     def set_crossfade_seconds(self, seconds):
         try:
             seconds = float(seconds)
@@ -16659,6 +18807,9 @@ class Myostoox(Gtk.Window):
             seconds = 0.0
         seconds = max(0.0, min(CROSSFADE_MAX_S, seconds))
         self.crossfade_seconds = seconds
+        if seconds < 0.15:
+            try: self._fade_cancel()
+            except Exception: pass
         try: self.save_state()
         except Exception: pass
         try:
@@ -16672,6 +18823,9 @@ class Myostoox(Gtk.Window):
 
     def set_gapless_enabled(self, enabled):
         self.gapless_enabled = bool(enabled)
+        if not self.gapless_enabled:
+            self._gapless_next = None
+            self._gapless_next_for = None
         try: self.save_state()
         except Exception: pass
         try:
@@ -16681,6 +18835,306 @@ class Myostoox(Gtk.Window):
             )
         except Exception: pass
 
+    def _apply_current_volume(self):
+        try:
+            if getattr(self, "is_muted", False):
+                self._set_playback_volume(0.0)
+            else:
+                self._set_playback_volume(self.volume_scale.get_value())
+        except Exception: pass
+
+    def _crossfade_half(self):
+        """Durée de chaque moitié du fondu (sortie + entrée) ; 0 = désactivé."""
+        try:
+            cf = float(getattr(self, "crossfade_seconds", 0.0) or 0.0)
+        except Exception:
+            cf = 0.0
+        return cf / 2.0 if cf >= 0.15 else 0.0
+
+    def _fade_cancel(self):
+        tid = getattr(self, "_fade_in_tid", 0) or 0
+        if tid:
+            try: GLib.source_remove(tid)
+            except Exception: pass
+            self._fade_in_tid = 0
+        self._fade_out_active = False
+        was = float(getattr(self, "_fade_gain", 1.0))
+        self._fade_gain = 1.0
+        if abs(was - 1.0) > 0.0005:
+            self._apply_current_volume()
+
+    def _fade_in_start(self):
+        half = self._crossfade_half()
+        path = getattr(self, "current_path", None)
+        if (
+            half <= 0.0
+            or not path
+            or is_stream(path)
+            or bool(getattr(self, "current_is_video", False))
+        ):
+            self._fade_cancel()
+            return
+        tid = getattr(self, "_fade_in_tid", 0) or 0
+        if tid:
+            try: GLib.source_remove(tid)
+            except Exception: pass
+            self._fade_in_tid = 0
+        self._fade_out_active = False
+        self._fade_gain = 0.0
+        self._apply_current_volume()
+        t0 = time.monotonic()
+        gen = self._playback_generation
+        state = {"id": 0}
+        def _tick():
+            if (
+                gen != self._playback_generation
+                or getattr(self, "_app_closing", False)
+            ):
+                return False
+            frac = (time.monotonic() - t0) / half
+            if frac >= 1.0 or not self.is_playing:
+                self._fade_gain = 1.0
+                self._apply_current_volume()
+                if self._fade_in_tid == state["id"]:
+                    self._fade_in_tid = 0
+                return False
+            self._fade_gain = math.sin(max(0.0, frac) * math.pi / 2.0)
+            self._apply_current_volume()
+            return True
+        state["id"] = self._fade_in_tid = GLib.timeout_add(40, _tick)
+
+    def _crossfade_update_out(self, position):
+        """Fondu de sortie piloté par la position (suit seeks et pauses)."""
+        half = self._crossfade_half()
+        path = getattr(self, "current_path", None)
+        try:
+            dur = float(getattr(self, "current_duration", 0) or 0)
+        except Exception:
+            dur = 0.0
+        if (
+            half > 0.0
+            and path
+            and dur > (2.0 * half + 1.0)
+            and not is_stream(path)
+            and not bool(getattr(self, "current_is_video", False))
+        ):
+            remaining = dur - float(position)
+            if remaining < half:
+                frac = max(0.0, min(1.0, remaining / half))
+                gain = math.sin(frac * math.pi / 2.0)
+                self._fade_out_active = True
+                if abs(gain - float(getattr(self, "_fade_gain", 1.0))) > 0.004:
+                    self._fade_gain = gain
+                    self._apply_current_volume()
+                return
+        if getattr(self, "_fade_out_active", False):
+            self._fade_out_active = False
+            if not (getattr(self, "_fade_in_tid", 0) or 0):
+                self._fade_gain = 1.0
+                self._apply_current_volume()
+
+    def _auto_next_with_fade(self):
+        """Enchaînement automatique après EOS, avec fondu d'entrée si actif."""
+        self._fade_in_pending = bool(self._crossfade_half() > 0.0)
+        try:
+            self.next(auto=True)
+        finally:
+            if getattr(self, "_fade_in_pending", False):
+                self._fade_in_pending = False
+                self._fade_cancel()
+
+    def _transition_tick(self, position_seconds):
+        self._gapless_refresh_next()
+        self._crossfade_update_out(position_seconds)
+
+    def _gapless_cancel(self):
+        self._gapless_pending = None
+        self._gapless_next = None
+        self._gapless_next_for = None
+
+    def _gapless_peek_next(self):
+        """Même logique que next(auto=True), sans effet de bord (hors file shuffle)."""
+        cur = getattr(self, "current_path", None)
+        if not cur or getattr(self, "_custom_pipeline", None) is not None:
+            return None
+        if getattr(self, "sleep_end_of_track", False):
+            return None
+        if bool(getattr(self, "current_is_video", False)) or not is_pure_audio_file(cur):
+            return None
+        paths = self.get_paths()
+        if not paths or cur not in paths:
+            return None
+        q = getattr(self, "play_next_queue", None) or []
+        if q:
+            cand = q[0] if q[0] in paths else None
+        elif self.repeat_track_path and self.repeat_track_path in paths:
+            cand = self.repeat_track_path
+        elif self.shuffle_mode and len(paths) > 1:
+            avail = set(p for p in paths if p != cur)
+            sq = [p for p in self.shuffle_queue if p in avail]
+            if not sq:
+                sq = [p for p in paths if p != cur]
+                random.shuffle(sq)
+            self.shuffle_queue = sq
+            cand = sq[0]
+        else:
+            idx = paths.index(cur) + 1
+            if idx >= len(paths):
+                if not self.repeat_mode:
+                    return None
+                idx = 0
+            cand = paths[idx]
+        if not cand or not is_pure_audio_file(cand):
+            return None
+        return cand
+
+    def _gapless_refresh_next(self):
+        """Prépare (thread principal) le titre que le thread GStreamer utilisera."""
+        if not getattr(self, "gapless_enabled", False):
+            self._gapless_next = None
+            self._gapless_next_for = None
+            return
+        pending = getattr(self, "_gapless_pending", None)
+        if pending:
+            try:
+                if self.player.get_property("uri") != path_to_uri(pending):
+                    self._gapless_pending = None   # obsolète
+                else:
+                    return
+            except Exception:
+                return
+        cur = getattr(self, "current_path", None)
+        now = time.monotonic()
+        if (
+            cur == getattr(self, "_gapless_next_for", None)
+            and (now - float(getattr(self, "_gapless_refresh_t", 0.0))) < 1.0
+        ):
+            return
+        self._gapless_refresh_t = now
+        try:
+            nxt = self._gapless_peek_next()
+        except Exception as exc:
+            print("gapless peek:", exc, file=sys.stderr)
+            nxt = None
+        self._gapless_next = nxt
+        self._gapless_next_for = cur
+
+    def _on_about_to_finish(self, playbin):
+        # Appelé depuis un thread GStreamer : aucun accès GTK ici.
+        try:
+            if not getattr(self, "gapless_enabled", False): return
+            if getattr(self, "_custom_pipeline", None) is not None: return
+            if getattr(self, "sleep_end_of_track", False): return
+            if getattr(self, "_gapless_pending", None): return
+            cur = getattr(self, "current_path", None)
+            nxt = getattr(self, "_gapless_next", None)
+            if not cur or not nxt: return
+            if getattr(self, "_gapless_next_for", None) != cur: return
+            uri = GLib.filename_to_uri(os.path.abspath(nxt), None)
+            self._gapless_pending = nxt
+            try:
+                playbin.set_property("uri", uri)
+            except Exception:
+                self._gapless_pending = None
+                raise
+        except Exception as exc:
+            print("gapless:", exc, file=sys.stderr)
+
+    def _gapless_check_transition(self, position_seconds):
+        """Détecte le passage effectif à la piste suivante (retour de la position à ~0)."""
+        pending = getattr(self, "_gapless_pending", None)
+        if not pending or self._seek_in_progress:
+            return False
+        last = float(getattr(self, "_last_known_position", 0.0) or 0.0)
+        if position_seconds + 1.0 >= last:
+            return False
+        try:
+            same = (self.player.get_property("uri") == path_to_uri(pending))
+        except Exception:
+            same = False
+        if not same:
+            self._gapless_pending = None
+            return False
+        return self._gapless_commit()
+
+    def _gapless_commit(self):
+        path = getattr(self, "_gapless_pending", None)
+        self._gapless_pending = None
+        self._gapless_next = None
+        self._gapless_next_for = None
+        if not path:
+            return False
+        try:
+            q = getattr(self, "play_next_queue", None)
+            if q and q[0] == path:
+                q.pop(0)
+            sq = getattr(self, "shuffle_queue", None)
+            if sq and sq[0] == path:
+                sq.pop(0)
+        except Exception: pass
+        self._playback_generation += 1
+        try: self._cancel_seek_release_timeout()
+        except Exception: pass
+        self._seek_in_progress = False
+        self._pending_seek_delta = 0.0
+        self.current_path = path
+        self.current_is_cdda = False
+        self.icy_title = ""
+        self.icy_artist = ""
+        self.current_radio_name = None
+        self.current_tv_name = None
+        self.current_duration = 0
+        try: self._refresh_playlist_current_style()
+        except Exception: pass
+        try:
+            _t, _a, _al, _y, meta_duration, _c, _tech = self.get_metadata(
+                path, load_cover=False
+            )
+            if meta_duration and float(meta_duration) > 0:
+                self.current_duration = float(meta_duration)
+                self.position_scale.set_range(0, self.current_duration)
+            else:
+                self.position_scale.set_range(0, 1)
+        except Exception:
+            try: self.position_scale.set_range(0, 1)
+            except Exception: pass
+        self._updating_position_scale = True
+        try:
+            self.position_scale.set_value(0)
+        except Exception: pass
+        finally:
+            self._updating_position_scale = False
+        self._last_known_position = 0.0
+        try:
+            self.time_label.set_text(
+                "0:00 • " + format_time(self.current_duration)
+            )
+        except Exception: pass
+        try: self.reset_spectrum()
+        except Exception: pass
+        try: self._clear_chapters()
+        except Exception: pass
+        try: self._scrobble_on_track_start(path)
+        except Exception: pass
+        try: self._refresh_lyrics_for_current()
+        except Exception: pass
+        try: self._announce_track_change(path)
+        except Exception: pass
+        try: self._push_recent_file(path)
+        except Exception: pass
+        try: self.update_information(path)
+        except Exception: pass
+        try: self.select_filename(path)
+        except Exception: pass
+        try: self._mpris_notify_playback()
+        except Exception: pass
+        try:
+            self.status_label.set_text(self.tr("Lecture"))
+        except Exception: pass
+        if self._crossfade_half() > 0.0:
+            try: self._fade_in_start()
+            except Exception as exc: print("fade in:", exc, file=sys.stderr)
+        return True
     def _start_crossfade_out(self, then_callback=None):
         if self._crossfade_timeout_id:
             try: GLib.source_remove(self._crossfade_timeout_id)
@@ -16723,8 +19177,6 @@ class Myostoox(Gtk.Window):
             except Exception: pass
             return True
         self._crossfade_timeout_id = GLib.timeout_add(step_ms, _tick)
-    # ------------------------------------------------------------------
-    # ------------------------------------------------------------------
     def cancel_sleep_timer(self):
         if getattr(self, "sleep_timer_id", 0):
             try: GLib.source_remove(self.sleep_timer_id)
@@ -16754,16 +19206,17 @@ class Myostoox(Gtk.Window):
             self.sleep_timer_id = 0
             self.sleep_timer_end = 0.0
             self.sleep_timer_minutes = 0
-            try:
-                self.toggle_pause()
-            except Exception:
+            if self.is_playing and not self.is_paused:
                 try:
-                    self.player.set_state(Gst.State.PAUSED)
-                    self.is_paused = True
-                    self.play_button.set_label("▶")
+                    self.toggle_pause()
+                except Exception:
+                    try:
+                        self._active_pipeline().set_state(Gst.State.PAUSED)
+                        self.is_paused = True
+                        self.play_button.set_label("▶")
+                    except Exception: pass
+                try: self.status_label.set_text(self.tr("Minuteur : arrêt"))
                 except Exception: pass
-            try: self.status_label.set_text(self.tr("Minuteur : arrêt"))
-            except Exception: pass
             return False
         self.sleep_timer_id = GLib.timeout_add_seconds(minutes * 60, _fire)
         try:
@@ -17061,6 +19514,8 @@ class Myostoox(Gtk.Window):
         dialog.destroy()
 
     def factory_reset_and_quit(self):
+        self._factory_reset = True
+        self._resume_reset = True
         try:
             try: self.player.set_state(Gst.State.NULL)
             except Exception: pass
@@ -17090,11 +19545,15 @@ class Myostoox(Gtk.Window):
             self.scrobble_enabled = False
             self.scrobble_token = ""
             self.scrobble_username = ""
+            self.scrobble_api_key = ""
+            self.scrobble_api_secret = ""
             self.play_next_queue = []
             try: self.cancel_sleep_timer()
             except Exception: pass
             self.playlist_only_mode = False
             self.playlist_only_maximized = False
+            self.hide_playlist_mode = False
+            self.lyrics_transparent_bg = False
             self.playback_rate = 1.0
             self.resume_prompt_enabled = True
             self._resume_data = {}
@@ -17104,6 +19563,13 @@ class Myostoox(Gtk.Window):
             self.playlist_transparency = False
             self.show_metadata_panel = True
             self.desktop_notifications = True
+            self.autostart_enabled = False
+            self.window_placement = "center"
+            try:
+                if os.path.isfile(AUTOSTART_DESKTOP_PATH):
+                    os.unlink(AUTOSTART_DESKTOP_PATH)
+            except Exception:
+                pass
             self.performance_mode = "hardware"
             try: self.status_label.set_text(self.tr("Réinitialisation…"))
             except Exception: pass
@@ -17254,6 +19720,22 @@ class Myostoox(Gtk.Window):
             if show and wrap is not None:
                 try: wrap.show_all()
                 except Exception: pass
+            try:
+                self.queue_resize()
+            except Exception:
+                pass
+            try:
+                paned = getattr(self, "content_paned", None)
+                if paned is not None:
+                    paned.queue_resize()
+            except Exception:
+                pass
+            try:
+                scroll = getattr(self, "playlist_scroll", None)
+                if scroll is not None:
+                    scroll.queue_resize()
+            except Exception:
+                pass
         except Exception: pass
 
     def toggle_playlist_transparency(self, menuitem=None):
@@ -17842,7 +20324,7 @@ class Myostoox(Gtk.Window):
             dialog.set_logo(pixbuf)
         except Exception: pass
         dialog.set_program_name(APP_NAME)
-        dialog.set_version("1.4.1")
+        dialog.set_version("1.4.2")
         dialog.set_comments(
             self.tr("Un lecteur audio complet en GTK3 et GStreamer")
         )
@@ -17892,26 +20374,6 @@ class Myostoox(Gtk.Window):
         dialog.show_all()
         self._hide_about_license_button(dialog)
         self._translate_about_dialog_buttons(dialog)
-        try:
-            action = dialog.get_action_area()
-            support = Gtk.Label()
-            support.set_markup(
-                '<a href="%s"><b>%s</b></a>'
-                % (
-                    GLib.markup_escape_text(PATREON_URL),
-                    GLib.markup_escape_text(self.tr("Soutenir…")),
-                )
-            )
-            support.set_use_markup(True)
-            support.set_margin_start(6)
-            support.set_margin_end(6)
-            action.pack_start(support, False, False, 0)
-            try:
-                children = action.get_children()
-                action.reorder_child(support, max(0, len(children) - 2))
-            except Exception: pass
-            support.show()
-        except Exception: pass
         def _find_labels(widget, acc):
             if isinstance(widget, Gtk.Label):
                 acc.append(widget)
@@ -17965,12 +20427,14 @@ class Myostoox(Gtk.Window):
             "_seek_release_timeout_id",
             "_osd_timeout_id",
             "_cursor_hide_timeout_id",
-                        "_fs_toast_tl_timeout",
+            "_fs_toast_tl_timeout",
             "_fs_toast_tr_timeout",
             "_mini_title_scroll_id",
             "_disk_meta_save_id",
             "_selection_info_timeout_id",
             "_transparency_css_timeout_id",
+            "_playlist_only_restore_tid",
+            "_fade_in_tid",
         ):
             tid = getattr(self, attr, 0) or 0
             if tid:
@@ -17992,20 +20456,23 @@ class Myostoox(Gtk.Window):
             "speed_window",
             "spectrum_sync_window",
             "fs_controls",
+            "fs_toast_tl",
+            "fs_toast_tr",
         ):
             w = getattr(self, attr, None)
             if w is not None:
                 try: w.destroy()
                 except Exception: pass
         try:
-            self.save_playlist()
-            self.save_state()
-            self.save_radios()
-            self.save_tvs()
-            self.save_bouquets()
-            self.save_associations()
-            self._disk_meta_dirty = True
-            self._save_disk_meta_cache()
+            if not getattr(self, "_factory_reset", False):
+                self.save_playlist()
+                self.save_state()
+                self.save_radios()
+                self.save_tvs()
+                self.save_bouquets()
+                self.save_associations()
+                self._disk_meta_dirty = True
+                self._save_disk_meta_cache()
         except Exception as e:
             print("save on destroy:", e, file=sys.stderr)
         try: trim_memory(force=True)
@@ -18190,15 +20657,21 @@ def main():
     window.show_all()
     try: window._hide_nano_playlist_panel()
     except Exception: pass
+    try:
+        GLib.idle_add(window._apply_window_placement)
+        GLib.timeout_add(120, window._apply_window_placement)
+    except Exception: pass
     try: window._apply_window_layer()
     except Exception: pass
     try: window._apply_playlist_only_mode()
+    except Exception: pass
+    try: window._apply_hide_playlist_mode()
     except Exception: pass
     try:
         if getattr(window, "playlist_only_maximized", False) and getattr(
             window, "playlist_only_mode", False
         ):
-            window.set_playlist_only_maximized(True)
+            window.set_playlist_only_maximized(True, force=True)
     except Exception: pass
     if files:
         try: window.cancel_pending_session_restore()
