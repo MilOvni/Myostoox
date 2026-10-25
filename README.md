@@ -140,7 +140,7 @@ Built with Python 3, GTK3 and GStreamer, and developed with AI assistance, Myost
 </p>
 
 <p align="center">
-  <img src="screenshots/Player_13.jpg" alt="TV" width="700">
+  <img src="screenshots/Player_14.jpg" alt="TV" width="700">
 </p>
 
 <p align="center">
@@ -164,15 +164,15 @@ Built with Python 3, GTK3 and GStreamer, and developed with AI assistance, Myost
 </p>
 
 <p align="center">
-  <img src="screenshots/Player_09.jpg" alt="Lyrics" width="700">
-</p>
-
-<p align="center">
   <img src="screenshots/Player_10.jpg" alt="Lyrics" width="700">
 </p>
 
 <p align="center">
   <img src="screenshots/Player_11.jpg" alt="Lyrics" width="700">
+</p>
+
+<p align="center">
+  <img src="screenshots/Player_09.jpg" alt="Lyrics" width="700">
 </p>
 
 
