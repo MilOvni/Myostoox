@@ -1,6 +1,6 @@
 # Myostoox 1.0
 
-**First public release** — audio/video player for Lubuntu and GTK desktops (LXQt / XFCE).
+**First public release** — audio/video player for Debian Trixie XFCE, Lubuntu 26.04 and GTK desktops (LXQt / XFCE).
 
 ---
 
@@ -46,14 +46,13 @@ myostoox
 ### Requirements
 
 Debian / Ubuntu / Lubuntu with Python 3, GTK 3 and GStreamer (see README).  
-Tested with a focus on **Lubuntu 26.04 LTS**.
+Tested with a focus on **Debian XFCE Trixie** and **Lubuntu 26.04 LTS**.
 
 ### License
 
 GNU GPL v3 (or later).  
-© 2026 O. Fraisse (MilOvni)
+© 2026 O. Fraisse (MilOvni) & Grok (AI)
 
-Support the project: https://www.patreon.com/MilOvni
 
 ---
 
@@ -99,11 +98,9 @@ myostoox
 ### Prérequis
 
 Debian / Ubuntu / Lubuntu avec Python 3, GTK 3 et GStreamer (voir le README).  
-Cible principale : **Lubuntu 26.04 LTS**.
+Cibles principales : **Debian XFCE Trixie** et **Lubuntu 26.04 LTS**.
 
 ### Licence
 
 GNU GPL v3 (ou ultérieure).  
-© 2026 O. Fraisse (MilOvni)
-
-Soutenir le projet : https://www.patreon.com/MilOvni
+© 2026 O. Fraisse (MilOvni) & Grok (IA)
