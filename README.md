@@ -4,7 +4,7 @@
 
 # Myostoox
 
-<br>Myostoox is an **audio and video player** designed primarily for *Debian XFCE Trixie* and *Lubuntu 26.04 LTS*, while also working on other Linux desktop environments using **GTK**, including **LXQt** and **XFCE**.
+<br>Myostoox is an **audio and video player** designed primarily for *Debian XFCE Trixie* and *Xubuntu 26.04 LTS*, while also working on other Linux desktop environments using **GTK**, including **XFCE**.
 
 Built with Python 3, GTK3 and GStreamer, and developed with AI assistance, Myostoox brings music, video, Internet radio, TV/M3U playlists and optical media together in a single application.<br><br><br><br>
 
@@ -198,7 +198,7 @@ The interface language is remembered between sessions.
 
 ## 📦 Installation
 
-### Debian / Ubuntu / Lubuntu
+### Debian / Ubuntu / Xubuntu
 
 Download the `.deb` package:
 
@@ -266,7 +266,7 @@ sudo apt update && sudo apt install -y \
   ubuntu-restricted-extras
 ```
 
-### Strongly recommended (Lubuntu / XFCE)
+### Strongly recommended (Xubuntu / XFCE)
 
 ```bash
 # Audio CD
