@@ -145,6 +145,10 @@ Myostoox is available in **13 languages** (menu **Appearence → Language**):
 The interface language is remembered between sessions.
 
 <br>
+
+**Tip**: Transparency **+** Player hidden **+** Mini-player **→** small floating scrolling banner, movable with Alt **+** click.
+
+<br>
 <br>
 
 
