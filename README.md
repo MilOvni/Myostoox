@@ -1,10 +1,10 @@
 <p align="center"> <img src="assets/logo_big2.png" alt="Myostoox logo" width="300"> </p> <p align="center"><br><br> <em>A complete audio player built with GTK3 and GStreamer... but a bit of a video player too.</em> <p align="center">
   <img src="assets/banner.svg" alt="Myostoox — Music · Radio · IPTV · CD/DVD · Video" width="920">
-</p><br> <p align="center"> <strong><a href="https://github.com/MilOvni/Myostoox/raw/refs/heads/main/myostoox_1.4-5_all.deb">📦 Download Myostoox 1.4.5 (.deb)</a></strong> </p><br> 
+</p><br> <p align="center"> <strong><a href="https://github.com/MilOvni/Myostoox/raw/refs/heads/main/myostoox_1.4-6_all.deb">📦 Download Myostoox 1.4.6 (.deb)</a></strong> </p><br> 
 
 # Myostoox
 
-<br>Myostoox is an **audio and video player** primarily designed for GTK desktops running on recent **Debian**-based and **Ubuntu**-based systems — especially **XFCE** (Debian XFCE, Xubuntu, Linux Mint XFCE, MX Linux, SparkyLinux XFCE, Linux Lite, Devuan XFCE, siduction XFCE... ).
+<br>Myostoox is an **audio and video player** primarily designed for GTK desktops running on recent **Debian**-based and **Ubuntu**-based systems — especially **XFCE** (Debian XFCE, Xubuntu, Linux Mint XFCE, MX Linux, SparkyLinux XFCE, Linux Lite, Devuan XFCE, siduction XFCE ... ).
 
 Built with Python 3, **GTK3** and **GStreamer**, and developed with **AI** assistance, Myostoox brings music, video, Internet radio, TV/M3U playlists and optical media together in a single application.<br><br><br><br>
 
@@ -207,17 +207,17 @@ The interface language is remembered between sessions.
 Download the `.deb` package:
 
 <p align="center">
-  <strong><a href="https://github.com/MilOvni/Myostoox/raw/refs/heads/main/myostoox_1.4-5_all.deb">📦 Download Myostoox 1.4.5 (.deb)</a></strong>
+  <strong><a href="https://github.com/MilOvni/Myostoox/raw/refs/heads/main/myostoox_1.4-6_all.deb">📦 Download Myostoox 1.4.6 (.deb)</a></strong>
 </p>
 
 From the directory containing the deb package, open a Terminal and install the application with one of the following commands:
 
 ```bash
-sudo apt install ./myostoox_1.4-5_all.deb
+sudo apt install ./myostoox_1.4-6_all.deb
 
 # or
 
-sudo dpkg -i myostoox_1.4-5_all.deb
+sudo dpkg -i myostoox_1.4-6_all.deb
 
 ```
 
