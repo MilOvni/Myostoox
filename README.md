@@ -1,6 +1,6 @@
 <p align="center"> <img src="assets/logo_big2.png" alt="Myostoox logo" width="300"> </p> <p align="center"><br><br> <em>A complete audio player built with GTK3 and GStreamer... but a bit of a video player too.</em> <p align="center">
   <img src="assets/banner.svg" alt="Myostoox — Music · Radio · IPTV · CD/DVD · Video" width="920">
-</p><br> <p align="center"> <strong><a href="https://github.com/MilOvni/Myostoox/raw/refs/heads/main/myostoox_1.4-8_all.deb">📦 Download Myostoox 1.4.8 (.deb)</a></strong> </p><br> 
+</p><br> <p align="center"> <strong><a href="https://github.com/MilOvni/Myostoox/raw/refs/heads/main/myostoox_1.4-9_all.deb">📦 Download Myostoox 1.4.9 (.deb)</a></strong> </p><br> 
 
 # Myostoox
 
@@ -99,7 +99,9 @@ Built with Python 3, **GTK3** and **GStreamer**, and developed with **AI** assis
 
     • Nano-player (with playlist)
 
-    • Themes
+    • Pure Spectrum mode: spectrum-only view, with size presets (Compact / Medium / Large)
+
+    • 14 Themes
 
     • Hide navigation controls
 
@@ -207,17 +209,17 @@ The interface language is remembered between sessions.
 Download the `.deb` package:
 
 <p align="center">
-  <strong><a href="https://github.com/MilOvni/Myostoox/raw/refs/heads/main/myostoox_1.4-8_all.deb">📦 Download Myostoox 1.4.8 (.deb)</a></strong>
+  <strong><a href="https://github.com/MilOvni/Myostoox/raw/refs/heads/main/myostoox_1.4-9_all.deb">📦 Download Myostoox 1.4.9 (.deb)</a></strong>
 </p>
 
 From the directory containing the deb package, open a Terminal and install the application with one of the following commands:
 
 ```bash
-sudo apt install ./myostoox_1.4-8_all.deb
+sudo apt install ./myostoox_1.4-9_all.deb
 
 # or
 
-sudo dpkg -i myostoox_1.4-8_all.deb
+sudo dpkg -i myostoox_1.4-9_all.deb
 
 ```
 
