@@ -81,7 +81,7 @@ Built with Python 3, **GTK3** and **GStreamer**, and developed with **AI** assis
 
     • Playlist persistence
 
-    • Missing files are clearly identified
+    • Missing files are clearly identified — they appear in italics and are marked with ⚠
 
     • Files opened from the file manager can be sent to an already running Myostoox instance
 
@@ -143,10 +143,6 @@ Myostoox is available in **13 languages** (menu **Appearance → Language**):
 | Svenska | Русский |
 | 简体中文 | 한국어 |
 | 日本語 | |
-
-<br>
-
-**Tip**: Transparency **+** Player hidden **+** Mini-player **→** small floating scrolling banner, movable with Alt **+** click.
 
 <br>
 <br>
@@ -395,7 +391,6 @@ Configuration: `~/.config/Myostoox/` (playlist, state, radios, themes…).<br>
 
 ## Notes
 
-- **Missing file**: absent tracks (unplugged USB) appear in *italics* with ⚠.
 - While a text field has focus (e.g. the search box), single-key shortcuts are disabled so you can type freely.
   Only **Quit**, **Factory reset**, **Playlist menu**, **Focus search** and **Recording** still work there.
 - Nano-player playlist: `↑` / `↓` to navigate, `Enter` to play the selected track.
@@ -462,7 +457,11 @@ Use in accordance with local laws (DVD/Blu-ray, stream sources).
 <br>
 <p align="center">
   <img src="screenshots/Player_12.jpg" alt="About" width="700">
-</p>
-<br><br>
+<br></p>
+<br> 
+
+**Tip**: Transparency **+** Player hidden **+** Mini-player **→** small floating scrolling banner, movable with Alt **+** click.
+
+<br>
 
 ```
