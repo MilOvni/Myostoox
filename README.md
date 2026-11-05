@@ -1,6 +1,6 @@
 <p align="center"> <img src="assets/logo_big2.png" alt="Myostoox logo" width="300"> </p> <p align="center"><br><br> <em>A complete audio player built with GTK3 and GStreamer... but a bit of a video player too.</em> <p align="center">
   <img src="assets/banner.svg" alt="Myostoox — Music · Radio · IPTV · CD/DVD · Video" width="920">
-</p><br> <p align="center"> <strong><a href="https://github.com/MilOvni/Myostoox/raw/refs/heads/main/myostoox_1.4-9_all.deb">📦 Download Myostoox 1.4.9 (.deb)</a></strong> </p><br> 
+</p><br> <p align="center"> <strong><a href="https://github.com/MilOvni/Myostoox/raw/refs/heads/main/myostoox_1.5-0_all.deb">📦 Download Myostoox 1.5.0 (.deb)</a></strong> </p><br> 
 
 # Myostoox
 
@@ -209,17 +209,17 @@ The interface language is remembered between sessions.
 Download the `.deb` package:
 
 <p align="center">
-  <strong><a href="https://github.com/MilOvni/Myostoox/raw/refs/heads/main/myostoox_1.4-9_all.deb">📦 Download Myostoox 1.4.9 (.deb)</a></strong>
+  <strong><a href="https://github.com/MilOvni/Myostoox/raw/refs/heads/main/myostoox_1.5-0_all.deb">📦 Download Myostoox 1.5.0 (.deb)</a></strong>
 </p>
 
 From the directory containing the deb package, open a Terminal and install the application with one of the following commands:
 
 ```bash
-sudo apt install ./myostoox_1.4-9_all.deb
+sudo apt install ./myostoox_1.5-0_all.deb
 
 # or
 
-sudo dpkg -i myostoox_1.4-9_all.deb
+sudo dpkg -i myostoox_1.5-0_all.deb
 
 ```
 
@@ -295,6 +295,21 @@ sudo ubuntu-drivers autoinstall
 libaacs0 + KEYDB.cfg (commercial Blu-rays)
 ```
 
+## Project structure
+
+```bash
+Myostoox/
+├── Myostoox.py            # Entry point — GTK UI & orchestration
+├── translations.json      # UI strings (13 languages)
+├── logo.png
+└── myostoox/              # Core library
+    ├── config.py          # Paths, resume, autostart
+    ├── playlist.py        # Media types, URI, JSON I/O
+    ├── metadata.py        # Tags, covers, lyrics
+    ├── subtitles.py       # Subtitles & audio tracks
+    ├── player.py          # GStreamer / custom MKV pipeline
+    └── themes.py          # Theme palettes
+```
 
 ## Launching
 
@@ -439,7 +454,7 @@ To prevent the screen from turning off during a movie:
 
 This project is free software distributed under the **GNU General Public License version 3** (GPL-3.0).
 
-See the [`LICENSE`](LICENSE) file for the full text.
+See the [`LICENSE`](LICENSE.txt) file for the full text.
 
 Use in accordance with local laws (DVD/Blu-ray, stream sources).
 
@@ -460,14 +475,11 @@ Use in accordance with local laws (DVD/Blu-ray, stream sources).
 
 ## Author(s)
 
-**O. FRAISSE (MilOvni)** & (AI) **Grok**
-
-GitHub — MilOvni/Myostoox<br><br>
-
-
+**O. FRAISSE** & (AI) **Grok**
+<br>
 <p align="center">
   <img src="screenshots/Player_12.jpg" alt="About" width="700">
 </p>
-<br>
+<br><br>
 
 ```
