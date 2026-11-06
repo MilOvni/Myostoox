@@ -4,9 +4,11 @@
 
 # Myostoox
 
-<br>Myostoox is an **audio and video player** primarily designed for GTK desktops running on recent **Debian**-based and **Ubuntu**-based systems — especially **XFCE** (Debian XFCE, Xubuntu, Linux Mint XFCE, MX Linux, SparkyLinux XFCE, Linux Lite, Devuan XFCE, siduction XFCE … ).
+<br>Myostoox is a versatile **audio and video player** designed primarily for GTK desktops running recent **Debian** and **Ubuntu**-based distributions, with a particular focus on **XFCE** environments such as Debian XFCE, Xubuntu, Linux Mint XFCE, MX Linux, SparkyLinux XFCE, Linux Lite, Devuan XFCE and siduction XFCE.
 
-A free, open-source desktop app with no ads or sponsor requests, built with Python 3, **GTK3** and **GStreamer**, and developed with **AI** assistance. Myostoox brings music, video, Internet radio, TV/M3U playlists and optical media together **in a single application**.<br><br><br><br>
+Free and open source, with no ads or sponsored content, Audialuc is built with Python 3, **GTK3** and **GStreamer**, and developed with the assistance of **AI**.
+
+And it brings together music, videos, Internet radio, TV and M3U playlists, as well as optical media playback, **in a single application**.<br><br><br><br>
 
 
 <p align="center">
