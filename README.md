@@ -30,7 +30,7 @@ Built with Python 3, **GTK3** and **GStreamer**, and developed with **AI** assis
 
     • Audio recording of streams in MP3 format at 320kbps VBR
 
-    • 10-Band Graphic Equalizer — Presets Flat, Crystal, Bass Boost, Classical, Jazz, Rock-Pop …
+    • 10-Band Graphic Equalizer — Presets: Flat, Crystal, Bass Boost, Classical, Jazz, Rock-Pop …
 
     • Pitch and tempo control
 
