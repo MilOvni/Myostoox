@@ -4,7 +4,7 @@
 
 # Myostoox
 
-<br>Myostoox is an **audio and video player** primarily designed for GTK desktops running on recent **Debian**-based and **Ubuntu**-based systems — especially **XFCE** (Debian XFCE, Xubuntu, Linux Mint XFCE, MX Linux, SparkyLinux XFCE, Linux Lite, Devuan XFCE, siduction XFCE ... ).
+<br>Myostoox is an **audio and video player** primarily designed for GTK desktops running on recent **Debian**-based and **Ubuntu**-based systems — especially **XFCE** (Debian XFCE, Xubuntu, Linux Mint XFCE, MX Linux, SparkyLinux XFCE, Linux Lite, Devuan XFCE, siduction XFCE … ).
 
 Built with Python 3, **GTK3** and **GStreamer**, and developed with **AI** assistance, Myostoox brings music, video, Internet radio, TV/M3U playlists and optical media together in a single application.<br><br><br><br>
 
@@ -30,7 +30,7 @@ Built with Python 3, **GTK3** and **GStreamer**, and developed with **AI** assis
 
     • Audio recording of streams in MP3 format at 320kbps VBR
 
-    • Equalizer
+    • 10-Band Graphic Equalizer: Presets Includes Flat, Crystal, Bass Boost, Classical, Jazz, Rock-Pop …
 
     • Pitch and tempo control
 
@@ -45,8 +45,6 @@ Built with Python 3, **GTK3** and **GStreamer**, and developed with **AI** assis
     • LRC lyrics
 
     • Metadata and track information
-
-    • MPRIS2 support
 
     • Desktop notifications
 
@@ -114,9 +112,11 @@ Built with Python 3, **GTK3** and **GStreamer**, and developed with **AI** assis
 
     • Spectrum analyzer + Color choice + Spectrum synchronization
 
-    • Transparency effect
+    • Transparency effect with opacity control
 
     • MPRIS2 integration
+
+    • Drag-and-drop local files
 
     • GTK3 interface designed for lightweight Linux desktops
 
