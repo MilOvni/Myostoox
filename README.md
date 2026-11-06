@@ -14,7 +14,8 @@ Built with Python 3, **GTK3** and **GStreamer**, and developed with **AI** assis
 </p>
 
 <br><br>
-## **Feature**s<br><br>
+## **Features**<br>
+
 ### **Audio**
 
     • Local music playback
@@ -130,9 +131,7 @@ Built with Python 3, **GTK3** and **GStreamer**, and developed with **AI** assis
     • Lyrics: .lrc, .txt
 
 
-## **Languages**
-
-Myostoox is available in **13 languages** (menu **Appearance → Language**):
+### **Languages**
 
 | | |
 |---|---|
@@ -144,7 +143,6 @@ Myostoox is available in **13 languages** (menu **Appearance → Language**):
 | 简体中文 | 한국어 |
 | 日本語 | |
 
-<br>
 <br>
 
 ## Screenshots
@@ -189,8 +187,6 @@ Myostoox is available in **13 languages** (menu **Appearance → Language**):
   <img src="screenshots/Player_09.jpg" alt="Lyrics" width="700">
 </p>
 
-
----
 
 <br>
 
@@ -426,6 +422,8 @@ To prevent the screen from turning off during a movie:
 
 `ServiceUnknown` messages related to ScreenSaver / Notifications are silently ignored.
 
+<br>
+
 ---
 
 ## License / usage
@@ -435,6 +433,7 @@ This project is free software distributed under the **GNU General Public License
 See the [`LICENSE`](LICENSE.txt) file for the full text.
 
 Use in accordance with local laws (DVD/Blu-ray, stream sources).
+
 
 ---
 
@@ -448,6 +447,7 @@ Use in accordance with local laws (DVD/Blu-ray, stream sources).
  **mpv**<br>
  **SMPlayer**<br>
  ...<br>
+
 
 ---
 
@@ -463,7 +463,5 @@ Use in accordance with local laws (DVD/Blu-ray, stream sources).
 **Tip**: Transparency **+** Player hidden **+** Mini-player **→** small floating scrolling banner, movable with Alt **+** click.
 
 <br>
-
----
-
+<br>
 ```
